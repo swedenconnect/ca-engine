@@ -416,7 +416,7 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
       break;
     case pem:
     case pkcs11:
-      keyLocation = locateFile(keyDir, entityIdentifier + ".key", null);
+      //keyLocation = locateFile(keyDir, entityIdentifier + ".key", null);
       certLocation = locateFile(keyDir, entityIdentifier + ".crt", null);
       break;
     case pkcs12:
