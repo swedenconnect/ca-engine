@@ -18,6 +18,7 @@ package se.swedenconnect.ca.service.base.configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.Connector;
+import org.apache.commons.lang.StringUtils;
 import org.apache.coyote.ajp.AbstractAjpProtocol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -50,7 +51,7 @@ public class TomcatSettings {
             connector.setAllowTrace(false);
             connector.setScheme("http");
             final AbstractAjpProtocol protocol = (AbstractAjpProtocol) connector.getProtocolHandler();
-            if (ajpSecret == null){
+            if (StringUtils.isBlank(ajpSecret)){
                 log.info("Setting up tomcat AJP without secret");
                 connector.setSecure(false);
                 protocol.setSecretRequired(false);
@@ -72,6 +73,7 @@ public class TomcatSettings {
           new ErrorPage(HttpStatus.NOT_FOUND, "/404-redirect"),
           new ErrorPage(HttpStatus.BAD_REQUEST, "/400-redirect"),
           new ErrorPage(HttpStatus.METHOD_NOT_ALLOWED, "/400-redirect"),
+          new ErrorPage(HttpStatus.FORBIDDEN, "/400-redirect"),
           new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500-redirect")
         );
         return webServerFactory;
