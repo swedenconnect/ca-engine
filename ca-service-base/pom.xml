@@ -10,11 +10,12 @@
     </parent>
     <groupId>se.swedenconnect.ca</groupId>
     <artifactId>ca-service-base</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>ca-service-base</name>
     <description>Certification Authority service base project</description>
     <properties>
         <java.version>11</java.version>
+        <ca.engine.version>1.0.1</ca.engine.version>
     </properties>
     <dependencies>
         <dependency>
@@ -67,7 +68,7 @@
         <dependency>
             <groupId>se.swedenconnect.ca</groupId>
             <artifactId>ca-engine</artifactId>
-            <version>1.0.0</version>
+            <version>${ca.engine.version}</version>
         </dependency>
         <dependency>
             <groupId>se.swedenconnect.opensaml</groupId>
