@@ -112,7 +112,6 @@
                     <doctitle>CA engine - ${project.version}</doctitle>
                     <windowtitle>CA engine - ${project.version}</windowtitle>
                     <source>8</source>
-                    <links></links>
                 </configuration>
             </plugin>
         </plugins>
