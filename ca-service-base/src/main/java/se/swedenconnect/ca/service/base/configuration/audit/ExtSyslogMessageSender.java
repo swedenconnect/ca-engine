@@ -173,7 +173,6 @@ public class ExtSyslogMessageSender implements SyslogMessageSender {
       .withMsg(jsonLogStr);
 
     sendMessage(syslogMessage);
-    log.debug("Log event sent to syslog {}", jsonLogStr);
   }
 
   private Severity getEventSeverity(String type) {
