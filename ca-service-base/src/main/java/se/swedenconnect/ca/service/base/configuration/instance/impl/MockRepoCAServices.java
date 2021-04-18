@@ -18,6 +18,7 @@ package se.swedenconnect.ca.service.base.configuration.instance.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is an implementation of of the CA Services bean that use a mockup
@@ -54,10 +56,12 @@ import java.util.List;
 @Component
 @Profile("mock")
 public class MockRepoCAServices extends AbstractDefaultCAServices{
+
+  @Autowired
   public MockRepoCAServices(InstanceConfiguration instanceConfiguration,
     PKCS11Provider pkcs11Provider,
-    BasicServiceConfig basicServiceConfig) {
-    super(instanceConfiguration, pkcs11Provider, basicServiceConfig);
+    BasicServiceConfig basicServiceConfig, Map<String, CARepository> caRepositoryMap) {
+    super(instanceConfiguration, pkcs11Provider, basicServiceConfig, caRepositoryMap);
   }
 
   /** {@inheritDoc} */
@@ -78,15 +82,6 @@ public class MockRepoCAServices extends AbstractDefaultCAServices{
     throws NoSuchAlgorithmException {
     // Use the default self issued certificate implementation provided by the abstract class
     return defaultGenerateSelfIssuedCaCert(caKeySource, caConfigData);
-  }
-
-  /** {@inheritDoc} */
-  @Override protected CARepository getCARespository(String instance, File repositoryDir) throws IOException {
-    // Create and supply a mock local JSON repository
-    log.warn("USING A JSON FILE BASED LOCAL REPOSITORY for instance {}. This is not suitable for production environments", instance);
-    File crlFile = new File(repositoryDir, instance + ".crl");
-    File repoFile = new File(repositoryDir, instance + "-repo.json");
-    return new LocalJsonCARepository(crlFile, repoFile);
   }
 
 }

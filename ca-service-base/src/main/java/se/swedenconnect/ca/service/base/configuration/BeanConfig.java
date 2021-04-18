@@ -16,6 +16,7 @@
 
 package se.swedenconnect.ca.service.base.configuration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
@@ -31,19 +32,21 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
+import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.service.base.configuration.audit.CAServiceContextListener;
 import se.swedenconnect.ca.service.base.configuration.audit.ExtSyslogMessageSender;
+import se.swedenconnect.ca.service.base.configuration.instance.InstanceConfiguration;
+import se.swedenconnect.ca.service.base.configuration.instance.LocalJsonCARepository;
+import se.swedenconnect.ca.service.base.configuration.properties.CAConfigData;
 
 import javax.servlet.ServletContextListener;
 import java.io.File;
 import java.io.IOException;
 import java.security.Security;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Configuration class to provide constructed beans
@@ -52,6 +55,7 @@ import java.util.Map;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Configuration
+@Slf4j
 public class BeanConfig implements ApplicationEventPublisherAware {
 
   private ApplicationEventPublisher applicationEventPublisher;
@@ -69,7 +73,7 @@ public class BeanConfig implements ApplicationEventPublisherAware {
     return servletListenerRegistrationBean;
   }
 
-  @Bean
+  @Bean (name = "BasicServiceConfig")
   BasicServiceConfig basicServiceConfig(
     @Value("${ca-service.config.data-directory}") String configLocation,
     @Value("${ca-service.config.base-url}") String serviceBaseUrl,
@@ -96,6 +100,26 @@ public class BeanConfig implements ApplicationEventPublisherAware {
       : serviceBaseUrl + serviceContextPath);
     basicServiceConfig.setServiceHostUrl(serviceBaseUrl);
     return basicServiceConfig;
+  }
+
+  @Profile({"mock", "dev"})
+  @DependsOn("BasicServiceConfig")
+  @Bean Map<String, CARepository> caRepositoryMap (
+    BasicServiceConfig basicServiceConfig,
+    InstanceConfiguration instanceConfiguration
+  ) throws IOException {
+    Map<String, CAConfigData> instanceConfigMap = instanceConfiguration.getInstanceConfigMap();
+    Set<String> instances = instanceConfigMap.keySet();
+    Map<String, CARepository> caRepositoryMap = new HashMap<>();
+    for (String instance: instances) {
+      File repositoryDir = new File(basicServiceConfig.getDataStoreLocation(), "instances/"+instance+"/repository");
+      log.warn("USING A JSON FILE BASED LOCAL REPOSITORY for instance {}. This is not suitable for production environments", instance);
+      File crlFile = new File(repositoryDir, instance + ".crl");
+      File repoFile = new File(repositoryDir, instance + "-repo.json");
+      CARepository caRepository= new LocalJsonCARepository(crlFile, repoFile);
+      caRepositoryMap.put(instance, caRepository);
+    }
+    return caRepositoryMap;
   }
 
   @Bean

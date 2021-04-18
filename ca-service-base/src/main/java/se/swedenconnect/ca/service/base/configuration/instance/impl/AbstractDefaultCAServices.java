@@ -87,14 +87,16 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
   private Map<String, CAService> caServicesMap;
   private final PKCS11Provider pkcs11Provider;
   private final BasicServiceConfig basicServiceConfig;
+  private final Map<String, CARepository> caRepositoryMap;
 
   public AbstractDefaultCAServices(InstanceConfiguration instanceConfiguration, PKCS11Provider pkcs11Provider,
-    BasicServiceConfig basicServiceConfig) {
+    BasicServiceConfig basicServiceConfig, Map<String, CARepository> caRepositoryMap) {
     super(instanceConfiguration);
     this.pkcs11Provider = pkcs11Provider;
     this.basicServiceConfig = basicServiceConfig;
     this.instancesDir = new File(basicServiceConfig.getDataStoreLocation(), "instances");
     this.instanceConfigMap = instanceConfiguration.getInstanceConfigMap();
+    this.caRepositoryMap = caRepositoryMap;
     caServicesMap = new HashMap<>();
     instanceConfigMap.keySet().forEach(instance -> {
       caServicesMap.put(instance, getCaService(instance));
@@ -172,8 +174,8 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
       }
 
       // Create CRL service and CA repository
+      CARepository caRepository = caRepositoryMap.get(instance);
       log.debug("Setting up CA Repository for instance {}", instance);
-      CARepository caRepository = getCARespository(instance, repositoryDir);
       String crlDistrPoint = basicServiceConfig.getServiceUrl() + "/crl/" + instance + ".crl";
       log.debug("Setting CRL distribution point for instance {} to {}", instance, crlDistrPoint);
       CRLIssuerModel crlIssuerModel = getCRLIssuerModel(caConfig, caCert, crlDistrPoint, caRepository);
@@ -259,7 +261,7 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
         log.debug("Instantiating OCSP responder for instance {}", instance);
         OCSPModel ocspModel = getOCSPmodel(ocspServiceChain, caService.getCaCertificate(), ocspAlgorithm, ocspConfig);
         OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(ocspKeySource.getCredential().getPrivateKey(), ocspModel,
-          caService.getCaRepository());
+          caRepository);
         // Add the OCSP responder to the CA service
         log.debug("Adding OCSP responder to instance {}", instance);
         caService.setOcspResponder(ocspResponder);
@@ -304,15 +306,6 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
    * @param certModelBuilder
    */
   protected abstract void customizeOcspCertificateModel(DefaultCertificateModelBuilder certModelBuilder, String instance);
-
-  /**
-   * Creates an instance of the CA repository for a particular instance
-   *
-   * @param instance      the CA services instance
-   * @param repositoryDir the directory created to support storage of data related to the CA services instance repository
-   * @return CA Repository instance
-   */
-  protected abstract CARepository getCARespository(String instance, File repositoryDir) throws IOException;
 
   /**
    * Generate self issued certificate. Note that this function does NOT engage the CA repository as the self issued certificate
