@@ -19,6 +19,7 @@ package se.swedenconnect.ca.service.base.configuration.instance;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import se.swedenconnect.ca.service.base.configuration.properties.CAConfigData;
 import se.swedenconnect.ca.service.base.configuration.properties.CAServiceProperties;
 import se.swedenconnect.ca.service.base.configuration.properties.EntityNameProperties;
@@ -32,7 +33,7 @@ import java.util.Map;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Configuration
+@Component
 public class InstanceConfiguration {
 
   private final CAServiceProperties caServiceProperties;
