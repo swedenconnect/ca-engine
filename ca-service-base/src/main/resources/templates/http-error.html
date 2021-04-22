@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <meta name="description" content="Signature Validation Service"/>
-    <meta name="author" content="IDsec Solutions AB"/>
+    <meta name="description" th:content="${htmlInfo.getHtmlDescription()}" />
+    <meta name="author" th:content="${htmlInfo.getHtmlAuthor()}"/>
     <meta http-equiv='pragma' content='no-cache'/>
     <meta http-equiv='cache-control' content='no-cache, no-store, must-revalidate'/>
     <meta http-equiv="Expires" content="-1"/>
@@ -17,7 +17,7 @@
 
     <link rel="stylesheet" th:href="${bootstrapCss}"/>
 
-    <title>Error page</title>
+    <title th:text="${htmlInfo.getHtmlTitlePrefix()} + ' - Error page'"></title>
 </head>
 <body>
 <div class="container">

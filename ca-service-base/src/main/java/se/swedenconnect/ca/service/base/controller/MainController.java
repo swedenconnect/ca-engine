@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventEnum;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventFactory;
 import se.swedenconnect.ca.service.base.configuration.instance.CAServices;
+import se.swedenconnect.ca.service.base.configuration.service.HtmlServiceInfo;
 
 /**
  * This is a sample controller showing principles for audit. This is not meant to be used and only appears in the "mock" profile
@@ -38,16 +39,19 @@ import se.swedenconnect.ca.service.base.configuration.instance.CAServices;
 @Controller
 public class MainController implements ApplicationEventPublisherAware {
 
+  private final HtmlServiceInfo htmlServiceInfo;
   private ApplicationEventPublisher applicationEventPublisher;
   private CAServices caServices;
 
   @Autowired
-  public MainController(CAServices caServices) {
+  public MainController(CAServices caServices, HtmlServiceInfo htmlServiceInfo) {
     this.caServices = caServices;
+    this.htmlServiceInfo = htmlServiceInfo;
   }
 
   @RequestMapping("/")
   public String mainPage(Model model){
+    model.addAttribute("htmlInfo", htmlServiceInfo);
     applicationEventPublisher.publishEvent(AuditEventFactory.getAuditEvent(AuditEventEnum.certificateRequested, "Loading main page"));
     return "main";
   }

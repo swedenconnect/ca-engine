@@ -146,7 +146,7 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
       if (caChain.isEmpty()) {
         // There is no chain stored on file. Generate and save new self issued CA cert
         log.debug("Generating new self signed certificate for instance {}", instance);
-        caCert = generateSelfIssuedCaCert(caKeySource, caConfigData, instance);
+        caCert = generateSelfIssuedCaCert(caKeySource, caConfigData, instance, basicServiceConfig.getServiceUrl());
         log.debug("Self signed CA cert issued for {}", caCert.getSubject().toString());
         caChain = Collections.singletonList(caCert);
         File chainFile = new File(certsDir, "ca-chain.pem");
@@ -320,7 +320,7 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
    * @return self issued certificate
    * @throws NoSuchAlgorithmException if the algorithm is not supported
    */
-  protected abstract X509CertificateHolder generateSelfIssuedCaCert(LocalKeySource caKeySource, CAConfigData caConfigData, String instance)
+  protected abstract X509CertificateHolder generateSelfIssuedCaCert(LocalKeySource caKeySource, CAConfigData caConfigData, String instance, String baseUrl)
     throws NoSuchAlgorithmException;
 
   /**

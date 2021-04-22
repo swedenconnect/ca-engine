@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import se.swedenconnect.ca.service.base.configuration.EmbeddedLogo;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventEnum;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventFactory;
+import se.swedenconnect.ca.service.base.configuration.service.HtmlServiceInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -22,6 +23,8 @@ public class ErrorController implements ApplicationEventPublisherAware {
     private static final String ERROR_MESSAGE = "message";
     private static final String ERROR_CODE = "errorCode";
 
+    private final HtmlServiceInfo htmlServiceInfo;
+
 
     @Value("${server.servlet.context-path}") String contextPath;
     @Value("${ca-service.config.bootstrap-css}") String bootstrapCss;
@@ -30,8 +33,9 @@ public class ErrorController implements ApplicationEventPublisherAware {
     private final Map<String, EmbeddedLogo> logoMap;
 
     @Autowired
-    public ErrorController(Map<String, EmbeddedLogo> logoMap) {
+    public ErrorController(Map<String, EmbeddedLogo> logoMap, HtmlServiceInfo htmlServiceInfo) {
         this.logoMap = logoMap;
+        this.htmlServiceInfo = htmlServiceInfo;
     }
 
     @RequestMapping("/400-redirect")
@@ -55,6 +59,7 @@ public class ErrorController implements ApplicationEventPublisherAware {
         model.addAttribute(ERROR_CODE, "404");
         model.addAttribute("logoMap", logoMap);
         model.addAttribute("bootstrapCss", bootstrapCss);
+        model.addAttribute("htmlInfo", htmlServiceInfo);
         return HTTP_ERROR_PAGE;
     }
 
@@ -64,6 +69,7 @@ public class ErrorController implements ApplicationEventPublisherAware {
         model.addAttribute(ERROR_CODE, "400");
         model.addAttribute("logoMap", logoMap);
         model.addAttribute("bootstrapCss", bootstrapCss);
+        model.addAttribute("htmlInfo", htmlServiceInfo);
         return HTTP_ERROR_PAGE;
     }
 
@@ -74,6 +80,7 @@ public class ErrorController implements ApplicationEventPublisherAware {
         model.addAttribute(ERROR_CODE, "500");
         model.addAttribute("logoMap", logoMap);
         model.addAttribute("bootstrapCss", bootstrapCss);
+        model.addAttribute("htmlInfo", htmlServiceInfo);
         return HTTP_ERROR_PAGE;
     }
 

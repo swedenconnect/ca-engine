@@ -78,7 +78,7 @@ public class MockRepoCAServices extends AbstractDefaultCAServices{
   }
 
   /** {@inheritDoc} */
-  @Override protected X509CertificateHolder generateSelfIssuedCaCert(LocalKeySource caKeySource, CAConfigData caConfigData, String instance)
+  @Override protected X509CertificateHolder generateSelfIssuedCaCert(LocalKeySource caKeySource, CAConfigData caConfigData, String instance, String baseUrl)
     throws NoSuchAlgorithmException {
     // Use the default self issued certificate implementation provided by the abstract class
     return defaultGenerateSelfIssuedCaCert(caKeySource, caConfigData);
