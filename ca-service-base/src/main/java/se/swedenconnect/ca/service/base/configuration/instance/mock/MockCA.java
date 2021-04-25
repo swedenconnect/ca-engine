@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.ca.service.base.configuration.instance.impl;
+package se.swedenconnect.ca.service.base.configuration.instance.mock;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
@@ -28,6 +26,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageM
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
+import se.swedenconnect.ca.service.base.configuration.instance.ca.AbstractBasicCA;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -35,14 +34,14 @@ import java.security.PublicKey;
 import java.util.List;
 
 /**
- * Description
+ * This is a Mock test implementation of a Basic CA used in the MocRepoCAServices
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class BasicCAService extends AbstractBasicCAService {
+public class MockCA extends AbstractBasicCA {
 
-  public BasicCAService(PrivateKey privateKey, X509CertificateHolder caCertificate,
+  public MockCA(PrivateKey privateKey, X509CertificateHolder caCertificate,
     CARepository caRepository, CertificateIssuerModel certIssuerModel,
     CRLIssuerModel crlIssuerModel, List<String> crlDistributionPoints) throws NoSuchAlgorithmException {
     super(privateKey, caCertificate, caRepository, certIssuerModel, crlIssuerModel, crlDistributionPoints);

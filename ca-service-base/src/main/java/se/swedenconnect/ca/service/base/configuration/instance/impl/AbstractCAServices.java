@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * The first level of abstract implementation of the CAServices interface
+ *
+ * The CAServices interface is designed to hold a whole set of individual CA instances
+ * based on property settings
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

@@ -46,7 +46,7 @@ public class AuditEventFactory {
      * @param message readable message about the event
      * @return Audit event object for the audit log system
      */
-    public static AuditApplicationEvent getAuditEvent(AuditEventEnum event, CAAutitEventData eventData, String message) {
+    public static AuditApplicationEvent getAuditEvent(AuditEventEnum event, CAAuditEventData eventData, String message) {
         return getAuditEvent(event, eventData, message, DEFAULT_AUDIT_PRINCIPAL);
     }
     /**
@@ -58,7 +58,7 @@ public class AuditEventFactory {
      * @param principal the principal responsible for the event
      * @return Audit event object for the audit log system
      */
-    public static AuditApplicationEvent getAuditEvent(AuditEventEnum event, CAAutitEventData eventData, String message, String principal) {
+    public static AuditApplicationEvent getAuditEvent(AuditEventEnum event, CAAuditEventData eventData, String message, String principal) {
         Map<String, Object> data = new HashMap<>();
 
         addBasicSessionData(data, eventData, message);
@@ -68,6 +68,7 @@ public class AuditEventFactory {
         case certificateRequested:
             data.put("subject" , eventData.getSubject());
             break;
+        case ocspCertificateIssued:
         case certificateIssued:
             data.put("subject" , eventData.getSubject());
             data.put("serialNumber" ,eventData.getCertSerialNumber().toString(16));
@@ -91,7 +92,7 @@ public class AuditEventFactory {
         return new AuditApplicationEvent(principal, event.getEventName(), data);
     }
 
-    private static void addBasicSessionData(Map<String, Object> data, CAAutitEventData eventData, String message) {
+    private static void addBasicSessionData(Map<String, Object> data, CAAuditEventData eventData, String message) {
         if (StringUtils.hasText(message)) {
             data.put("message", message);
         }

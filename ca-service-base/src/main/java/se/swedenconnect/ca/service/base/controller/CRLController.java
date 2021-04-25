@@ -36,11 +36,10 @@ import org.springframework.web.bind.annotation.RestController;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventEnum;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventFactory;
-import se.swedenconnect.ca.service.base.configuration.audit.CAAutitEventData;
+import se.swedenconnect.ca.service.base.configuration.audit.CAAuditEventData;
 import se.swedenconnect.ca.service.base.configuration.instance.CAServices;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -115,7 +114,7 @@ public class CRLController implements ApplicationEventPublisherAware {
       log.info("Succeeded to publish new CRL with CRL number {}", crlNumberFromCrl.getCRLNumber().toString());
       // Audit log CRL publicatioin
       applicationEventPublisher.publishEvent(AuditEventFactory.getAuditEvent(AuditEventEnum.crlPublished,
-        CAAutitEventData.builder()
+        CAAuditEventData.builder()
           .crlNumber(crlNumberFromCrl.getCRLNumber())
           .build(), null, AuditEventFactory.DEFAULT_AUDIT_PRINCIPAL));
 

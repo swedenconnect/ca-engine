@@ -16,26 +16,21 @@
 
 package se.swedenconnect.ca.service.base.configuration.health;
 
-import lombok.Data;
-import lombok.ToString;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.service.base.configuration.BasicServiceConfig;
 import se.swedenconnect.ca.service.base.configuration.instance.CAServices;
 import se.swedenconnect.ca.service.base.configuration.instance.InstanceConfiguration;
-import se.swedenconnect.ca.service.base.configuration.instance.impl.AbstractBasicCAService;
-import se.swedenconnect.ca.service.base.configuration.instance.impl.BasicCAService;
+import se.swedenconnect.ca.service.base.configuration.instance.ca.AbstractBasicCA;
 import se.swedenconnect.ca.service.base.configuration.keys.BasicX509Utils;
 import se.swedenconnect.ca.service.base.configuration.properties.CAConfigData;
-import se.swedenconnect.ca.service.base.configuration.properties.CAServiceProperties;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -202,8 +197,8 @@ public class ServiceInfo {
       X509CertificateHolder ocspCert = getOcspCert(instance);
       List<String> crlDistributionPoints = new ArrayList<>();
       String ocspResponderUrl = null;
-      if (caService instanceof AbstractBasicCAService) {
-        AbstractBasicCAService basicCAService = (AbstractBasicCAService) caService;
+      if (caService instanceof AbstractBasicCA) {
+        AbstractBasicCA basicCAService = (AbstractBasicCA) caService;
         crlDistributionPoints = basicCAService.getCrlDistributionPoints();
         ocspResponderUrl = basicCAService.getOcspResponderUrl();
       }

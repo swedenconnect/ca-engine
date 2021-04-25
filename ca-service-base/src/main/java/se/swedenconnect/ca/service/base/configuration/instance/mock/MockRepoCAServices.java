@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.ca.service.base.configuration.instance.impl;
+package se.swedenconnect.ca.service.base.configuration.instance.mock;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -27,13 +29,12 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.service.base.configuration.BasicServiceConfig;
 import se.swedenconnect.ca.service.base.configuration.instance.InstanceConfiguration;
-import se.swedenconnect.ca.service.base.configuration.instance.LocalJsonCARepository;
+import se.swedenconnect.ca.service.base.configuration.instance.ca.AbstractBasicCA;
+import se.swedenconnect.ca.service.base.configuration.instance.impl.AbstractDefaultCAServices;
 import se.swedenconnect.ca.service.base.configuration.keys.LocalKeySource;
 import se.swedenconnect.ca.service.base.configuration.properties.CAConfigData;
 import se.swedenconnect.opensaml.pkcs11.PKCS11Provider;
 
-import java.io.File;
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.List;
@@ -53,23 +54,21 @@ import java.util.Map;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-@Component
-@Profile("mock")
-public class MockRepoCAServices extends AbstractDefaultCAServices{
+public class MockRepoCAServices extends AbstractDefaultCAServices {
 
   @Autowired
   public MockRepoCAServices(InstanceConfiguration instanceConfiguration,
-    PKCS11Provider pkcs11Provider,
-    BasicServiceConfig basicServiceConfig, Map<String, CARepository> caRepositoryMap) {
-    super(instanceConfiguration, pkcs11Provider, basicServiceConfig, caRepositoryMap);
+    PKCS11Provider pkcs11Provider, BasicServiceConfig basicServiceConfig, Map<String,
+    CARepository> caRepositoryMap, ApplicationEventPublisher applicationEventPublisher) {
+    super(instanceConfiguration, pkcs11Provider, basicServiceConfig, caRepositoryMap, applicationEventPublisher);
   }
 
   /** {@inheritDoc} */
-  @Override protected AbstractBasicCAService getBasicCaService(String instance, String type, PrivateKey privateKey, List<X509CertificateHolder> caChain,
+  @Override protected AbstractBasicCA getBasicCaService(String instance, String type, PrivateKey privateKey, List<X509CertificateHolder> caChain,
     CARepository caRepository, CertificateIssuerModel certIssuerModel, CRLIssuerModel crlIssuerModel, List<String> crlDistributionPoints)
     throws NoSuchAlgorithmException {
     // Returning the same Basic CA service for any instance;
-    return new BasicCAService(privateKey, caChain.get(0), caRepository, certIssuerModel, crlIssuerModel, crlDistributionPoints);
+    return new MockCA(privateKey, caChain.get(0), caRepository, certIssuerModel, crlIssuerModel, crlDistributionPoints);
   }
 
   /** {@inheritDoc} */

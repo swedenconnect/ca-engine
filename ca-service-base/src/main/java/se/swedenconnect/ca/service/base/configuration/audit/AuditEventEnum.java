@@ -30,6 +30,7 @@ public enum AuditEventEnum {
     revocationRequested ("REVOCATION_REQUESTED"),
     certificateIssued ("CERTIFICATE_ISSUED"),
     certificateRevoked("CERTIFICATE_REVOKED"),
+    ocspCertificateIssued("OCSP_CERT_ISSUED"),
     crlPublished("CRL_PUBLISHED"),
     startup("CA_SERVICE_STARTUP"),
     shutdown("CA_SERVICE_SHUTDOWN"),

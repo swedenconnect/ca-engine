@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.ca.service.base.configuration.instance.impl;
+package se.swedenconnect.ca.service.base.configuration.instance.ca;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -35,12 +35,15 @@ import java.security.PrivateKey;
 import java.util.List;
 
 /**
- * Basic Root CA service for test
+ * Abstract basic implementation of a CA based on the core CA ca-engine module
+ *
+ * This forms a basic model for providing a complete CA that includes a CA repository,
+ * a CRL issuer and optionally an OCSP responder.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public abstract class AbstractBasicCAService extends AbstractCAService<DefaultCertificateModelBuilder> {
+public abstract class AbstractBasicCA extends AbstractCAService<DefaultCertificateModelBuilder> {
 
   @Getter protected CertificateIssuer certificateIssuer;
   protected CRLIssuer crlIssuer;
@@ -48,7 +51,7 @@ public abstract class AbstractBasicCAService extends AbstractCAService<DefaultCe
   @Getter protected final List<String> crlDistributionPoints;
   @Setter @Getter protected String ocspResponderUrl;
 
-  public AbstractBasicCAService(PrivateKey privateKey, X509CertificateHolder caCertificate, CARepository caRepository,
+  public AbstractBasicCA(PrivateKey privateKey, X509CertificateHolder caCertificate, CARepository caRepository,
     CertificateIssuerModel certIssuerModel, CRLIssuerModel crlIssuerModel, List<String> crlDistributionPoints)
     throws NoSuchAlgorithmException {
     super(caCertificate, caRepository);

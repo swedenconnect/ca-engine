@@ -84,6 +84,7 @@ public class InstanceConfiguration {
     caConfig.setType((String) getValue(prop.getType(), defaultVal.getType()));
     caConfig.setAllowV1((Boolean) getValue(prop.getAllowV1(), defaultVal.getAllowV1()));
     caConfig.setSelfIssuedValidYears((Integer) getValue(prop.getSelfIssuedValidYears(), defaultVal.getSelfIssuedValidYears()));
+    caConfig.setOcspCertValidityAmount((Integer) getValue(prop.getOcspCertValidityAmount(), defaultVal.getOcspCertValidityAmount()));
     caConfig.setKeySource(getKeySource(prop.getKeySource(), defaultVal.getKeySource()));
     caConfig.setValidity(getValidityData(prop.getValidity(), defaultVal.getValidity()));
     caConfig.setCrlValidity(getValidityData(prop.getCrlValidity(), defaultVal.getCrlValidity()));

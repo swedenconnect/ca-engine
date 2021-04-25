@@ -191,6 +191,7 @@ public class ExtSyslogMessageSender implements SyslogMessageSender {
     case crlPublished:
       return Severity.INFORMATIONAL;
     case certificateIssued:
+    case ocspCertificateIssued:
       return Severity.NOTICE;
     case certificateRevoked:
       return Severity.WARNING;

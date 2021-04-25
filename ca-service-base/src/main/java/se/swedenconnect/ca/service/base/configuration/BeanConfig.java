@@ -102,26 +102,6 @@ public class BeanConfig implements ApplicationEventPublisherAware {
     return basicServiceConfig;
   }
 
-  @Profile({"mock", "dev"})
-  @DependsOn("BasicServiceConfig")
-  @Bean Map<String, CARepository> caRepositoryMap (
-    BasicServiceConfig basicServiceConfig,
-    InstanceConfiguration instanceConfiguration
-  ) throws IOException {
-    Map<String, CAConfigData> instanceConfigMap = instanceConfiguration.getInstanceConfigMap();
-    Set<String> instances = instanceConfigMap.keySet();
-    Map<String, CARepository> caRepositoryMap = new HashMap<>();
-    for (String instance: instances) {
-      File repositoryDir = new File(basicServiceConfig.getDataStoreLocation(), "instances/"+instance+"/repository");
-      log.warn("USING A JSON FILE BASED LOCAL REPOSITORY for instance {}. This is not suitable for production environments", instance);
-      File crlFile = new File(repositoryDir, instance + ".crl");
-      File repoFile = new File(repositoryDir, instance + "-repo.json");
-      CARepository caRepository= new LocalJsonCARepository(crlFile, repoFile);
-      caRepositoryMap.put(instance, caRepository);
-    }
-    return caRepositoryMap;
-  }
-
   @Bean
   @DependsOn("syslogMessageSender")
   AuditEventRepository auditEventRepository() throws Exception {

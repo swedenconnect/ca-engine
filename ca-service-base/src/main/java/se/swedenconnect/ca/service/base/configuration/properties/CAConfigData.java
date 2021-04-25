@@ -47,6 +47,7 @@ public class CAConfigData {
     String algorithm;
     Boolean allowV1;
     Integer selfIssuedValidYears;
+    Integer ocspCertValidityAmount;
     ValidityData validity;
     ValidityData crlValidity;
     KeySourceData keySource;

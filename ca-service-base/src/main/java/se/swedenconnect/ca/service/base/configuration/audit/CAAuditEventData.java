@@ -34,7 +34,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CAAutitEventData {
+public class CAAuditEventData {
 
   String caInstance;
   String issuedCertificate;
@@ -50,7 +50,7 @@ public class CAAutitEventData {
    * @param caInstance CA instance
    * @param subject subject for the certificate request
    */
-  public CAAutitEventData(String caInstance, String subject) {
+  public CAAuditEventData(String caInstance, String subject) {
     this.caInstance = caInstance;
     this.subject = subject;
   }
@@ -62,7 +62,7 @@ public class CAAutitEventData {
    * @param certSerialNumber the certificate serial number
    * @param subject the subject name of the certificate
    */
-  public CAAutitEventData(String caInstance, String issuedCertificate, BigInteger certSerialNumber, String subject) {
+  public CAAuditEventData(String caInstance, String issuedCertificate, BigInteger certSerialNumber, String subject) {
     this.caInstance = caInstance;
     this.issuedCertificate = issuedCertificate;
     this.certSerialNumber = certSerialNumber;
@@ -76,7 +76,7 @@ public class CAAutitEventData {
    * @param revocationTime revocation time
    * @param reason revocation reason
    */
-  public CAAutitEventData(String caInstance, BigInteger certSerialNumber, Date revocationTime, Integer reason, String subject) {
+  public CAAuditEventData(String caInstance, BigInteger certSerialNumber, Date revocationTime, Integer reason, String subject) {
     this.caInstance = caInstance;
     this.certSerialNumber = certSerialNumber;
     this.revocationTime = revocationTime;
@@ -89,7 +89,7 @@ public class CAAutitEventData {
    * @param caInstance
    * @param crlNumber
    */
-  public CAAutitEventData(String caInstance, BigInteger crlNumber) {
+  public CAAuditEventData(String caInstance, BigInteger crlNumber) {
     this.caInstance = caInstance;
     this.crlNumber = crlNumber;
   }
