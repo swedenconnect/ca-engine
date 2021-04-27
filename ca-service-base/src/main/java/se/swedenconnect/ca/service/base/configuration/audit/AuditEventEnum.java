@@ -31,6 +31,7 @@ public enum AuditEventEnum {
     certificateIssued ("CERTIFICATE_ISSUED"),
     certificateRevoked("CERTIFICATE_REVOKED"),
     ocspCertificateIssued("OCSP_CERT_ISSUED"),
+    selfSignedCACertIsssued("SELF_SIGNED_CA_CERT_ISSUED"),
     crlPublished("CRL_PUBLISHED"),
     startup("CA_SERVICE_STARTUP"),
     shutdown("CA_SERVICE_SHUTDOWN"),

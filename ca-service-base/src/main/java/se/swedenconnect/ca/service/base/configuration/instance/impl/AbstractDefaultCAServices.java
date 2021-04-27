@@ -157,6 +157,16 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
         // There is no chain stored on file. Generate and save new self issued CA cert
         log.debug("Generating new self signed certificate for instance {}", instance);
         caCert = generateSelfIssuedCaCert(caKeySource, caConfigData, instance, basicServiceConfig.getServiceUrl());
+
+        //Create self-issued CA certificate issuance audit log event
+        applicationEventPublisher.publishEvent(AuditEventFactory.getAuditEvent(AuditEventEnum.selfSignedCACertIsssued,
+          new CAAuditEventData(
+            instance,
+            Base64.toBase64String(caCert.getEncoded()),
+            caCert.getSerialNumber(),
+            caCert.getSubject().toString()
+          ),null, AuditEventFactory.DEFAULT_AUDIT_PRINCIPAL));
+
         log.debug("Self signed CA cert issued for {}", caCert.getSubject().toString());
         caChain = Collections.singletonList(caCert);
         File chainFile = new File(certsDir, "ca-chain.pem");
@@ -224,21 +234,15 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
             ocspIssuerCert = generateOcspCertificate(caKeySource, caCert, ocspKeySource.getCertificate().getPublicKey(),
               caConfigData, instance, basicServiceConfig.getServiceUrl());
 
-/*
-            DefaultCertificateModelBuilder certModelBuilder = caService.getCertificateModelBuilder(
-              getSubjectNameModel(ocspConfig.getName()), ocspKeySource.getCertificate().getPublicKey());
-            certModelBuilder
-              .qcStatements(null)
-              .keyUsage(new KeyUsageModel(KeyUsage.digitalSignature))
-              .crlDistributionPoints(null)
-              .ocspServiceUrl(null)
-              .ocspNocheck(true)
-              .extendedKeyUsage(new ExtendedKeyUsageModel(true, KeyPurposeId.id_kp_OCSPSigning));
+            //Create OCSP certificate issuance audit log event
+            applicationEventPublisher.publishEvent(AuditEventFactory.getAuditEvent(AuditEventEnum.ocspCertificateIssued,
+              new CAAuditEventData(
+                instance,
+                Base64.toBase64String(ocspIssuerCert.getEncoded()),
+                ocspIssuerCert.getSerialNumber(),
+                ocspIssuerCert.getSubject().toString()
+              ),null, AuditEventFactory.DEFAULT_AUDIT_PRINCIPAL));
 
-            // Allow the implementation of this abstract class to modify the OCSP certificate content
-            customizeOcspCertificateModel(certModelBuilder, instance);
-
-            ocspIssuerCert = caService.issueCertificate(certModelBuilder.build());*/
             log.debug("Issued a new OCSP certificate for {}", ocspIssuerCert.getSubject().toString());
             // Save OCSP cert
             FileUtils.writeStringToFile(
@@ -355,18 +359,7 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
 
     // Allow the implementation of this abstract class to modify the OCSP certificate content
     customizeOcspCertificateModel(certModelBuilder, instance);
-    X509CertificateHolder ocspIssuerCert = issuer.issueCertificate(certModelBuilder.build());
-
-    //Create OCSP certificate issuance audit log event
-    applicationEventPublisher.publishEvent(AuditEventFactory.getAuditEvent(AuditEventEnum.ocspCertificateIssued,
-      new CAAuditEventData(
-        instance,
-        Base64.toBase64String(ocspIssuerCert.getEncoded()),
-        ocspIssuerCert.getSerialNumber(),
-        ocspIssuerCert.getSubject().toString()
-      ),null, AuditEventFactory.DEFAULT_AUDIT_PRINCIPAL));
-
-    return ocspIssuerCert;
+    return issuer.issueCertificate(certModelBuilder.build());
   }
 
   /**

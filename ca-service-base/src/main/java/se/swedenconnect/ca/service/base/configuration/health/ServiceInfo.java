@@ -25,12 +25,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
+import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.ca.service.base.configuration.BasicServiceConfig;
 import se.swedenconnect.ca.service.base.configuration.instance.CAServices;
 import se.swedenconnect.ca.service.base.configuration.instance.InstanceConfiguration;
 import se.swedenconnect.ca.service.base.configuration.instance.ca.AbstractBasicCA;
 import se.swedenconnect.ca.service.base.configuration.keys.BasicX509Utils;
 import se.swedenconnect.ca.service.base.configuration.properties.CAConfigData;
+import se.swedenconnect.ca.service.base.utils.GeneralCAUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,6 +51,8 @@ import java.util.stream.Collectors;
  */
 @Configuration
 public class ServiceInfo {
+
+  private static final long WEEK_MILLISECONDS = 1000 * 60 * 60 * 24 * 7;
 
   private CAServiceInfo caServiceInfo;
 
@@ -105,51 +109,68 @@ public class ServiceInfo {
     }
 
     for (CAServiceInfo.CAInstanceInfo caInstanceInfo : caInstances) {
-      String id = caInstanceInfo.getId();
+      String instance = caInstanceInfo.getId();
       if (!StringUtils.hasText(caInstanceInfo.getKeySourceType())) {
-        throw new IllegalArgumentException("CA key source type is undefined for instance " + id);
+        throw new IllegalArgumentException("CA key source type is undefined for instance " + instance);
       }
 
       CAServiceInfo.KeyInfo keyInfo = caInstanceInfo.getKeyInfo();
       if (keyInfo == null) {
-        throw new IllegalArgumentException("No CA key present for instance " + id);
+        throw new IllegalArgumentException("No CA key present for instance " + instance);
       }
       else {
         if (keyInfo.getKeyType() == null) {
-          throw new IllegalArgumentException("Illegal key type for instance " + id);
+          throw new IllegalArgumentException("Illegal key type for instance " + instance);
         }
         switch (keyInfo.getKeyType().toUpperCase()) {
         case "RSA":
           if (keyInfo.getKeyLength() < 2048) {
-            throw new IllegalArgumentException("RSA key for instance " + id + " is less than 2048 bit");
+            throw new IllegalArgumentException("RSA key for instance " + instance + " is less than 2048 bit");
           }
           break;
         case "EC":
           if (keyInfo.getKeyLength() < 256) {
-            throw new IllegalArgumentException("EC key for instance " + id + " is less than 256 bit");
+            throw new IllegalArgumentException("EC key for instance " + instance + " is less than 256 bit");
           }
           break;
         default:
-          throw new IllegalArgumentException("Illegal key type for instance " + id);
+          throw new IllegalArgumentException("Illegal key type for instance " + instance);
         }
       }
 
       if (!StringUtils.hasText(caInstanceInfo.getAlgorithm())) {
-        throw new IllegalArgumentException("No algorithm specified for instance " + id);
+        throw new IllegalArgumentException("No algorithm specified for instance " + instance);
       }
       if (!StringUtils.hasText(caInstanceInfo.getDn())) {
-        throw new IllegalArgumentException("No CA certificate is specified for instance " + id);
+        throw new IllegalArgumentException("No CA certificate is specified for instance " + instance);
       }
 
       if (caInstanceInfo.isOscpEnabled()) {
         CAServiceInfo.OCSPInfo ocspInfo = caInstanceInfo.getOcspInfo();
         if (!StringUtils.hasText(ocspInfo.getOcspServiceUrl())) {
-          throw new IllegalArgumentException("No OCSP service URL is specified for instance " + id);
+          throw new IllegalArgumentException("No OCSP service URL is specified for instance " + instance);
         }
         if (ocspInfo.isSeparateEntity()) {
           CAServiceInfo.OCSPEntityInfo ocspEntity = ocspInfo.getOcspEntity();
-
-
+          OCSPResponder ocspResponder = caServices.getCAService(instance).getOCSPResponder();
+          X509CertificateHolder ocspCert = null;
+          try {
+            ocspCert = GeneralCAUtils.getOcspCert(basicServiceConfig.getDataStoreLocation(), instance);
+          } catch (Exception ex) {
+            throw new RuntimeException("unable to parse OCSP certificate: " + ex.getMessage());
+          }
+          Date ocspCertNotAfter = ocspCert.getNotAfter();
+          Date currentTime = new Date();
+          Date aWeekFromNow = new Date(System.currentTimeMillis() + WEEK_MILLISECONDS);
+          if (ocspCertNotAfter.before(currentTime)){
+            throw new IllegalArgumentException("The OCSP certificate has expired");
+          }
+          if (ocspCertNotAfter.before(aWeekFromNow)){
+            ServiceHealthWarningException warning = new ServiceHealthWarningException("The OCSP certificate will expire soon");
+            warning.addDetail("expiryDate:", ocspCertNotAfter);
+            warning.addDetail("ocspIssuer: ", ocspCert.getSubject().toString());
+            throw warning;
+          }
 
         }
 

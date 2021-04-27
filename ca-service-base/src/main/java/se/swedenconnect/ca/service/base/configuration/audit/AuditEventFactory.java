@@ -68,6 +68,7 @@ public class AuditEventFactory {
         case certificateRequested:
             data.put("subject" , eventData.getSubject());
             break;
+        case selfSignedCACertIsssued:
         case ocspCertificateIssued:
         case certificateIssued:
             data.put("subject" , eventData.getSubject());

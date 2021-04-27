@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,9 +47,16 @@ public class ServiceHealthIndicator implements HealthIndicator {
         try {
             serviceInfo.testConfiguration();
         } catch (RuntimeException ex){
-            log.warn("The CA Service has a negative health state");
+            if (ex instanceof ServiceHealthWarningException){
+                log.warn("The CA Service has a health warning: {}", ex.getMessage());
+                return Health
+                  .status(new Status("WARNING", ex.getMessage()))
+                  .withDetails(((ServiceHealthWarningException)ex).getDetails())
+                  .build();
+            }
+            log.warn("The CA Service has a negative health state: {}", ex.getMessage());
             return Health
-                    .outOfService()
+                    .down()
                     .withDetail("error-message", ex.getMessage())
                     .build();
         }
