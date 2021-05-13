@@ -31,6 +31,7 @@ import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.ca.service.base.configuration.instance.CAServices;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -71,13 +72,15 @@ public class OCSPController {
    */
   @PostMapping(value = "/ocsp/{instance}")
   public ResponseEntity<InputStreamResource> ocspPostRespondse(
-    @PathVariable("instance") String instance, HttpEntity<byte[]> requestPayload, @RequestHeader("Content-Type") String contentType) {
+    @PathVariable("instance") String instance, HttpEntity<byte[]> requestPayload,
+    @RequestHeader("Content-Type") String contentType,
+    HttpServletRequest request) {
     if (!contentType.equalsIgnoreCase("application/ocsp-request") && enforceOcspContentType){
       log.debug("Received post request for OCSP response with illegal Content-Type {}", contentType);
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     try {
-      return getOCSPResponse(requestPayload.getBody(), instance);
+      return getOCSPResponse(requestPayload.getBody(), instance, request);
     } catch (Exception ex) {
       log.debug("Unable to parse OCSP POST request: {}", ex.getMessage());
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -97,7 +100,8 @@ public class OCSPController {
   @GetMapping(value = "/ocsp/{instance}/{ocspreq}")
   public ResponseEntity<InputStreamResource> ocspGetResponse(
     @PathVariable("instance") String instance,
-    @PathVariable("ocspreq") String urlEncodedOCspReq
+    @PathVariable("ocspreq") String urlEncodedOCspReq,
+    HttpServletRequest request
   ) {
     try {
       // RFC 6960 recommends the GET is not used if request is larger than 255 bytes. We allow more, but set a maximum limit of 10K to defend against attacks.
@@ -106,7 +110,7 @@ public class OCSPController {
       }
       String b64OcspReq = URLDecoder.decode(urlEncodedOCspReq, StandardCharsets.UTF_8);
       byte[] ocspRequestBytes = Base64.decode(b64OcspReq);
-      return getOCSPResponse(ocspRequestBytes, instance);
+      return getOCSPResponse(ocspRequestBytes, instance, request);
 
     } catch (Exception ex) {
       log.debug("Unable to parse OCSP GET request: {}", ex.getMessage());
@@ -114,7 +118,7 @@ public class OCSPController {
     }
   }
 
-  private ResponseEntity<InputStreamResource> getOCSPResponse(byte[] ocspRequestBytes, String instance) throws IOException {
+  private ResponseEntity<InputStreamResource> getOCSPResponse(byte[] ocspRequestBytes, String instance, HttpServletRequest request) throws IOException {
     CAService caService = caServices.getCAService(instance);
     if (caService == null) {
       log.debug("OCSP request for unknown CA instance");
@@ -132,7 +136,10 @@ public class OCSPController {
 
     OCSPRequest ocspRequest = OCSPRequest.getInstance(new ASN1InputStream(ocspRequestBytes).readObject());
     byte[] ocspResp = ocspResponder.handleRequest(ocspRequest).getEncoded();
-    log.debug("Generated and returning OCSP response for instance {}", instance);
+    if (log.isDebugEnabled()){
+      String clientIp = getRemoteIpAdress(request);
+      log.debug("Generated and returning OCSP response for instance {} from IP {}", instance, clientIp);
+    }
 
     return ResponseEntity
       .ok()
@@ -141,4 +148,19 @@ public class OCSPController {
       .contentType(MediaType.parseMediaType("application/ocsp-response"))
       .body(new InputStreamResource(new ByteArrayInputStream(ocspResp)));
   }
+
+  /**
+   * Retrieves the original client IP-adress. Chooses the X-FORWARDED-FOR adress if present or
+   * Otherwise chooses the originating ip address.
+   * @param request The HttpServlet request
+   * @return The remote ip address
+   */
+  public static final String getRemoteIpAdress(HttpServletRequest request){
+    String ipAddress = request.getHeader("X-FORWARDED-FOR");
+    if (ipAddress == null) {
+      ipAddress = request.getRemoteAddr();
+    }
+    return ipAddress;
+  }
+
 }
