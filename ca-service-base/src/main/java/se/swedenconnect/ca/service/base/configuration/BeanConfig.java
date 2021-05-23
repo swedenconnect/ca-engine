@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.service.base.configuration.audit.CAServiceContextListener;
 import se.swedenconnect.ca.service.base.configuration.audit.ExtSyslogMessageSender;
@@ -139,12 +140,13 @@ public class BeanConfig implements ApplicationEventPublisherAware {
 
   @Bean
   Map<String, EmbeddedLogo> logoMap(
+    ResourceLoader resourceLoader,
     @Value("${ca-service.config.logo}")String logoLocation,
     @Value("${ca-service.config.icon}")String iconLocation
   ) throws Exception {
     Map<String, EmbeddedLogo> logoMap = new HashMap<>();
-    logoMap.put("logo", new EmbeddedLogo(logoLocation));
-    logoMap.put("icon", new EmbeddedLogo(iconLocation));
+    logoMap.put("logo", new EmbeddedLogo(logoLocation, resourceLoader));
+    logoMap.put("icon", new EmbeddedLogo(iconLocation, resourceLoader));
     return logoMap;
   }
 

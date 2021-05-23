@@ -151,16 +151,42 @@ public class LocalKeySource {
             //No valid configuration for PKCS11 tokes are provided.
             throw new IllegalArgumentException("Illegal Key Source Type declaration in application.properties - Missing PKCS11 configuration for PKCS11 token");
         }
-        List<Object> certPemObjects = BasicX509Utils.getPemObjects(getSourceInputStream(keySourceCertLocation));
-        Optional<X509CertificateHolder> certificateHolderOptional = certPemObjects.stream()
-                .filter(o -> o instanceof X509CertificateHolder)
-                .map(o -> (X509CertificateHolder) o)
-                .findFirst();
 
-        if (!certificateHolderOptional.isPresent()) {
+        // Look for an externally configured certificate
+        X509CertificateHolder extCert = null;
+        try {
+            List<Object> certPemObjects = BasicX509Utils.getPemObjects(getSourceInputStream(keySourceCertLocation));
+            extCert = certPemObjects.stream()
+              .filter(o -> o instanceof X509CertificateHolder)
+              .map(o -> (X509CertificateHolder) o)
+              .findFirst()
+              .orElse(null);
+        } catch (Exception ex) {
+            log.debug("Unable to locate certificate using external file resource");
+        }
+
+        //Attempt to recover the certificate from the HSM
+        X509CertificateHolder hsmCert = null;
+        try {
+            List<String> providerNameList = pkcs11Provider.getProviderNameList();
+            for (String providerName: providerNameList){
+                KeyStore keyStore = KeyStore.getInstance("PKCS11", providerName);
+                keyStore.load(null, this.keySourcePassword.toCharArray());
+                hsmCert = new X509CertificateHolder(keyStore.getCertificate(this.keySourceAlias).getEncoded());
+            }
+        } catch (Exception ex) {
+            log.debug("No certificate was obtained from the hsm slot");
+        }
+
+        if (extCert == null && hsmCert == null) {
             throw new IllegalArgumentException("Illegal Key Source Type declaration in application.properties - Missing external certificate declaration");
         }
-        X509Certificate certificate = BasicX509Utils.getCertificate(certificateHolderOptional.get().getEncoded());
+
+        X509Certificate certificate = BasicX509Utils.getCertificate(
+          extCert != null
+            ? extCert.getEncoded()
+            : hsmCert.getEncoded()
+        );
         BasicX509Credential bcred;
         if (pkcs11ReloadableKeys){
             bcred = new PKCS11Credential(certificate, pkcs11Provider.getProviderNameList(), keySourceAlias, keySourcePassword);

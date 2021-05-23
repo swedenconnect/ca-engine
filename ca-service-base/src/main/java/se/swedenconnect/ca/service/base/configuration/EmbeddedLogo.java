@@ -7,6 +7,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 
 import java.io.File;
@@ -38,19 +39,20 @@ public class EmbeddedLogo {
   /**
    * Contructor of the EmbeddedLogo object
    * @param location the logo location
+   * @param resourceLoader resource loader
    * @throws Exception error parsing data
    */
-  public EmbeddedLogo(String location) throws Exception {
-    Resource logoResource = getResource(location);
-    this.logoData = FileUtils.readFileToByteArray(logoResource.getFile());
+  public EmbeddedLogo(String location, ResourceLoader resourceLoader) throws Exception {
+    Resource logoResource = getResource(location, resourceLoader);
+    this.logoData = IOUtils.toByteArray(logoResource.getInputStream());
     this.b64Logo = Base64.toBase64String(this.logoData);
     this.logoMimeType = getMimeType(logoResource.getFilename());
     this.imgSrc = getImageSource();
   }
 
-  private Resource getResource(String location) {
+  private Resource getResource(String location, ResourceLoader resourceLoader) {
     if (location.toLowerCase().startsWith("classpath:")){
-      return new ClassPathResource(location.substring(10));
+      return resourceLoader.getResource(location);
     }
     return new FileSystemResource(location);
   }
