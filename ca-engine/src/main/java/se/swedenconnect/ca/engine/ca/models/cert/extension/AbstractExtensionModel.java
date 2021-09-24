@@ -21,10 +21,13 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Abstract model for extension data
@@ -52,11 +55,22 @@ public abstract class AbstractExtensionModel implements ExtensionModel {
 
   @Override public void addExtensions(JcaX509v3CertificateBuilder certificateBuilder) throws CertificateIssuanceException {
 
+    try {
+      certificateBuilder.addExtension(getExtensions().get(0));
+      log.debug("Added extension");
+    }
+    catch (IOException e) {
+      throw new CertificateIssuanceException("Unable to encode extension", e);
+    }
+  }
+
+  @Override public List<Extension> getExtensions() throws CertificateIssuanceException {
     ASN1Object extensionObject = getExtensionObject();
     ExtensionMetadata emd = getExtensionMetadata();
     try {
-      certificateBuilder.addExtension(emd.getOid(), emd.isCritical(), extensionObject.getEncoded("DER"));
-      log.debug("Added " + emd.getName() + " extension");
+      Extension extension = new Extension(emd.getOid(), emd.isCritical(), extensionObject.getEncoded("DER"));
+      log.debug("Encoded " + emd.getName() + " extension");
+      return Arrays.asList(extension);
     }
     catch (IOException e) {
       throw new CertificateIssuanceException("Unable to encode " + emd.getName() + " extension", e);

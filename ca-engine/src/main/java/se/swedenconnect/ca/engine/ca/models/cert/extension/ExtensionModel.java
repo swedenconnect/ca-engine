@@ -18,6 +18,9 @@ package se.swedenconnect.ca.engine.ca.models.cert.extension;
 
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
+import org.bouncycastle.asn1.x509.Extension;
+
+import java.util.List;
 
 /**
  * Interface of certificate extension model
@@ -34,5 +37,13 @@ public interface ExtensionModel {
    * @throws CertificateIssuanceException error building the intended extension based on the extension model
    */
   void addExtensions(JcaX509v3CertificateBuilder certificateBuilder) throws CertificateIssuanceException;
+
+  /**
+   * Returns the extensions defined by this ExtensionModel
+   * @return List of Extensions objects
+   * @throws CertificateIssuanceException on error creating the extensions
+   */
+  List<Extension> getExtensions() throws CertificateIssuanceException;
+
 
 }

@@ -1,0 +1,120 @@
+/*
+ * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package se.swedenconnect.ca.cmc.ca;
+
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+import se.swedenconnect.ca.engine.ca.repository.CARepository;
+import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
+import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
+import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
+import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
+import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * Test implementation of a CA repository
+ *
+ * @author Martin Lindström (martin@idsec.se)
+ * @author Stefan Santesson (stefan@idsec.se)
+ */
+public class TestCARepository implements CARepository, CRLRevocationDataProvider {
+
+  private final File crlFile;
+  private List<CertificateRecord> issuedCerts;
+  private BigInteger crlNumber;
+
+  public TestCARepository(File crlFile) {
+    this.crlFile = crlFile;
+    this.issuedCerts = new ArrayList<>();
+    this.crlNumber = BigInteger.ZERO;
+  }
+
+  @Override public List<BigInteger> getAllCertificates() {
+    return issuedCerts.stream()
+      .map(certificateRecord -> certificateRecord.getSerialNumber())
+      .collect(Collectors.toList());
+  }
+
+  @Override public CertificateRecord getCertificate(BigInteger bigInteger) {
+    Optional<CertificateRecord> recordOptional = issuedCerts.stream()
+      .filter(certificateRecord -> certificateRecord.getSerialNumber().equals(bigInteger))
+      .findFirst();
+    return recordOptional.isPresent() ? recordOptional.get() : null;
+  }
+
+  @Override public void addCertificate(X509CertificateHolder certificate) throws IOException {
+    CertificateRecord record = getCertificate(certificate.getSerialNumber());
+    if (record != null) {
+      throw new IOException("This certificate already exists in the certificate repository");
+    }
+    issuedCerts.add(new SerializableCertificateRecord(certificate.getEncoded(), certificate.getSerialNumber(),
+      certificate.getNotBefore(), certificate.getNotAfter(), false, null, null));
+  }
+
+  @Override public void revokeCertificate(BigInteger serialNumber, int reason, Date revocationTime) throws CertificateRevocationException {
+    if (serialNumber == null) {
+      throw new CertificateRevocationException("Null Serial number");
+    }
+    CertificateRecord certificateRecord = getCertificate(serialNumber);
+    if (certificateRecord == null) {
+      throw new CertificateRevocationException("No such certificate (" + serialNumber.toString(16) + ")");
+    }
+    certificateRecord.setRevoked(true);
+    certificateRecord.setReason(reason);
+    certificateRecord.setRevocationTime(revocationTime);
+  }
+
+  @Override public CRLRevocationDataProvider getCRLRevocationDataProvider() {
+    return this;
+  }
+
+  @Override public List<RevokedCertificate> getRevokedCertificates() {
+    return issuedCerts.stream()
+      .filter(certificateRecord -> certificateRecord.isRevoked())
+      .map(certificateRecord -> new RevokedCertificate(
+        certificateRecord.getSerialNumber(),
+        certificateRecord.getRevocationTime(),
+        certificateRecord.getReason()
+      ))
+      .collect(Collectors.toList());
+  }
+
+  @Override public BigInteger getNextCrlNumber() {
+    crlNumber = crlNumber.add(BigInteger.ONE);
+    return crlNumber;
+  }
+
+  @SneakyThrows @Override public void publishNewCrl(X509CRLHolder crl) {
+    FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
+  }
+
+  @SneakyThrows @Override public X509CRLHolder getCurrentCrl() {
+    return new X509CRLHolder(new FileInputStream(crlFile));
+  }
+}

@@ -29,6 +29,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.EncodedCertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
+import se.swedenconnect.ca.engine.utils.CAUtils;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -76,25 +77,7 @@ public abstract class CertificateIssuer {
    * @throws IOException errors creating the X500Name object
    */
   protected X500Name getX500Name(CertNameModel nameModel) throws IOException {
-    if (nameModel instanceof EncodedCertNameModel) {
-      return ((EncodedCertNameModel) nameModel).getNameData();
-    }
-
-    final List<List<AttributeTypeAndValueModel>> rdnSequenceData = ((ExplicitCertNameModel) nameModel).getNameData();
-    final ASN1EncodableVector rdnSequence = new ASN1EncodableVector();
-    for (List<AttributeTypeAndValueModel> rdnData : rdnSequenceData) {
-      if (!rdnData.isEmpty()) {
-        final ASN1EncodableVector rdnSet = new ASN1EncodableVector();
-        for (AttributeTypeAndValueModel attrTypeAndValData : rdnData) {
-          final ASN1EncodableVector attrTypeAndVal = new ASN1EncodableVector();
-          attrTypeAndVal.add(attrTypeAndValData.getAttributeType());
-          attrTypeAndVal.add(attributeValueEncoder.encode(attrTypeAndValData.getAttributeType(), attrTypeAndValData.getValue()));
-          rdnSet.add(new DERSequence(attrTypeAndVal));
-        }
-        rdnSequence.add(new DERSet(rdnSet));
-      }
-    }
-    return X500Name.getInstance(new DERSequence(rdnSequence));
+    return CAUtils.getX500Name(nameModel, attributeValueEncoder);
   }
 
   /**
