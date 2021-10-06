@@ -1,4 +1,4 @@
-package se.swedenconnect.ca.cmc.model;
+package se.swedenconnect.ca.cmc.model.request.admin;
 
 /**
  * Description
@@ -6,6 +6,6 @@ package se.swedenconnect.ca.cmc.model;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public enum CMCRequestType {
-  issueCert, revoke, admin, getCert;
+public enum SortBy {
+  serialNumber, issueDate;
 }

@@ -1,4 +1,4 @@
-package se.swedenconnect.ca.cmc.model.admin;
+package se.swedenconnect.ca.cmc.model.request.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,9 +15,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AdminRequestData {
+public class ListCerts {
 
-  private AdminRequestType adminRequestType;
-  private String requestData;
+  private boolean valid;
+  private SortBy sortBy;
+  private int pageSize;
+  private int pageIndex;
 
 }

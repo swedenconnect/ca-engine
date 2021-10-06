@@ -1,4 +1,4 @@
-package se.swedenconnect.ca.cmc.model;
+package se.swedenconnect.ca.cmc.model.request;
 
 import org.bouncycastle.operator.ContentSigner;
 import java.security.cert.X509Certificate;

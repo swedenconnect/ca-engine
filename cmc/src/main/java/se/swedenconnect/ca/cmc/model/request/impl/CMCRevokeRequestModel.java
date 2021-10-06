@@ -1,10 +1,9 @@
-package se.swedenconnect.ca.cmc.model.impl;
+package se.swedenconnect.ca.cmc.model.request.impl;
 
 import lombok.Getter;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
-import se.swedenconnect.ca.cmc.model.CMCRequestType;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;

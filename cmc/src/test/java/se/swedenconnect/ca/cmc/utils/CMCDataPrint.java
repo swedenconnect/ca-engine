@@ -8,8 +8,8 @@ import org.bouncycastle.util.encoders.Base64;
 import se.swedenconnect.ca.cmc.api.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
-import se.swedenconnect.ca.cmc.model.CMCRequestType;
-import se.swedenconnect.ca.cmc.model.admin.AdminRequestData;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
+import se.swedenconnect.ca.cmc.model.request.admin.AdminRequestData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

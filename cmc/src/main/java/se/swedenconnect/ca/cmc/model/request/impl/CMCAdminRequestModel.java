@@ -1,17 +1,14 @@
-package se.swedenconnect.ca.cmc.model.impl;
+package se.swedenconnect.ca.cmc.model.request.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
-import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.operator.ContentSigner;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
-import se.swedenconnect.ca.cmc.model.CMCRequestType;
-import se.swedenconnect.ca.cmc.model.admin.AdminRequestData;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
+import se.swedenconnect.ca.cmc.model.request.admin.AdminRequestData;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.List;
 
 /**

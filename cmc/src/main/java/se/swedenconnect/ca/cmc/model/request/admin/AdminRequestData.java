@@ -1,4 +1,4 @@
-package se.swedenconnect.ca.cmc.model.admin;
+package se.swedenconnect.ca.cmc.model.request.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,9 +15,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AdminResponse {
+public class AdminRequestData {
 
   private AdminRequestType adminRequestType;
-  private String adminResponseData;
+  private String requestData;
 
 }

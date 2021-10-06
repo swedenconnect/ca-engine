@@ -1,17 +1,15 @@
 package se.swedenconnect.ca.cmc.data;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import se.swedenconnect.ca.cmc.api.CMCRequest;
-import se.swedenconnect.ca.cmc.model.admin.AdminRequestData;
-import se.swedenconnect.ca.cmc.model.admin.AdminRequestType;
-import se.swedenconnect.ca.cmc.model.admin.ListCerts;
-import se.swedenconnect.ca.cmc.model.admin.SortBy;
-import se.swedenconnect.ca.cmc.model.impl.CMCAdminRequestModel;
+import se.swedenconnect.ca.cmc.model.request.admin.AdminRequestData;
+import se.swedenconnect.ca.cmc.model.request.admin.AdminRequestType;
+import se.swedenconnect.ca.cmc.model.request.admin.ListCerts;
+import se.swedenconnect.ca.cmc.model.request.admin.SortBy;
+import se.swedenconnect.ca.cmc.model.request.impl.CMCAdminRequestModel;
 import se.swedenconnect.ca.cmc.utils.TestUtils;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
-import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 
 import java.util.Arrays;

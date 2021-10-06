@@ -1,11 +1,11 @@
-package se.swedenconnect.ca.cmc.model.impl;
+package se.swedenconnect.ca.cmc.model.request.impl;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.bouncycastle.operator.ContentSigner;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
-import se.swedenconnect.ca.cmc.model.CMCRequestModel;
-import se.swedenconnect.ca.cmc.model.CMCRequestType;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
