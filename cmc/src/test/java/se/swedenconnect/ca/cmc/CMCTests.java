@@ -2,31 +2,32 @@ package se.swedenconnect.ca.cmc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.crmf.CRMFException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.ca.cmc.api.CMCRequest;
 import se.swedenconnect.ca.cmc.auth.impl.DirectTrustCMCValidator;
 import se.swedenconnect.ca.cmc.ca.*;
+import se.swedenconnect.ca.cmc.data.CMCRequestData;
 import se.swedenconnect.ca.cmc.model.CMCRequestModel;
+import se.swedenconnect.ca.cmc.model.impl.CMCAdminRequestModel;
 import se.swedenconnect.ca.cmc.model.impl.CMCCertificateRequestModel;
+import se.swedenconnect.ca.cmc.model.impl.CMCGetCertRequestModel;
+import se.swedenconnect.ca.cmc.model.impl.CMCRevokeRequestModel;
 import se.swedenconnect.ca.cmc.utils.CMCSigner;
+import se.swedenconnect.ca.cmc.utils.CMCDataPrint;
 import se.swedenconnect.ca.cmc.utils.TestUtils;
-import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
-import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
 import java.io.IOException;
-import java.security.*;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.Security;
+import java.util.Date;
 
 /**
  * Description
@@ -74,37 +75,69 @@ public class CMCTests {
     TestCAHolder caHolder = TestServices.getTestCAs().get(TestCA.INSTANCE1);
     TestCAService ca = caHolder.getCscaService();
     KeyPair subjectKeyPair = TestUtils.generateECKeyPair(TestUtils.NistCurve.P256);
-    DefaultCertificateModelBuilder certificateModelBuilder = ca.getCertificateModelBuilder(new ExplicitCertNameModel(Arrays.asList(
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Nisse Hult").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("1234567890").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Nisse").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Hult").build()
-    )), subjectKeyPair.getPublic());
+
+    DefaultCertificateModelBuilder certificateModelBuilder = ca.getCertificateModelBuilder(CMCRequestData.subjectMap.get(CMCRequestData.DEFAULT), subjectKeyPair.getPublic());
     CertificateModel certificateModel = certificateModelBuilder.build();
+    X509CertificateHolder testCert01 = ca.issueCertificate(certificateModel);
 
     CMCRequest cmcRequest;
     CMCRequest cmcParsed;
     //Create certificate request with PKCS#10
     cmcRequest = getCMCRequest(ca, certificateModel, subjectKeyPair, false);
-    log.debug("Test logging");
+    log.info("CMC Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     cmcParsed = new CMCRequest(cmcRequest.getCmcRequestBytes(), new DirectTrustCMCValidator(cmcSigner.getSignerChain().get(0)));
+    log.info("Parsed CMC Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
 
     //Create certificate request with CRMF
-    cmcRequest = getCMCRequest(ca, certificateModel, subjectKeyPair, false);
+    cmcRequest = getCMCRequest(ca, certificateModel, subjectKeyPair, true);
+    log.info("CMC Certificate request with CRMF:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     cmcParsed = new CMCRequest(cmcRequest.getCmcRequestBytes(), new DirectTrustCMCValidator(cmcSigner.getSignerChain().get(0)));
+    log.info("Parsed CMC Certificate request with CRMF:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
 
+
+    //Create CMC revoke request
+    BigInteger certSerial = testCert01.getSerialNumber();
+    cmcRequest = new CMCRequest(new CMCRevokeRequestModel(
+      certSerial, CRLReason.unspecified, new Date(),ca.getCaCertificate().getSubject(),
+      cmcSigner.getContentSigner(), cmcSigner.getSignerChain()));
+    log.info("CMC Revoke request:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    cmcParsed = new CMCRequest(cmcRequest.getCmcRequestBytes(), new DirectTrustCMCValidator(cmcSigner.getSignerChain().get(0)));
+    log.info("Parsed CMC Revoke request:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
+
+    //Create CMC Get Cert request
+    cmcRequest = new CMCRequest(new CMCGetCertRequestModel(certSerial, ca.getCaCertificate().getSubject(),
+      cmcSigner.getContentSigner(), cmcSigner.getSignerChain()));
+    log.info("CMC Get Cert request:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    cmcParsed = new CMCRequest(cmcRequest.getCmcRequestBytes(), new DirectTrustCMCValidator(cmcSigner.getSignerChain().get(0)));
+    log.info("Parsed CMC Get Cert request:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
+
+    //Create CMC Admin request - CA Info
+    cmcRequest = new CMCRequest(new CMCAdminRequestModel(CMCRequestData.adminRequestMap.get(CMCRequestData.CA_INFO),cmcSigner.getContentSigner(), cmcSigner.getSignerChain()));
+    log.info("CMC Admin request - CA Info:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    cmcParsed = new CMCRequest(cmcRequest.getCmcRequestBytes(), new DirectTrustCMCValidator(cmcSigner.getSignerChain().get(0)));
+    log.info("Parsed Admin request - CA Info:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
+
+    //Create CMC Admin request - list certs
+    cmcRequest = new CMCRequest(new CMCAdminRequestModel(CMCRequestData.adminRequestMap.get(CMCRequestData.LIST_CERTS),cmcSigner.getContentSigner(), cmcSigner.getSignerChain()));
+    log.info("CMC Admin request - List Certs:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    cmcParsed = new CMCRequest(cmcRequest.getCmcRequestBytes(), new DirectTrustCMCValidator(cmcSigner.getSignerChain().get(0)));
+    log.info("Parsed Admin request - List Certs:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
+
+    //Create CMC Admin request - list all serials
+    cmcRequest = new CMCRequest(new CMCAdminRequestModel(CMCRequestData.adminRequestMap.get(CMCRequestData.LIST_CERT_SERIALS),cmcSigner.getContentSigner(), cmcSigner.getSignerChain()));
+    log.info("CMC Admin request - List All Serials:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    cmcParsed = new CMCRequest(cmcRequest.getCmcRequestBytes(), new DirectTrustCMCValidator(cmcSigner.getSignerChain().get(0)));
+    log.info("Parsed Admin request - List All Serials:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
 
   }
 
 
   private CMCRequest getCMCRequest(TestCAService ca, CertificateModel certificateModel, KeyPair kp, boolean crmf)
-    throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, IOException, CRMFException,
-    CertificateEncodingException {
+    throws IOException {
 
     CMCRequestModel cmcRequestModel = crmf
-      ? new CMCCertificateRequestModel(certificateModel, "profile1", cmcSigner.getContentSigner(), cmcSigner.getSignerChain())
-      : new CMCCertificateRequestModel(certificateModel, "profile1", cmcSigner.getContentSigner(), cmcSigner.getSignerChain(),
+      ? new CMCCertificateRequestModel(certificateModel, "profileCrmf", cmcSigner.getContentSigner(), cmcSigner.getSignerChain())
+      : new CMCCertificateRequestModel(certificateModel, "profilePkcs10", cmcSigner.getContentSigner(), cmcSigner.getSignerChain(),
       kp.getPrivate(), CAAlgorithmRegistry.ALGO_ID_SIGNATURE_ECDSA_SHA256);
     CMCRequest cmcRequest = new CMCRequest(cmcRequestModel);
     return cmcRequest;

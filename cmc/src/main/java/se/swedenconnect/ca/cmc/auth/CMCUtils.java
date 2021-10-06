@@ -25,6 +25,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import se.swedenconnect.ca.cmc.api.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
+import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.model.CMCRequestType;
 import se.swedenconnect.ca.cmc.model.PEMType;
 import se.swedenconnect.ca.cmc.model.admin.AdminRequestData;
@@ -126,16 +127,17 @@ public class CMCUtils {
     return strWr.toString();
   }
 
-  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier controlOid, PKIData pkiData) throws IOException {
-    return getCMCControlObject(controlOid, pkiData, null);
+  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData) throws IOException {
+    return getCMCControlObject(asn1controlOid, pkiData, null);
   }
-  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier controlOid, PKIData pkiData, CMCRequestType cmcRequestType)
+  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData, CMCRequestType cmcRequestType)
     throws IOException {
+    CMCControlObjectID controlOid = CMCControlObjectID.getControlObjectID(asn1controlOid);
     CMCControlObject.CMCControlObjectBuilder resultBuilder = CMCControlObject.builder().type(controlOid);
     TaggedAttribute[] controlSequence = pkiData.getControlSequence();
     for (TaggedAttribute controlAttr : controlSequence){
       ASN1ObjectIdentifier attrType = controlAttr.getAttrType();
-      if (attrType != null && attrType.equals(controlOid)){
+      if (attrType != null && attrType.equals(controlOid.getOid())){
         resultBuilder
           .bodyPartID(controlAttr.getBodyPartID())
           .value(getRequestControlValue(controlOid, controlAttr.getAttrValues(), cmcRequestType));
@@ -144,10 +146,10 @@ public class CMCUtils {
     return resultBuilder.build();
   }
 
-  private static Object getRequestControlValue(ASN1ObjectIdentifier controlOid, ASN1Set controlAttrVals, CMCRequestType cmcRequestType)
+  private static Object getRequestControlValue(CMCControlObjectID controlOid, ASN1Set controlAttrVals, CMCRequestType cmcRequestType)
     throws IOException {
     Object controlValue = getControlValue(controlOid, controlAttrVals);
-    if (CMCObjectIdentifiers.id_cmc_regInfo.equals(controlOid)){
+    if (CMCControlObjectID.regInfo.equals(controlOid)){
       byte[] regInfoBytes = (byte[]) controlValue;
       if (CMCRequestType.admin.equals(cmcRequestType)){
         return OBJECT_MAPPER.readValue(regInfoBytes, AdminRequestData.class);
@@ -157,7 +159,7 @@ public class CMCUtils {
   }
 
 
-  private static Object getControlValue(ASN1ObjectIdentifier controlOid, ASN1Set controlAttrVals)
+  private static Object getControlValue(CMCControlObjectID controlOid, ASN1Set controlAttrVals)
     throws IOException {
 
     try {
@@ -171,23 +173,23 @@ public class CMCUtils {
         return null;
       }
 
-      if (CMCObjectIdentifiers.id_cmc_regInfo.equals(controlOid)
-        || CMCObjectIdentifiers.id_cmc_responseInfo.equals(controlOid)
-        || CMCObjectIdentifiers.id_cmc_senderNonce.equals(controlOid)
-        || CMCObjectIdentifiers.id_cmc_recipientNonce.equals(controlOid)
+      if (CMCControlObjectID.regInfo.equals(controlOid)
+        || CMCControlObjectID.responseInfo.equals(controlOid)
+        || CMCControlObjectID.senderNonce.equals(controlOid)
+        || CMCControlObjectID.recipientNonce.equals(controlOid)
       ){
         return ASN1OctetString.getInstance(firstObject).getOctets();
       }
-      if (CMCObjectIdentifiers.id_cmc_getCert.equals(controlOid)){
+      if (CMCControlObjectID.getCert.equals(controlOid)){
         return GetCert.getInstance(firstObject);
       }
-      if (CMCObjectIdentifiers.id_cmc_lraPOPWitness.equals(controlOid)){
+      if (CMCControlObjectID.lraPOPWitness.equals(controlOid)){
         return LraPopWitness.getInstance(firstObject);
       }
-      if (CMCObjectIdentifiers.id_cmc_revokeRequest.equals(controlOid)){
+      if (CMCControlObjectID.revokeRequest.equals(controlOid)){
         return RevokeRequest.getInstance(firstObject);
       }
-      if (CMCObjectIdentifiers.id_cmc_statusInfoV2.equals(controlOid)){
+      if (CMCControlObjectID.statusInfoV2.equals(controlOid)){
         return CMCStatusInfoV2.getInstance(firstObject);
       }
     } catch (Exception ex){
@@ -196,4 +198,53 @@ public class CMCUtils {
     log.debug("Unsupported CMC control message {} - returning null", controlOid);
     return null;
   }
+
+  /**
+   * Return the status code value of CMCStatus
+   * @param cmcStatus CMCStatus
+   * @return integer value
+   * @throws Exception On illegal status value content
+   */
+  public static int getCMCStatusCode(CMCStatus cmcStatus) throws Exception{
+    ASN1Integer cmcStatusAsn1Int = (ASN1Integer) cmcStatus.toASN1Primitive();
+    return cmcStatusAsn1Int.intPositiveValueExact();
+  }
+
+  public static String getCMCStatusString(CMCStatus cmcStatus) {
+
+    /**
+     *   public static final CMCStatus success = new CMCStatus(new ASN1Integer(0L));
+     *   public static final CMCStatus failed = new CMCStatus(new ASN1Integer(2L));
+     *   public static final CMCStatus pending = new CMCStatus(new ASN1Integer(3L));
+     *   public static final CMCStatus noSupport = new CMCStatus(new ASN1Integer(4L));
+     *   public static final CMCStatus confirmRequired = new CMCStatus(new ASN1Integer(5L));
+     *   public static final CMCStatus popRequired = new CMCStatus(new ASN1Integer(6L));
+     *   public static final CMCStatus partial = new CMCStatus(new ASN1Integer(7L));
+     */
+    try {
+      int cmcStatusCode = getCMCStatusCode(cmcStatus);
+      switch (cmcStatusCode) {
+      case 0:
+        return "success";
+      case 2:
+        return "failed";
+      case 3:
+        return "pending";
+      case 4:
+        return "noSupport";
+      case 5:
+        return "confirmRequired";
+      case 6:
+        return "popRequired";
+      case 7:
+        return "partial";
+      default:
+        return "unknown";
+      }
+    }
+    catch (Exception e) {
+      return "illegal: " + e.toString();
+    }
+  }
+
 }

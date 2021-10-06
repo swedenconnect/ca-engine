@@ -13,6 +13,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <ca.engine.version>1.0.2-SNAPSHOT</ca.engine.version>
+        <slf4j.version>1.7.31</slf4j.version>
     </properties>
 
     <dependencies>
@@ -44,7 +45,20 @@
             <version>1.0.2</version>
             <scope>test</scope>
         </dependency>
-
+<!--
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cmc.BodyPartID;
 
 /**
@@ -20,7 +19,7 @@ import org.bouncycastle.asn1.cmc.BodyPartID;
 public class CMCControlObject {
 
   BodyPartID bodyPartID;
-  ASN1ObjectIdentifier type;
+  CMCControlObjectID type;
   Object value;
 
 }
