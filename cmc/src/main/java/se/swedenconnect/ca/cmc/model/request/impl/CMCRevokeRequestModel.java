@@ -19,8 +19,8 @@ import java.util.List;
 @Getter
 public class CMCRevokeRequestModel extends AbstractCMCRequestModel {
   public CMCRevokeRequestModel(BigInteger serialNumber, int reason, Date revocationDate,
-    X500Name issuerName, ContentSigner cmcSigner, List<X509Certificate> cmcSignerCerts) {
-    super(CMCRequestType.revoke, cmcSigner, cmcSignerCerts);
+    X500Name issuerName) {
+    super(CMCRequestType.revoke);
     this.serialNumber = serialNumber;
     this.reason = reason;
     this.revocationDate = revocationDate;

@@ -27,7 +27,7 @@ import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.cmc.model.PEMType;
-import se.swedenconnect.ca.cmc.model.request.admin.AdminRequestData;
+import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
@@ -151,7 +151,7 @@ public class CMCUtils {
     if (CMCControlObjectID.regInfo.equals(controlOid)){
       byte[] regInfoBytes = (byte[]) controlValue;
       if (CMCRequestType.admin.equals(cmcRequestType)){
-        return OBJECT_MAPPER.readValue(regInfoBytes, AdminRequestData.class);
+        return OBJECT_MAPPER.readValue(regInfoBytes, AdminCMCData.class);
       }
     }
     return controlValue;

@@ -5,11 +5,12 @@ import org.bouncycastle.asn1.cmc.*;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle.util.encoders.Base64;
-import se.swedenconnect.ca.cmc.api.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
+import se.swedenconnect.ca.cmc.api.data.CMCRequest;
+import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
-import se.swedenconnect.ca.cmc.model.request.admin.AdminRequestData;
+import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -61,6 +62,11 @@ public class CMCDataPrint {
     }
   }
 
+  public static String printCMCResponse(CMCResponse cmcResponse, boolean includeFullMessage) {
+    return "CMCResponse print\n";
+  }
+
+
   private static void printControlValue(CMCRequestType cmcRequestType, CMCControlObjectID controlObjectID, TaggedAttribute csAttr,
     StringBuilder b) {
     ASN1Set attrValues = csAttr.getAttrValues();
@@ -88,9 +94,9 @@ public class CMCDataPrint {
             b.append("    value: ").append(valueStr).append("\n");
             break;
           case admin:
-            AdminRequestData adminRequestData = TestUtils.OBJECT_MAPPER.readValue(octets, AdminRequestData.class);
+            AdminCMCData adminRequestData = TestUtils.OBJECT_MAPPER.readValue(octets, AdminCMCData.class);
             b.append("    admin-type: ").append(adminRequestData.getAdminRequestType()).append("\n");
-            String requestData = adminRequestData.getRequestData();
+            String requestData = adminRequestData.getData();
             if (requestData != null) {
               valueStr = TestUtils.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
                 TestUtils.OBJECT_MAPPER.readValue(requestData, Object.class)

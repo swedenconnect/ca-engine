@@ -18,8 +18,8 @@ import java.util.List;
 @Getter
 public class CMCGetCertRequestModel extends AbstractCMCRequestModel {
   public CMCGetCertRequestModel(BigInteger serialNumber,
-    X500Name issuerName, ContentSigner cmcSigner, List<X509Certificate> cmcSignerCerts) {
-    super(CMCRequestType.getCert, cmcSigner, cmcSignerCerts);
+    X500Name issuerName) {
+    super(CMCRequestType.getCert);
     this.serialNumber = serialNumber;
     this.issuerName = issuerName;
   }

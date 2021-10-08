@@ -1,9 +1,11 @@
-package se.swedenconnect.ca.cmc.model.request.admin;
+package se.swedenconnect.ca.cmc.model.admin.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * Description
@@ -15,9 +17,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AdminResponse {
+public class CAInformation {
 
-  private AdminRequestType adminRequestType;
-  private String adminResponseData;
+  private int certificateCount;
+  private int validCertificateCount;
+  List<byte[]> certificateChain;
+  byte[] ocspCertificate;
 
 }

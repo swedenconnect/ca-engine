@@ -1,6 +1,7 @@
 package se.swedenconnect.ca.cmc.model.response;
 
-import org.bouncycastle.operator.ContentSigner;
+import se.swedenconnect.ca.cmc.api.data.CMCFailType;
+import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 import java.security.cert.X509Certificate;
@@ -27,20 +28,15 @@ public interface CMCResponseModel {
   byte[] getResponseInfo();
 
   /**
-   * The type of request
-   * @return cmc request type
+   * The status of the response
+   * @return cmc response status
    */
-  CMCRequestType getCmcRequestType();
+  CMCResponseStatus getCmcResponseStatus();
 
   /**
-   * Get the signer of the CMC message
-   * @return signer
+   * Return certificates for the response
+   * @return list of certificate bytes
    */
-  ContentSigner getCmcSigner();
+  List<X509Certificate> getReturnCertificates();
 
-  /**
-   * Get the signer certificate chain of the CMC signer
-   * @return CMC signer certificates
-   */
-  List<X509Certificate> getCmcSignerCerts();
 }

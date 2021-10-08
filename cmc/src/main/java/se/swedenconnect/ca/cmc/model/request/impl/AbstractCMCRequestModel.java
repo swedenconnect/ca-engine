@@ -21,15 +21,13 @@ public abstract class AbstractCMCRequestModel implements CMCRequestModel {
 
   private static final SecureRandom RNG = CMCUtils.RNG;
 
-  public AbstractCMCRequestModel(CMCRequestType cmcRequestType, ContentSigner cmcSigner, List<X509Certificate> cmcSignerCerts) {
-    this(cmcRequestType, cmcSigner, cmcSignerCerts, null);
+  public AbstractCMCRequestModel(CMCRequestType cmcRequestType) {
+    this(cmcRequestType, null);
   }
 
-  public AbstractCMCRequestModel(CMCRequestType cmcRequestType, ContentSigner cmcSigner, List<X509Certificate> cmcSignerCerts, byte[] registrationInfo) {
+  public AbstractCMCRequestModel(CMCRequestType cmcRequestType, byte[] registrationInfo) {
     this.registrationInfo = registrationInfo;
     this.cmcRequestType = cmcRequestType;
-    this.cmcSigner = cmcSigner;
-    this.cmcSignerCerts = cmcSignerCerts;
     this.nonce = new byte[128];
     RNG.nextBytes(nonce);
   }
@@ -37,8 +35,6 @@ public abstract class AbstractCMCRequestModel implements CMCRequestModel {
   @Getter @Setter protected byte[] nonce;
   @Getter @Setter protected byte[] registrationInfo;
   @Getter protected CMCRequestType cmcRequestType;
-  @Getter protected ContentSigner cmcSigner;
-  @Getter protected List<X509Certificate> cmcSignerCerts;
 
 
 

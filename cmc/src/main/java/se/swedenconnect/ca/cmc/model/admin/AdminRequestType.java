@@ -1,4 +1,4 @@
-package se.swedenconnect.ca.cmc.model.request.admin;
+package se.swedenconnect.ca.cmc.model.admin;
 
 /**
  * Description
@@ -6,6 +6,6 @@ package se.swedenconnect.ca.cmc.model.request.admin;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public enum SortBy {
-  serialNumber, issueDate;
+public enum AdminRequestType {
+  caInfo, listCerts, allCertSerials;
 }

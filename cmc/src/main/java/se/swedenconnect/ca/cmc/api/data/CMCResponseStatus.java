@@ -1,9 +1,11 @@
-package se.swedenconnect.ca.cmc.model.request.admin;
+package se.swedenconnect.ca.cmc.api.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import se.swedenconnect.ca.cmc.api.data.CMCFailType;
+import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
 
 /**
  * Description
@@ -15,9 +17,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AdminRequestData {
+public class CMCResponseStatus {
 
-  private AdminRequestType adminRequestType;
-  private String requestData;
+  private CMCStatusType status;
+  private CMCFailType failType;
+  private String message;
 
 }

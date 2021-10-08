@@ -1,8 +1,6 @@
 package se.swedenconnect.ca.cmc.auth.impl;
 
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
@@ -33,19 +31,9 @@ import java.util.*;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-public class DirectTrustCMCValidator implements CMCValidator {
+public abstract class AbstractCMCValidator implements CMCValidator {
 
-  private final List<X509CertificateHolder> trustedCMCSigners;
-
-  public DirectTrustCMCValidator(X509Certificate... trustedCMCSigners) throws CertificateEncodingException {
-    this.trustedCMCSigners = new ArrayList();
-    for (X509Certificate cert : trustedCMCSigners) {
-      this.trustedCMCSigners.add(new JcaX509CertificateHolder(cert));
-    }
-  }
-
-  public DirectTrustCMCValidator(X509CertificateHolder... trustedCMCSigners) {
-    this.trustedCMCSigners = Arrays.asList(trustedCMCSigners);
+  public AbstractCMCValidator() {
   }
 
   @Override public CMCValidationResult validateCMC(byte[] cmcMessage) {
@@ -70,12 +58,9 @@ public class DirectTrustCMCValidator implements CMCValidator {
       result.setSignedData(cmsSignedData);
 
       Collection<X509CertificateHolder> certsInCMS = cmsSignedData.getCertificates().getMatches(null);
-      X509CertificateHolder trustedSignerCert = getTrustedSignerCert(certsInCMS);
-      SignerInformationVerifier signerInformationVerifier = new JcaSimpleSignerInfoVerifierBuilder().build(trustedSignerCert);
-      SignerInformation signerInformation = cmsSignedData.getSignerInfos().iterator().next();
-      signerInformation.verify(signerInformationVerifier);
+      List<X509CertificateHolder> trustedSignerCertChain = verifyCMSSignature(cmsSignedData);
       // Set result conclusion
-      result.setSignerCertificatePath(Arrays.asList(trustedSignerCert));
+      result.setSignerCertificatePath(trustedSignerCertChain);
       result.setSimpleResponse(false);
       result.setValid(true);
     }
@@ -88,18 +73,13 @@ public class DirectTrustCMCValidator implements CMCValidator {
     return result;
   }
 
-  private X509CertificateHolder getTrustedSignerCert(Collection<X509CertificateHolder> certsInCMS)
-    throws CertificateException, OperatorCreationException {
-    Iterator<X509CertificateHolder> iterator = certsInCMS.iterator();
-    while (iterator.hasNext()) {
-      for (X509CertificateHolder trustedCMCSigner : trustedCMCSigners) {
-        if (trustedCMCSigner.equals(iterator.next())) {
-          return trustedCMCSigner;
-        }
-      }
-    }
-    throw new IllegalArgumentException("No trusted certificate found in signed CMC");
-  }
+  /**
+   * Verifies the CMS signature
+   * @param cmsSignedData the signed data to verify
+   * @return The signing certificate chain if the verification was successful
+   * @throws IOException if signature validation failed
+   */
+  protected abstract List<X509CertificateHolder> verifyCMSSignature(CMSSignedData cmsSignedData) throws Exception;
 
   private boolean isSimpleCMCResponse(CMCValidationResult result, byte[] cmcMessage) {
     List<X509CertificateHolder> certificateList = new ArrayList<>();

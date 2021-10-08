@@ -30,15 +30,4 @@ public interface CMCRequestModel {
    */
   CMCRequestType getCmcRequestType();
 
-  /**
-   * Get the signer of the CMC message
-   * @return signer
-   */
-  ContentSigner getCmcSigner();
-
-  /**
-   * Get the signer certificate chain of the CMC signer
-   * @return CMC signer certificates
-   */
-  List<X509Certificate> getCmcSignerCerts();
 }
