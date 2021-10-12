@@ -4,11 +4,12 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cmc.*;
-import org.bouncycastle.cmc.SimplePKIResponse;
 import org.bouncycastle.operator.ContentSigner;
-import se.swedenconnect.ca.cmc.api.data.*;
+import se.swedenconnect.ca.cmc.api.data.CMCFailType;
+import se.swedenconnect.ca.cmc.api.data.CMCResponse;
+import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
+import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
-import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
 import se.swedenconnect.ca.cmc.model.response.CMCResponseModel;
 
 import java.io.IOException;
@@ -70,7 +71,7 @@ public class CMCResponseFactory {
   private List<TaggedAttribute> getControlAttributes(CMCResponseModel cmcResponseModel) {
 
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    CMCRequestFactory.addNonceControl(taggedAttributeList, cmcResponseModel.getNonce());
+    addNonceControl(taggedAttributeList, cmcResponseModel.getNonce());
     // Add response status and fail info
     addStatusControl(taggedAttributeList, cmcResponseModel);
 
@@ -82,14 +83,26 @@ public class CMCResponseFactory {
     return taggedAttributeList;
   }
 
+  public static void addNonceControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce) {
+    if (nonce != null) {
+      taggedAttributeList.add(CMCRequestFactory.getControl(CMCObjectIdentifiers.id_cmc_recipientNonce, new DEROctetString(nonce)));
+    }
+  }
+
+
+
   private void addStatusControl(List<TaggedAttribute> taggedAttributeList, CMCResponseModel cmcResponseModel) {
     CMCResponseStatus cmcResponseStatus = cmcResponseModel.getCmcResponseStatus();
     CMCStatusType cmcStatusType = cmcResponseStatus.getStatus();
     CMCFailType cmcFailType = cmcResponseStatus.getFailType();
+    String message = cmcResponseStatus.getMessage();
     CMCStatusInfoV2Builder statusBuilder = new CMCStatusInfoV2Builder(cmcStatusType.getCmcStatus(),
-      CMCRequestFactory.getBodyPartId());
+      cmcResponseModel.getProcessedRequestObjects().toArray(new BodyPartID[0]));
     if (!cmcStatusType.equals(CMCStatusType.success) && cmcFailType != null) {
       statusBuilder.setOtherInfo(cmcFailType.getCmcFailInfo());
+    }
+    if (message != null) {
+      statusBuilder.setStatusString(message);
     }
     taggedAttributeList.add(CMCRequestFactory.getControl(CMCObjectIdentifiers.id_cmc_statusInfoV2, statusBuilder.build()));
   }

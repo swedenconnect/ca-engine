@@ -5,15 +5,14 @@ import org.bouncycastle.asn1.cmc.*;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle.util.encoders.Base64;
-import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
-import se.swedenconnect.ca.cmc.api.data.CMCRequest;
-import se.swedenconnect.ca.cmc.api.data.CMCResponse;
+import se.swedenconnect.ca.cmc.api.data.*;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
 /**
  * Description
@@ -63,7 +62,32 @@ public class CMCDataPrint {
   }
 
   public static String printCMCResponse(CMCResponse cmcResponse, boolean includeFullMessage) {
-    return "CMCResponse print\n";
+    if (cmcResponse == null) {
+      return "Null CMC Request";
+    }
+
+    try {
+      StringBuilder b = new StringBuilder();
+      String cmcBase64 = Base64.toBase64String(cmcResponse.getCmcResponseBytes());
+      PKIResponse pkiResponse = cmcResponse.getPkiResponse();
+      TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
+      if (responseControlSequence.length > 0) {
+        b.append("CMC Control sequence (size=").append(responseControlSequence.length).append(")\n");
+        for (TaggedAttribute csAttr: responseControlSequence){
+          CMCControlObjectID controlObjectID = CMCControlObjectID.getControlObjectID(csAttr.getAttrType());
+          b.append("  type: ").append(controlObjectID).append("\n");
+          printControlValue(null, controlObjectID, csAttr, b);
+        }
+      }
+
+      if (includeFullMessage) {
+        b.append("  Full CMC request:\n").append(base64Print(cmcResponse.getCmcResponseBytes(), 120)).append("\n");
+      }
+
+      return b.toString();
+    } catch (Exception ex) {
+      return "Error parsing CMC request: " + ex.toString() + "\n";
+    }
   }
 
 
@@ -83,6 +107,9 @@ public class CMCDataPrint {
           break;
         case regInfo:
           byte[] octets = ASN1OctetString.getInstance(asn1Encodable).getOctets();
+          if (cmcRequestType == null) {
+            break;
+          }
           switch (cmcRequestType) {
           case issueCert:
             valueStr = new String(octets, StandardCharsets.UTF_8);
@@ -129,11 +156,37 @@ public class CMCDataPrint {
           break;
         case statusInfoV2:
           CMCStatusInfoV2 statusInfoV2 = CMCStatusInfoV2.getInstance(asn1Encodable);
-          CMCStatus cmcStatus = statusInfoV2.getcMCStatus();
+          CMCFailType cmcFailType = getCmcFailType(statusInfoV2);
+          CMCStatusType cmcStatus = CMCStatusType.getCMCStatusType(statusInfoV2.getcMCStatus());
           DERUTF8String statusString = statusInfoV2.getStatusString();
-          b.append("    CMC Status: ").append(CMCUtils.getCMCStatusString(cmcStatus)).append("\n");
+          b.append("    CMC status: ").append(cmcStatus).append("\n");
+          BodyPartID[] bodyList = statusInfoV2.getBodyList();
+          for (BodyPartID bodyPartID:bodyList) {
+            b.append("      Processed object: ").append(bodyPartID.getID()).append("\n");
+          }
+          if (cmcFailType != null){
+            b.append("    CMC fail info: ").append(cmcFailType).append("\n");
+          }
           if (statusString != null) {
-            b.append("    Status string: ").append(statusString.getString()).append("\n");
+            b.append("    status string: ").append(statusString.getString()).append("\n");
+          }
+          break;
+        case responseInfo:
+          byte[] responseInfoData = ASN1OctetString.getInstance(asn1Encodable).getOctets();
+          try {
+            AdminCMCData adminCMCData = CMCUtils.OBJECT_MAPPER.readValue(responseInfoData, AdminCMCData.class);
+            b.append("    admin-type: ").append(adminCMCData.getAdminRequestType()).append("\n");
+            String responseData = adminCMCData.getData();
+            if (responseData != null) {
+              valueStr = TestUtils.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
+                TestUtils.OBJECT_MAPPER.readValue(responseData, Object.class)
+              );
+              b.append("    response-data:\n").append(valueStr.replaceAll("(?m)^", "      ")).append("\n");
+            }
+          } catch (Exception ex) {
+            // This was not admin json data. Check if this is a string value
+            String responseInfoString = TestUtils.getStringRepresentation(responseInfoData);
+            b.append("    response-data: ").append(responseInfoString).append("\n");
           }
           break;
         default:
@@ -148,6 +201,15 @@ public class CMCDataPrint {
         b.append("    value: ").append(valueStr).append("\n");
       }
     }
+  }
+
+  public static CMCFailType getCmcFailType(CMCStatusInfoV2 statusInfoV2) {
+    OtherStatusInfo otherStatusInfo = statusInfoV2.getOtherStatusInfo();
+    if (otherStatusInfo != null && otherStatusInfo.isFailInfo()){
+      CMCFailInfo cmcFailInfo = CMCFailInfo.getInstance(otherStatusInfo.toASN1Primitive());
+      return CMCFailType.getCMCFailType(cmcFailInfo);
+    }
+    return null;
   }
 
   private static void printIssueCert(PKIData pkiData, boolean includeCertRequest, StringBuilder b) throws IOException {

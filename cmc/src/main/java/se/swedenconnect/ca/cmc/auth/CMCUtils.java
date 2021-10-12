@@ -39,6 +39,8 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -126,37 +128,56 @@ public class CMCUtils {
     return strWr.toString();
   }
 
-  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData) throws IOException {
-    return getCMCControlObject(asn1controlOid, pkiData, null);
-  }
-  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData, CMCRequestType cmcRequestType)
+  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData)
     throws IOException {
     CMCControlObjectID controlOid = CMCControlObjectID.getControlObjectID(asn1controlOid);
-    CMCControlObject.CMCControlObjectBuilder resultBuilder = CMCControlObject.builder().type(controlOid);
     TaggedAttribute[] controlSequence = pkiData.getControlSequence();
+
+    CMCControlObject.CMCControlObjectBuilder resultBuilder = CMCControlObject.builder().type(controlOid);
     for (TaggedAttribute controlAttr : controlSequence){
       ASN1ObjectIdentifier attrType = controlAttr.getAttrType();
       if (attrType != null && attrType.equals(controlOid.getOid())){
         resultBuilder
           .bodyPartID(controlAttr.getBodyPartID())
-          .value(getRequestControlValue(controlOid, controlAttr.getAttrValues(), cmcRequestType));
+          .value(getRequestControlValue(controlOid, controlAttr.getAttrValues()));
       }
     }
     return resultBuilder.build();
   }
 
-  private static Object getRequestControlValue(CMCControlObjectID controlOid, ASN1Set controlAttrVals, CMCRequestType cmcRequestType)
+  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, TaggedAttribute[] controlSequence)
+    throws IOException {
+    CMCControlObjectID controlOid = CMCControlObjectID.getControlObjectID(asn1controlOid);
+    CMCControlObject.CMCControlObjectBuilder resultBuilder = CMCControlObject.builder().type(controlOid);
+    for (TaggedAttribute controlAttr : controlSequence){
+      ASN1ObjectIdentifier attrType = controlAttr.getAttrType();
+      if (attrType != null && attrType.equals(controlOid.getOid())){
+        resultBuilder
+          .bodyPartID(controlAttr.getBodyPartID())
+          .value(getRequestControlValue(controlOid, controlAttr.getAttrValues()))
+          .type(controlOid);
+      }
+    }
+    return resultBuilder.build();
+  }
+
+  private static Object getRequestControlValue(CMCControlObjectID controlOid, ASN1Set controlAttrVals)
     throws IOException {
     Object controlValue = getControlValue(controlOid, controlAttrVals);
-    if (CMCControlObjectID.regInfo.equals(controlOid)){
-      byte[] regInfoBytes = (byte[]) controlValue;
-      if (CMCRequestType.admin.equals(cmcRequestType)){
-        return OBJECT_MAPPER.readValue(regInfoBytes, AdminCMCData.class);
-      }
+    if (CMCControlObjectID.regInfo.equals(controlOid) || CMCControlObjectID.responseInfo.equals(controlOid)){
+      byte[] dataBytes = (byte[]) controlValue;
+      return getbytesOrJsonObject(dataBytes, AdminCMCData.class);
     }
     return controlValue;
   }
 
+  private static Object getbytesOrJsonObject(byte[] regInfoBytes, Class<?> dataClass) {
+    try {
+      return OBJECT_MAPPER.readValue(regInfoBytes, dataClass);
+    } catch (Exception ex){
+      return regInfoBytes;
+    }
+  }
 
   private static Object getControlValue(CMCControlObjectID controlOid, ASN1Set controlAttrVals)
     throws IOException {
@@ -209,41 +230,16 @@ public class CMCUtils {
     return cmcStatusAsn1Int.intPositiveValueExact();
   }
 
-  public static String getCMCStatusString(CMCStatus cmcStatus) {
-
-    /**
-     *   public static final CMCStatus success = new CMCStatus(new ASN1Integer(0L));
-     *   public static final CMCStatus failed = new CMCStatus(new ASN1Integer(2L));
-     *   public static final CMCStatus pending = new CMCStatus(new ASN1Integer(3L));
-     *   public static final CMCStatus noSupport = new CMCStatus(new ASN1Integer(4L));
-     *   public static final CMCStatus confirmRequired = new CMCStatus(new ASN1Integer(5L));
-     *   public static final CMCStatus popRequired = new CMCStatus(new ASN1Integer(6L));
-     *   public static final CMCStatus partial = new CMCStatus(new ASN1Integer(7L));
-     */
-    try {
-      int cmcStatusCode = getCMCStatusCode(cmcStatus);
-      switch (cmcStatusCode) {
-      case 0:
-        return "success";
-      case 2:
-        return "failed";
-      case 3:
-        return "pending";
-      case 4:
-        return "noSupport";
-      case 5:
-        return "confirmRequired";
-      case 6:
-        return "popRequired";
-      case 7:
-        return "partial";
-      default:
-        return "unknown";
+  public static TaggedAttribute[] getResponseControlSequence(PKIResponse pkiResponse){
+    List<TaggedAttribute> attributeList = new ArrayList<>();
+    ASN1Sequence controlSequence = pkiResponse.getControlSequence();
+    if (controlSequence.size() > 0) {
+      Iterator<ASN1Encodable> iterator = controlSequence.iterator();
+      while (iterator.hasNext()){
+        TaggedAttribute csAttr = TaggedAttribute.getInstance(iterator.next());
+        attributeList.add(csAttr);
       }
     }
-    catch (Exception e) {
-      return "illegal: " + e.toString();
-    }
+    return attributeList.toArray(new TaggedAttribute[0]);
   }
-
 }

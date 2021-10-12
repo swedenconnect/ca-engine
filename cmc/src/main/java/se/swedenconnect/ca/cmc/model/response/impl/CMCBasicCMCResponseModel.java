@@ -2,6 +2,7 @@ package se.swedenconnect.ca.cmc.model.response.impl;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bouncycastle.asn1.cmc.BodyPartID;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
@@ -26,8 +27,8 @@ import java.util.List;
  */
 public class CMCBasicCMCResponseModel extends AbstractCMCResponseModel {
 
-  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, byte[] responseInfo) {
-    super(nonce, cmcResponseStatus, responseInfo);
+  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, List<BodyPartID> processedRequestObjects, byte[] responseInfo) {
+    super(nonce, cmcResponseStatus, processedRequestObjects, responseInfo);
   }
 
   /**
@@ -39,9 +40,9 @@ public class CMCBasicCMCResponseModel extends AbstractCMCResponseModel {
    * @throws CertificateException
    * @throws IOException
    */
-  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, byte[] responseInfo, List<? extends Object> returnCertificates)
+  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, List<BodyPartID> processedRequestObjects, byte[] responseInfo, List<? extends Object> returnCertificates)
     throws CertificateException, IOException {
-    super(nonce, cmcResponseStatus, responseInfo);
+    super(nonce, cmcResponseStatus, processedRequestObjects, responseInfo);
     addCertificates(returnCertificates);
 
   }

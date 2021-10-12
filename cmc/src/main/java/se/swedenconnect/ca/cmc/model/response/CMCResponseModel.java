@@ -1,5 +1,6 @@
 package se.swedenconnect.ca.cmc.model.response;
 
+import org.bouncycastle.asn1.cmc.BodyPartID;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
@@ -38,5 +39,11 @@ public interface CMCResponseModel {
    * @return list of certificate bytes
    */
   List<X509Certificate> getReturnCertificates();
+
+  /**
+   * Return list of body part ID for processed request objects
+   * @return list of body part ID
+   */
+  List<BodyPartID> getProcessedRequestObjects();
 
 }

@@ -111,7 +111,7 @@ public class CMCRequestParser {
       cmcRequest.setCmcRequestType(CMCRequestType.getCert);
       return;
     }
-    Object regInfoObj = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_regInfo, cmcRequest.getPkiData(), CMCRequestType.admin).getValue();
+    Object regInfoObj = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_regInfo, cmcRequest.getPkiData()).getValue();
     if (regInfoObj != null && regInfoObj instanceof AdminCMCData){
       cmcRequest.setCmcRequestType(CMCRequestType.admin);
       return;

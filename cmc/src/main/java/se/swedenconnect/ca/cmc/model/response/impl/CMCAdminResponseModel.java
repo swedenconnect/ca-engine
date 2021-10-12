@@ -2,6 +2,7 @@ package se.swedenconnect.ca.cmc.model.response.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
+import org.bouncycastle.asn1.cmc.BodyPartID;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
 import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
@@ -10,6 +11,7 @@ import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Description
@@ -21,8 +23,8 @@ public class CMCAdminResponseModel extends AbstractCMCResponseModel {
 
   @Getter private AdminCMCData adminCMCData;
 
-  public CMCAdminResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, AdminCMCData adminCMCData) throws IOException {
-    super(nonce, cmcResponseStatus, getResponseInfo(adminCMCData));
+  public CMCAdminResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, List<BodyPartID> processedRequestObjects, AdminCMCData adminCMCData) throws IOException {
+    super(nonce, cmcResponseStatus, processedRequestObjects, getResponseInfo(adminCMCData));
     this.adminCMCData = adminCMCData;
   }
 

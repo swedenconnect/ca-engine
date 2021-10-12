@@ -32,6 +32,7 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.util.encoders.Base64;
 import se.swedenconnect.ca.cmc.ca.TestCA;
 import se.swedenconnect.ca.cmc.ca.TestCAHolder;
 import se.swedenconnect.ca.cmc.ca.TestServices;
@@ -40,6 +41,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -61,6 +63,7 @@ import java.util.List;
 public class TestUtils {
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  public static final String ASCII_STR_REGEX = "^([\\w]|[0-9]|[\\s]){1,}$";
 
   public static X509Certificate getCertificate(byte[] certBytes) throws CertificateException, IOException {
     try (InputStream inStream = new ByteArrayInputStream(certBytes)) {
@@ -145,7 +148,17 @@ public class TestUtils {
     return IETFUtils.valueToString(cert.getSubject().getRDNs(oid)[0].getFirst().getValue());
   }
 
+  public static String getStringRepresentation(byte[] responseInfoData) {
+    if (responseInfoData == null || responseInfoData.length == 0){
+      return "";
+    }
 
+    String str = new String(responseInfoData, StandardCharsets.UTF_8);
+    if (str.matches(ASCII_STR_REGEX)){
+      return str;
+    }
+    return Base64.toBase64String(responseInfoData);
+  }
 
   public enum KeyType {
     RSA, EC, ECDSA;
