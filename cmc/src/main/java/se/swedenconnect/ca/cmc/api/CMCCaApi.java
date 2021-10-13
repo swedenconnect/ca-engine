@@ -4,6 +4,7 @@ import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
 
 /**
  * Description
@@ -13,6 +14,6 @@ import java.io.IOException;
  */
 public interface CMCCaApi {
 
-  CMCResponse processRequest (CMCRequest cmcRequest) throws RuntimeException;
+  CMCResponse processRequest (CMCRequest cmcRequest) throws CertificateException, IOException;
 
 }

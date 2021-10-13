@@ -19,6 +19,10 @@ import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
 @Builder
 public class CMCResponseStatus {
 
+  public CMCResponseStatus(CMCStatusType status) {
+    this.status = status;
+  }
+
   private CMCStatusType status;
   private CMCFailType failType;
   private String message;
