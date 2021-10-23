@@ -102,7 +102,7 @@ public class TestCAHolder {
     X509CertificateHolder rootCA01Cert = certificateIssuer.issueCertificate(builder.build());
     File crlFile = new File(dataDir, caConfig.getId() + "/root-ca.crl");
 
-    return new TestCAService(kp.getPrivate(), rootCA01Cert, new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
+    return new TestCAService(kp.getPrivate(), Arrays.asList(rootCA01Cert), new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
   }
 
   private CertNameModel getCAName(String commonName) {
@@ -158,7 +158,7 @@ public class TestCAHolder {
 
       OCSPModel ocspModel = new OCSPModel(ocspServiceChain, cscaService.getCaCertificate(), algorithm);
       OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(kp.getPrivate(), ocspModel, cscaService.getCaRepository());
-      cscaService.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp");
+      cscaService.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp", ocspServiceChain.get(0));
     }
     catch (Exception ex) {
       log.error("Error creating OCSP responder", ex);

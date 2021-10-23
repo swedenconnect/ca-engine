@@ -59,7 +59,7 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
 
   public BasicRootCAService(PrivateKey privateKey, X509CertificateHolder caCertificate, CARepository caRepository,
     File crlFile, String algorithm) throws Exception {
-    super(caCertificate, caRepository);
+    super(Arrays.asList(caCertificate), caRepository);
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(
       new CertificateIssuerModel(algorithm, 10), getCaCertificate().getSubject(), privateKey);
@@ -92,6 +92,10 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
   }
 
   @Override public OCSPResponder getOCSPResponder() {
+    return null;
+  }
+
+  @Override public X509CertificateHolder getOCSPResponderCertificate() {
     return null;
   }
 

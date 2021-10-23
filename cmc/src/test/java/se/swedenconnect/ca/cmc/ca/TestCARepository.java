@@ -22,6 +22,7 @@ import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
+import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
@@ -31,10 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -108,6 +106,57 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
   @Override public BigInteger getNextCrlNumber() {
     crlNumber = crlNumber.add(BigInteger.ONE);
     return crlNumber;
+  }
+
+  @Override public int getCertificateCount(boolean valid) {
+    if (!valid) {
+      return issuedCerts.size();
+    }
+
+    return (int) issuedCerts.stream()
+      .filter(certificateRecord -> !certificateRecord.isRevoked())
+      .count();
+  }
+
+  @Override public List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean valid, SortBy sortBy) {
+
+    List<CertificateRecord> records = issuedCerts.stream()
+      .filter(certificateRecord -> {
+        if (valid) {
+          return !certificateRecord.isRevoked();
+        }
+        return true;
+      })
+      .collect(Collectors.toList());
+
+    if (sortBy != null) {
+      switch (sortBy) {
+      case serialNumber:
+        Collections.sort(records, Comparator.comparing(CertificateRecord::getSerialNumber));
+        break;
+      case issueDate:
+        Collections.sort(records, Comparator.comparing(CertificateRecord::getIssueDate));
+        break;
+      }
+    }
+
+    int startIdx = page * pageSize;
+    int endIdx = startIdx + pageSize;
+
+    if (startIdx > records.size()){
+      return new ArrayList<>();
+    }
+
+    if (endIdx > records.size()) {
+      endIdx = records.size();
+    }
+
+    List<CertificateRecord> resultCertList = new ArrayList<>();
+    for (int i = startIdx; i<endIdx;i++) {
+      resultCertList.add(records.get(i));
+    }
+
+    return resultCertList;
   }
 
   @SneakyThrows @Override public void publishNewCrl(X509CRLHolder crl) {

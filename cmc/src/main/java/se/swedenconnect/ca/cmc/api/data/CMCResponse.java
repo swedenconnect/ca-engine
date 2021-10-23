@@ -25,6 +25,7 @@ public class CMCResponse {
   private byte[] nonce;
   List<X509Certificate> returnCertificates;
   PKIResponse pkiResponse;
+  CMCResponseStatus responseStatus;
 
 
 

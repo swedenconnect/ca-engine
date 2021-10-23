@@ -28,6 +28,7 @@ import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Interface for a CA service
@@ -106,6 +107,12 @@ public interface CAService {
   X509CertificateHolder getCaCertificate();
 
   /**
+   * Returns the current configured certificate chain to a trusted root
+   * @return CA certificate chain with the CA certificate first and the trust anchor last in the list
+   */
+  List<X509CertificateHolder> getCACertificateChain();
+
+  /**
    * Getter for the CA repository for this CA service
    *
    * @return CA repository
@@ -118,4 +125,12 @@ public interface CAService {
    * @return OCSP responder
    */
   OCSPResponder getOCSPResponder();
+
+  /**
+   * Getter for the OCSP responder certificate
+   * @return OCSP responder certificate or null of the CA has no OCSP responder
+   */
+  X509CertificateHolder getOCSPResponderCertificate();
+
+
 }

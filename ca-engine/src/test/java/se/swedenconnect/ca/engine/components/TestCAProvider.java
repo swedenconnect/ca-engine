@@ -98,8 +98,9 @@ public class TestCAProvider {
 */
 
     X509CertificateHolder caCert = rootCA.issueCertificate(builder.build());
+    List<X509CertificateHolder> caCertChain = Arrays.asList(caCert, rootCA.getCaCertificate());
     File crlFile = new File(dataDir, caConfig.getId() + "/ca.crl");
-    return new BasicIssuerCAService(kp.getPrivate(), caCert, new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
+    return new BasicIssuerCAService(kp.getPrivate(), caCertChain, new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
   }
 
   private BasicRootCAService createRootCA() throws Exception {
@@ -180,7 +181,7 @@ public class TestCAProvider {
 
       OCSPModel ocspModel = new OCSPModel(ocspServiceChain, ca.getCaCertificate(), algorithm);
       OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(kp.getPrivate(), ocspModel, ca.getCaRepository());
-      ca.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp");
+      ca.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp", ocspServiceChain.get(0));
     }
     catch (Exception ex) {
       log.error("Error creating OCSP responder", ex);

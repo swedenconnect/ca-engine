@@ -12,7 +12,10 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
-import org.bouncycastle.cms.*;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.ContentSigner;
@@ -25,7 +28,6 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
-import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.cmc.model.PEMType;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
@@ -38,6 +40,7 @@ import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -230,6 +233,11 @@ public class CMCUtils {
     return cmcStatusAsn1Int.intPositiveValueExact();
   }
 
+  /**
+   * Get the control sequence array from a CMC PKI Response
+   * @param pkiResponse CMC PKI Response
+   * @return control data sequence in the form of an array of {@link TaggedAttribute}
+   */
   public static TaggedAttribute[] getResponseControlSequence(PKIResponse pkiResponse){
     List<TaggedAttribute> attributeList = new ArrayList<>();
     ASN1Sequence controlSequence = pkiResponse.getControlSequence();
@@ -242,4 +250,33 @@ public class CMCUtils {
     }
     return attributeList.toArray(new TaggedAttribute[0]);
   }
+
+  /**
+   * Return a list of certificate bytes representing a list of X509 Certificates
+   * @param certificateList list of certificates
+   * @return list of certificate bytes
+   * @throws CertificateEncodingException on certificate encoding errors
+   */
+  public static List<byte[]> getCertByteList(List<X509Certificate> certificateList) throws CertificateEncodingException {
+    List<byte[]> certByteList = new ArrayList<>();
+    for (X509Certificate cert: certificateList){
+      certByteList.add(cert.getEncoded());
+    }
+    return certByteList;
+  }
+
+  /**
+   * Return a list of certificate bytes representing a list of X509 Certificates
+   * @param certificateList list of certificates
+   * @return list of certificate bytes
+   * @throws IOException on certificate encoding errors
+   */
+  public static List<byte[]> getCerHolderByteList(List<X509CertificateHolder> certificateList) throws IOException {
+    List<byte[]> certByteList = new ArrayList<>();
+    for (X509CertificateHolder cert: certificateList){
+      certByteList.add(cert.getEncoded());
+    }
+    return certByteList;
+  }
+
 }

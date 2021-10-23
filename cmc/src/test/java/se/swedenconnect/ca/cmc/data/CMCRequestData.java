@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.cmc.model.admin.AdminRequestType;
 import se.swedenconnect.ca.cmc.model.admin.request.ListCerts;
-import se.swedenconnect.ca.cmc.model.admin.SortBy;
 import se.swedenconnect.ca.cmc.utils.TestUtils;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
+import se.swedenconnect.ca.engine.ca.repository.SortBy;
 
 import java.util.Arrays;
 import java.util.HashMap;

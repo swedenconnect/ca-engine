@@ -2,9 +2,12 @@ package se.swedenconnect.ca.cmc.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.bouncycastle.asn1.cmc.BodyPartID;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
 import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
+
+import java.util.List;
 
 /**
  * Description
@@ -12,7 +15,6 @@ import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Getter
 @AllArgsConstructor
 public enum TestResponseStatus {
 
@@ -25,6 +27,16 @@ public enum TestResponseStatus {
     .message("Bad CMC Request")
     .build());
 
-  CMCResponseStatus responseStatus;
+  private CMCResponseStatus responseStatus;
+
+  public CMCResponseStatus withBodyParts(List<BodyPartID> bodyPartIDList){
+    CMCResponseStatus status = CMCResponseStatus.builder()
+      .status(responseStatus.getStatus())
+      .failType(responseStatus.getFailType())
+      .message(responseStatus.getMessage())
+      .bodyPartIDList(bodyPartIDList)
+      .build();
+    return status;
+  }
 
 }

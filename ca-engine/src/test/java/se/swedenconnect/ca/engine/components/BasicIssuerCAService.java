@@ -59,11 +59,12 @@ public class BasicIssuerCAService extends AbstractCAService<DefaultCertificateMo
   private CRLIssuer crlIssuer;
   private List<String> crlDistributionPoints;
   private OCSPResponder ocspResponder;
+  private X509CertificateHolder ocspResponderCertificate;
   @Getter private String ocspResponderUrl;
 
-  public BasicIssuerCAService(PrivateKey privateKey, X509CertificateHolder caCertificate,
+  public BasicIssuerCAService(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain,
     CARepository caRepository, File crlFile, String algorithm) throws Exception {
-    super(caCertificate, caRepository);
+    super(caCertificateChain, caRepository);
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(
       new CertificateIssuerModel(algorithm, 2), getCaCertificate().getSubject(), privateKey);
@@ -94,9 +95,16 @@ public class BasicIssuerCAService extends AbstractCAService<DefaultCertificateMo
     return crlIssuer;
   }
 
-  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl) {
+  @Override
+  public X509CertificateHolder getOCSPResponderCertificate(){
+    return ocspResponderCertificate;
+  }
+
+
+  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl, X509CertificateHolder ocspResponderCertificate) {
     this.ocspResponder = ocspResponder;
     this.ocspResponderUrl = ocspResponderUrl;
+    this.ocspResponderCertificate = ocspResponderCertificate;
   }
 
   @Override public OCSPResponder getOCSPResponder() {

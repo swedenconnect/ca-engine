@@ -23,8 +23,8 @@ public class CMCAdminResponseModel extends AbstractCMCResponseModel {
 
   @Getter private AdminCMCData adminCMCData;
 
-  public CMCAdminResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, List<BodyPartID> processedRequestObjects, AdminCMCData adminCMCData) throws IOException {
-    super(nonce, cmcResponseStatus, processedRequestObjects, getResponseInfo(adminCMCData));
+  public CMCAdminResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, AdminCMCData adminCMCData) throws IOException {
+    super(nonce, cmcResponseStatus, getResponseInfo(adminCMCData));
     this.adminCMCData = adminCMCData;
   }
 

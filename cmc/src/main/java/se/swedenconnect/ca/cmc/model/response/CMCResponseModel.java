@@ -40,10 +40,4 @@ public interface CMCResponseModel {
    */
   List<X509Certificate> getReturnCertificates();
 
-  /**
-   * Return list of body part ID for processed request objects
-   * @return list of body part ID
-   */
-  List<BodyPartID> getProcessedRequestObjects();
-
 }

@@ -18,22 +18,19 @@ import java.util.List;
  */
 public class AbstractCMCResponseModel implements CMCResponseModel {
 
-  public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, List<BodyPartID> processedRequestObjects) {
-    this(nonce, cmcResponseStatus, processedRequestObjects, null);
+  public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus) {
+    this(nonce, cmcResponseStatus, null);
   }
 
-  public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, List<BodyPartID> processedRequestObjects,
-    byte[] responseInfo) {
+  public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, byte[] responseInfo) {
     this.nonce = nonce;
     this.responseInfo = responseInfo;
     this.cmcResponseStatus = cmcResponseStatus;
     this.returnCertificates = new ArrayList<>();
-    this.processedRequestObjects = processedRequestObjects;
   }
 
   @Getter @Setter protected byte[] nonce;
   @Getter @Setter protected byte[] responseInfo;
   @Getter @Setter protected List<X509Certificate> returnCertificates;
   @Getter protected CMCResponseStatus cmcResponseStatus;
-  @Getter protected List<BodyPartID> processedRequestObjects;
 }

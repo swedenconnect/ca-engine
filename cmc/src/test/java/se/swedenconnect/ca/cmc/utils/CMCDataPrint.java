@@ -12,7 +12,9 @@ import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Description
@@ -80,8 +82,16 @@ public class CMCDataPrint {
         }
       }
 
+      List<X509Certificate> returnCertificates = cmcResponse.getReturnCertificates();
+      if (returnCertificates != null) {
+        for (X509Certificate certificate: returnCertificates){
+          b.append("  ReturnCert: ").append(certificate.getSubjectX500Principal()).append("\n");
+          b.append("    Certificate bytes:\n").append(base64Print(certificate.getEncoded(), 120)).append("\n");
+        }
+      }
+
       if (includeFullMessage) {
-        b.append("  Full CMC request:\n").append(base64Print(cmcResponse.getCmcResponseBytes(), 120)).append("\n");
+        b.append("  Full CMC response:\n").append(base64Print(cmcResponse.getCmcResponseBytes(), 120)).append("\n");
       }
 
       return b.toString();

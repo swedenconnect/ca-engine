@@ -38,7 +38,6 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 
 import java.io.File;
 import java.security.PrivateKey;
@@ -61,11 +60,12 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
   private CRLIssuer crlIssuer;
   private List<String> crlDistributionPoints;
   private OCSPResponder ocspResponder;
+  private X509CertificateHolder ocspResponderCertificate;
   @Getter private String ocspResponderUrl;
 
-  public TestCAService(PrivateKey privateKey, X509CertificateHolder caCertificate, CARepository caRepository,
+  public TestCAService(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain, CARepository caRepository,
     File crlFile, String algorithm) throws Exception {
-    super(caCertificate, caRepository);
+    super(caCertificateChain, caRepository);
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(
       new CertificateIssuerModel(algorithm, 10), getCaCertificate().getSubject(), privateKey);
@@ -97,14 +97,19 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
     return crlIssuer;
   }
 
-  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl) {
+  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl, X509CertificateHolder ocspResponderCertificate) {
     this.ocspResponder = ocspResponder;
     this.ocspResponderUrl = ocspResponderUrl;
+    this.ocspResponderCertificate = ocspResponderCertificate;
   }
 
 
   @Override public OCSPResponder getOCSPResponder() {
     return ocspResponder;
+  }
+
+  @Override public X509CertificateHolder getOCSPResponderCertificate() {
+    return ocspResponderCertificate;
   }
 
   @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject, PublicKey publicKey,

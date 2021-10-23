@@ -205,7 +205,7 @@ public class CMCDataValidator {
     
     // Check control messages
     // Check the mandatory status message
-    List<BodyPartID> processedRequestObjects = responseModel.getProcessedRequestObjects();
+    List<BodyPartID> processedRequestObjects = responseModel.getCmcResponseStatus().getBodyPartIDList();
     TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
     CMCStatusInfoV2 statusInfo = (CMCStatusInfoV2) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_statusInfoV2, responseControlSequence).getValue();
     CMCResponseStatus cmcResponseStatus = responseModel.getCmcResponseStatus();

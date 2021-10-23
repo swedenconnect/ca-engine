@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,6 +62,15 @@ public class CAUtils {
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
       return (X509Certificate) cf.generateCertificate(inStream);
     }
+  }
+
+  public static List<X509Certificate> getCertList(List<X509CertificateHolder> certificateHolderList)
+    throws CertificateException, IOException {
+    List<X509Certificate> certificateList = new ArrayList<>();
+    for (X509CertificateHolder certificateHolder : certificateHolderList) {
+      certificateList.add(getCert(certificateHolder));
+    }
+    return certificateList;
   }
 
   /**

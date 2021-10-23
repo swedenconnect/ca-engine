@@ -8,12 +8,10 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import se.swedenconnect.ca.cmc.api.CMCRequestFactory;
-import se.swedenconnect.ca.cmc.api.CMCRequestParser;
-import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
-import se.swedenconnect.ca.cmc.api.CMCResponseParser;
+import se.swedenconnect.ca.cmc.api.*;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
+import se.swedenconnect.ca.cmc.api.impl.DefaultCMCCaApi;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCValidator;
 import se.swedenconnect.ca.cmc.ca.*;
@@ -38,11 +36,13 @@ import se.swedenconnect.ca.cmc.utils.TestUtils;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
+import se.swedenconnect.ca.engine.utils.CAUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Arrays;
@@ -198,9 +198,10 @@ public class CMCTests {
   public void checkCMCResponses() throws Exception {
     TestCAHolder caHolder = TestServices.getTestCAs().get(TestCA.INSTANCE1);
     TestCAService ca = caHolder.getCscaService();
+    PublicKey caPublicKey = CAUtils.getCert(ca.getCaCertificate()).getPublicKey();
 
     CMCResponseFactory cmcResponseFactory = new CMCResponseFactory(cmcSigner.getSignerChain(), cmcSigner.getContentSigner());
-    CMCResponseParser cmcResponseParser = new CMCResponseParser(new DefaultCMCValidator(cmcSigner.getSignerChain().get(0)));
+    CMCResponseParser cmcResponseParser = new CMCResponseParser(new DefaultCMCValidator(cmcSigner.getSignerChain().get(0)), caPublicKey);
 
     CMCResponseModel responseModel;
     CMCResponse cmcResponse;
@@ -214,26 +215,26 @@ public class CMCTests {
       new BodyPartID(Long.valueOf("345"))
     );
 
-    responseModel = new CMCBasicCMCResponseModel(nonce, TestResponseStatus.success.getResponseStatus(), processedObjects,
+    responseModel = new CMCBasicCMCResponseModel(nonce, TestResponseStatus.success.withBodyParts(processedObjects),
       "profile".getBytes(
         StandardCharsets.UTF_8), Arrays.asList(testCert01));
     cmcResponse = cmcResponseFactory.getCMCResponse(responseModel);
     log.info("CMC Success response:\n{}", CMCDataPrint.printCMCResponse(cmcResponse, true));
     CMCDataValidator.validateCMCResponse(cmcResponse, responseModel);
-    cmcParsed = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes());
+    cmcParsed = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), true);
     log.info("Parsed CMC Success response:\n{}", CMCDataPrint.printCMCResponse(cmcParsed, false));
     CMCDataValidator.validateCMCResponse(cmcParsed, responseModel);
 
-    responseModel = new CMCBasicCMCResponseModel(nonce, TestResponseStatus.failBadRequest.getResponseStatus(), processedObjects, "profile".getBytes(
+    responseModel = new CMCBasicCMCResponseModel(nonce, TestResponseStatus.failBadRequest.withBodyParts(processedObjects), "profile".getBytes(
         StandardCharsets.UTF_8), Arrays.asList(testCert01));
     cmcResponse = cmcResponseFactory.getCMCResponse(responseModel);
     log.info("CMC Fail response:\n{}", CMCDataPrint.printCMCResponse(cmcResponse, true));
     CMCDataValidator.validateCMCResponse(cmcResponse, responseModel);
-    cmcParsed = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes());
+    cmcParsed = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), true);
     log.info("Parsed CMC Success response:\n{}", CMCDataPrint.printCMCResponse(cmcParsed, false));
     CMCDataValidator.validateCMCResponse(cmcParsed, responseModel);
 
-    responseModel = new CMCAdminResponseModel(nonce, TestResponseStatus.success.getResponseStatus(), processedObjects, AdminCMCData.builder()
+    responseModel = new CMCAdminResponseModel(nonce, TestResponseStatus.success.withBodyParts(processedObjects), AdminCMCData.builder()
         .adminRequestType(AdminRequestType.caInfo)
         .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(CAInformation.builder()
             .certificateChain(Arrays.asList(ca.getCaCertificate().getEncoded()))
@@ -248,7 +249,7 @@ public class CMCTests {
     log.info("Parsed CA info response:\n{}", CMCDataPrint.printCMCResponse(cmcParsed, false));
     CMCDataValidator.validateCMCResponse(cmcParsed, responseModel);
 
-    responseModel = new CMCAdminResponseModel(nonce, TestResponseStatus.success.getResponseStatus(), processedObjects, AdminCMCData.builder()
+    responseModel = new CMCAdminResponseModel(nonce, TestResponseStatus.success.withBodyParts(processedObjects), AdminCMCData.builder()
         .adminRequestType(AdminRequestType.listCerts)
         .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(Arrays.asList(
           CertificateData.builder()
@@ -275,7 +276,7 @@ public class CMCTests {
     CMCDataValidator.validateCMCResponse(cmcParsed, responseModel);
 
     //List all serials
-    responseModel = new CMCAdminResponseModel(nonce, TestResponseStatus.success.getResponseStatus(), processedObjects, AdminCMCData.builder()
+    responseModel = new CMCAdminResponseModel(nonce, TestResponseStatus.success.withBodyParts(processedObjects), AdminCMCData.builder()
         .adminRequestType(AdminRequestType.allCertSerials)
         .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(Arrays.asList(
           BigInteger.ONE,BigInteger.TWO, BigInteger.TEN
@@ -287,6 +288,43 @@ public class CMCTests {
     cmcParsed = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes());
     log.info("Parsed List all serials response:\n{}", CMCDataPrint.printCMCResponse(cmcParsed, false));
     CMCDataValidator.validateCMCResponse(cmcParsed, responseModel);
+  }
+
+  @Test
+  public void checkCMCCaApi() throws Exception {
+
+    TestCAHolder caHolder = TestServices.getTestCAs().get(TestCA.INSTANCE1);
+    TestCAService ca = caHolder.getCscaService();
+    PublicKey caPublicKey = CAUtils.getCert(ca.getCaCertificate()).getPublicKey();
+    CMCResponseFactory cmcResponseFactory = new CMCResponseFactory(cmcSigner.getSignerChain(), cmcSigner.getContentSigner());
+    CMCRequestParser cmcRequestParser = new CMCRequestParser(new DefaultCMCValidator(cmcSigner.getSignerChain().get(0)));
+    CMCRequestFactory cmcRequestFactory = new CMCRequestFactory(cmcSigner.getSignerChain(), cmcSigner.getContentSigner());
+    CMCResponseParser cmcResponseParser = new CMCResponseParser(new DefaultCMCValidator(cmcSigner.getSignerChain().get(0)), caPublicKey);
+    KeyPair subjectKeyPair = TestUtils.generateECKeyPair(TestUtils.NistCurve.P256);
+
+    DefaultCertificateModelBuilder certificateModelBuilder = ca.getCertificateModelBuilder(
+      CMCRequestData.subjectMap.get(CMCRequestData.USER1), subjectKeyPair.getPublic());
+    CertificateModel certificateModel = certificateModelBuilder.build();
+
+    CMCCaApi cmcCaApi = new DefaultCMCCaApi(ca, cmcRequestParser, cmcResponseFactory);
+
+    CMCRequest cmcRequest;
+    CMCRequestModel requestModel;
+    CMCResponse cmcResponse;
+    CMCResponse parsedCMCResponse;
+
+    requestModel = getCMCRequest(ca, certificateModel, subjectKeyPair, false, cmcRequestFactory);
+    cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
+    log.info("CMC API Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), true);
+
+    log.info("CMC response from API Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+
+
+
+    // TODO implement a CA API
   }
 
   private CMCRequestModel getCMCRequest(TestCAService ca, CertificateModel certificateModel, KeyPair kp, boolean crmf,

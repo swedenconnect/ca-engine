@@ -39,12 +39,16 @@ public class CMCResponseFactory {
     List<X509Certificate> outputCerts = cmcResponseModel.getReturnCertificates();
     if (outputCerts != null) {
       outputCerts.stream().forEach(x509Certificate -> cmsCertList.add(x509Certificate));
+    } else {
+      outputCerts = new ArrayList<>();
     }
 
     CMCResponse.CMCResponseBuilder responseBuilder = CMCResponse.builder()
       .nonce(cmcResponseModel.getNonce())
       .pkiResponse(pkiResponseData)
-      .cmcResponseBytes(CMCUtils.signEncapsulatedCMSContent(CMCObjectIdentifiers.id_cct_PKIResponse, pkiResponseData, cmsCertList, signer));
+      .cmcResponseBytes(CMCUtils.signEncapsulatedCMSContent(CMCObjectIdentifiers.id_cct_PKIResponse, pkiResponseData, cmsCertList, signer))
+      .returnCertificates(outputCerts)
+      .responseStatus(cmcResponseModel.getCmcResponseStatus());
 
     return responseBuilder.build();
   }
@@ -97,7 +101,7 @@ public class CMCResponseFactory {
     CMCFailType cmcFailType = cmcResponseStatus.getFailType();
     String message = cmcResponseStatus.getMessage();
     CMCStatusInfoV2Builder statusBuilder = new CMCStatusInfoV2Builder(cmcStatusType.getCmcStatus(),
-      cmcResponseModel.getProcessedRequestObjects().toArray(new BodyPartID[0]));
+      cmcResponseStatus.getBodyPartIDList().toArray(new BodyPartID[0]));
     if (!cmcStatusType.equals(CMCStatusType.success) && cmcFailType != null) {
       statusBuilder.setOtherInfo(cmcFailType.getCmcFailInfo());
     }

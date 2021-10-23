@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class provides an abstract skeleton for a typical CA service by combining the functions of a CertificateIssuer, a CRLIssuer
@@ -48,17 +49,17 @@ import java.util.Date;
 @Slf4j
 public abstract class AbstractCAService<T extends CertificateModelBuilder> implements CAService {
 
-  @Getter private final X509CertificateHolder caCertificate;
+  @Getter private final List<X509CertificateHolder> caCertificateChain;
   @Getter private final CARepository caRepository;
 
   /**
    * Constructor for the CA service
    *
-   * @param caCertificate the certificate for the public key of this CA service
+   * @param caCertificateChain the certificate chain for the public key of this CA service with the CA certificate first and the trust anchor la
    * @param caRepository  repository for certificate and revocation data
    */
-  public AbstractCAService(X509CertificateHolder caCertificate, CARepository caRepository) {
-    this.caCertificate = caCertificate;
+  public AbstractCAService(List<X509CertificateHolder> caCertificateChain, CARepository caRepository) {
+    this.caCertificateChain = caCertificateChain;
     this.caRepository = caRepository;
   }
 
@@ -96,7 +97,7 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
 
   /** {@inheritDoc} */
   @Override public T getCertificateModelBuilder(CertNameModel subject, PublicKey publicKey) throws CertificateIssuanceException {
-    return getBaseCertificateModelBuilder(subject, publicKey, caCertificate, getCertificateIssuer().getCertificateIssuerModel());
+    return getBaseCertificateModelBuilder(subject, publicKey, getCaCertificate(), getCertificateIssuer().getCertificateIssuerModel());
   }
 
   /** {@inheritDoc} */
@@ -136,5 +137,14 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
   @Override public X509CRLHolder getCurrentCrl() {
     return caRepository.getCRLRevocationDataProvider().getCurrentCrl();
   }
+
+  @Override public X509CertificateHolder getCaCertificate() {
+    return caCertificateChain.get(0);
+  }
+
+  @Override public List<X509CertificateHolder> getCACertificateChain() {
+    return caCertificateChain;
+  }
+
 
 }

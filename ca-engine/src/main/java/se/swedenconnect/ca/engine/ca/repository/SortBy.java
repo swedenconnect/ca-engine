@@ -1,4 +1,4 @@
-package se.swedenconnect.ca.cmc.model.admin;
+package se.swedenconnect.ca.engine.ca.repository;
 
 /**
  * Description

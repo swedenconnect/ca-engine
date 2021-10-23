@@ -73,4 +73,21 @@ public interface CARepository {
    */
   CRLRevocationDataProvider getCRLRevocationDataProvider();
 
+  /**
+   * Get the number of certificates in the certificate repository
+   * @param valid true to count only the current valid certificates and false for the count of all certificates in the repository
+   * @return number of certificates
+   */
+  int getCertificateCount(boolean valid);
+
+  /**
+   * Get a range of certificates from the certificate repository
+   * @param page the index of the page of certificates to return
+   * @param pageSize the size of each page of certificates
+   * @param valid true if the pages of certificates holds only valid non-revoked certificates
+   * @param sortBy set to define sorting preferences or null if unsorted
+   * @return list of certificates in the selected page
+   */
+  List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean valid, SortBy sortBy);
+
 }
