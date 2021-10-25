@@ -95,6 +95,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
       cmcRequest.getNonce(),
       new CMCResponseStatus(CMCStatusType.success, Arrays.asList(cmcRequest.getCertReqBodyPartId())),
+      cmcRequest.getCmcRequestType(),
       (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_regInfo, cmcRequest.getPkiData()).getValue(),
       Arrays.asList(certificateHolder)
     );
@@ -129,12 +130,13 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
 
   protected CMCResponse processCustomRequest(CMCRequest cmcRequest) throws Exception {
     PKIData pkiData = cmcRequest.getPkiData();
-    CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_getCert, pkiData);
+    CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_regInfo, pkiData);
     AdminCMCData adminRequest = (AdminCMCData) cmcControlObject.getValue();
     AdminCMCData adminResponse = getAdminResponse(adminRequest);
     CMCResponseModel responseModel = new CMCAdminResponseModel(
       cmcRequest.getNonce(),
       new CMCResponseStatus(CMCStatusType.success, Arrays.asList(cmcControlObject.getBodyPartID())),
+      cmcRequest.getCmcRequestType(),
       adminResponse
     );
 
@@ -153,8 +155,8 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
       X509CertificateHolder targetCertificateHolder = new X509CertificateHolder(certificateRecord.getCertificate());
       CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
         cmcRequest.getNonce(),
-        new CMCResponseStatus(CMCStatusType.success, Arrays.asList(cmcControlObject.getBodyPartID()))
-        , null,
+        new CMCResponseStatus(CMCStatusType.success, Arrays.asList(cmcControlObject.getBodyPartID())),
+        cmcRequest.getCmcRequestType(), null,
         Arrays.asList(CAUtils.getCert(targetCertificateHolder))
       );
       return cmcResponseFactory.getCMCResponse(responseModel);

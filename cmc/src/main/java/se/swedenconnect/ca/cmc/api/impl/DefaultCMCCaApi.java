@@ -1,18 +1,19 @@
 package se.swedenconnect.ca.cmc.api.impl;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cmc.BodyPartID;
 import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
 import org.bouncycastle.asn1.cmc.CertificationRequest;
 import org.bouncycastle.asn1.cmc.LraPopWitness;
+import org.bouncycastle.asn1.crmf.CertTemplate;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.cert.crmf.CertificateRequestMessage;
+import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessage;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -30,10 +31,13 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.InheritExtension
 import se.swedenconnect.ca.engine.ca.models.cert.impl.EncodedCertNameModel;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Description
@@ -63,9 +67,40 @@ public class DefaultCMCCaApi extends AbstractAdminCMCCaApi {
   }
 
   private CertificateModel getCertificateModelFromCRMF(CertificateRequestMessage certificateRequestMessage, LraPopWitness lraPopWitness,
-    BodyPartID certReqBodyPartId) {
-    //TODO
-    return null;
+    BodyPartID certReqBodyPartId)  throws Exception{
+
+    // Check POP
+    if (lraPopWitness == null) {
+      throw new IOException("Certificate request message format requests must hav LRA POP Witness set");
+    }
+    final List<Long> lraPopIdList = Arrays.asList(lraPopWitness.getBodyIds()).stream()
+      .map(BodyPartID::getID)
+      .collect(Collectors.toList());
+    if (!lraPopIdList.contains(certReqBodyPartId.getID())){
+      throw new IOException("No matching LRA POP Witness ID in CRMF request");
+    }
+
+    CertTemplate certTemplate = certificateRequestMessage.getCertTemplate();
+    JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+    PublicKey publicKey = converter.getPublicKey(certTemplate.getPublicKey());
+    Extensions extensions = certTemplate.getExtensions();
+    ASN1ObjectIdentifier[] extensionOIDs = extensions.getExtensionOIDs();
+    List<ExtensionModel> extensionModelList = new ArrayList<>();
+    for (ASN1ObjectIdentifier extOid : extensionOIDs) {
+      Extension extension = extensions.getExtension(extOid);
+      extensionModelList.add(new GenericExtensionModel(
+        extension.getExtnId(),
+        extension.getParsedValue().toASN1Primitive(),
+        extension.isCritical()
+      ));
+    }
+
+    CertificateModel certificateModel = CertificateModel.builder()
+      .publicKey(publicKey)
+      .subject(new EncodedCertNameModel(certTemplate.getSubject()))
+      .extensionModels(extensionModelList)
+      .build();
+    return certificateModel;
   }
 
   private CertificateModel getCertificateModelFromPKCS10(CertificationRequest certificationRequest) throws Exception {

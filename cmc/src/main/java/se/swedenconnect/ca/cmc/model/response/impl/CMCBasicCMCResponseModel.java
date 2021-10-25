@@ -27,8 +27,8 @@ import java.util.List;
  */
 public class CMCBasicCMCResponseModel extends AbstractCMCResponseModel {
 
-  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, byte[] responseInfo) {
-    super(nonce, cmcResponseStatus, responseInfo);
+  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, byte[] responseInfo) {
+    super(nonce, cmcResponseStatus, cmcRequestType, responseInfo);
   }
 
   /**
@@ -40,9 +40,9 @@ public class CMCBasicCMCResponseModel extends AbstractCMCResponseModel {
    * @throws CertificateException
    * @throws IOException
    */
-  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, byte[] responseInfo, List<? extends Object> returnCertificates)
+  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, byte[] responseInfo, List<? extends Object> returnCertificates)
     throws CertificateException, IOException {
-    super(nonce, cmcResponseStatus, responseInfo);
+    super(nonce, cmcResponseStatus, cmcRequestType, responseInfo);
     addCertificates(returnCertificates);
   }
 

@@ -73,6 +73,7 @@ public class CMCDataPrint {
       String cmcBase64 = Base64.toBase64String(cmcResponse.getCmcResponseBytes());
       PKIResponse pkiResponse = cmcResponse.getPkiResponse();
       TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
+      b.append("CMC Request type: ").append(cmcResponse.getCmcRequestType()).append("\n");
       if (responseControlSequence.length > 0) {
         b.append("CMC Control sequence (size=").append(responseControlSequence.length).append(")\n");
         for (TaggedAttribute csAttr: responseControlSequence){

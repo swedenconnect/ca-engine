@@ -24,6 +24,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
+import se.swedenconnect.ca.engine.ca.issuer.impl.BasicCertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.impl.SelfIssuedCertificateIssuer;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
@@ -141,7 +142,8 @@ public class TestCAHolder {
           .ocspNocheck(true)
           .extendedKeyUsage(new ExtendedKeyUsageModel(true, KeyPurposeId.id_kp_OCSPSigning));
 
-        X509CertificateHolder ocspIssuerCert = cscaService.issueCertificate(certModelBuilder.build());
+
+        X509CertificateHolder ocspIssuerCert = cscaService.getCertificateIssuer().issueCertificate(certModelBuilder.build());
         ocspServiceChain = Arrays.asList(
           ocspIssuerCert,
           cscaService.getCaCertificate()

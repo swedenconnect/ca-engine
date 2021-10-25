@@ -34,26 +34,31 @@ public class CMCResponseFactory {
   }
 
   public CMCResponse getCMCResponse(CMCResponseModel cmcResponseModel) throws IOException {
-    PKIResponse pkiResponseData = getPKIResponseData(cmcResponseModel);
-    List<X509Certificate> cmsCertList = new ArrayList<>(signerCertChain);
-    List<X509Certificate> outputCerts = cmcResponseModel.getReturnCertificates();
-    if (outputCerts != null) {
-      outputCerts.stream().forEach(x509Certificate -> cmsCertList.add(x509Certificate));
-    } else {
-      outputCerts = new ArrayList<>();
+    try {
+      PKIResponse pkiResponseData = getPKIResponseData(cmcResponseModel);
+      List<X509Certificate> cmsCertList = new ArrayList<>(signerCertChain);
+      List<X509Certificate> outputCerts = cmcResponseModel.getReturnCertificates();
+      if (outputCerts != null) {
+        outputCerts.stream().forEach(x509Certificate -> cmsCertList.add(x509Certificate));
+      } else {
+        outputCerts = new ArrayList<>();
+      }
+
+      CMCResponse.CMCResponseBuilder responseBuilder = CMCResponse.builder()
+        .nonce(cmcResponseModel.getNonce())
+        .pkiResponse(pkiResponseData)
+        .cmcResponseBytes(CMCUtils.signEncapsulatedCMSContent(CMCObjectIdentifiers.id_cct_PKIResponse, pkiResponseData, cmsCertList, signer))
+        .returnCertificates(outputCerts)
+        .responseStatus(cmcResponseModel.getCmcResponseStatus())
+        .cmcRequestType(cmcResponseModel.getCmcRequestType());
+
+      return responseBuilder.build();
+    } catch (Exception ex) {
+      throw new IOException("Error creating CMC Response", ex);
     }
-
-    CMCResponse.CMCResponseBuilder responseBuilder = CMCResponse.builder()
-      .nonce(cmcResponseModel.getNonce())
-      .pkiResponse(pkiResponseData)
-      .cmcResponseBytes(CMCUtils.signEncapsulatedCMSContent(CMCObjectIdentifiers.id_cct_PKIResponse, pkiResponseData, cmsCertList, signer))
-      .returnCertificates(outputCerts)
-      .responseStatus(cmcResponseModel.getCmcResponseStatus());
-
-    return responseBuilder.build();
   }
 
-  private PKIResponse getPKIResponseData(CMCResponseModel cmcResponseModel) {
+  private PKIResponse getPKIResponseData(CMCResponseModel cmcResponseModel) throws Exception{
 
     ASN1EncodableVector pkiResponseSeq = new ASN1EncodableVector();
     ASN1EncodableVector controlSeq = new ASN1EncodableVector();
@@ -72,7 +77,7 @@ public class CMCResponseFactory {
     return pkiResponse;
   }
 
-  private List<TaggedAttribute> getControlAttributes(CMCResponseModel cmcResponseModel) {
+  private List<TaggedAttribute> getControlAttributes(CMCResponseModel cmcResponseModel)  throws Exception {
 
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceControl(taggedAttributeList, cmcResponseModel.getNonce());
@@ -95,7 +100,7 @@ public class CMCResponseFactory {
 
 
 
-  private void addStatusControl(List<TaggedAttribute> taggedAttributeList, CMCResponseModel cmcResponseModel) {
+  private void addStatusControl(List<TaggedAttribute> taggedAttributeList, CMCResponseModel cmcResponseModel) throws Exception {
     CMCResponseStatus cmcResponseStatus = cmcResponseModel.getCmcResponseStatus();
     CMCStatusType cmcStatusType = cmcResponseStatus.getStatus();
     CMCFailType cmcFailType = cmcResponseStatus.getFailType();

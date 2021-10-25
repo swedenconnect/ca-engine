@@ -71,7 +71,7 @@ public class CMCUtils {
     for (ExtensionModel extensionModel: extensionModels){
       List<Extension> extensions = extensionModel.getExtensions();
       for (Extension extension: extensions){
-        crmfBuilder.addExtension(extension.getExtnId(), extension.isCritical(), extension.getExtnValue());
+        crmfBuilder.addExtension(extension.getExtnId(), extension.isCritical(), extension.getParsedValue());
       }
     }
     return crmfBuilder;

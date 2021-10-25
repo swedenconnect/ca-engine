@@ -40,4 +40,5 @@ public interface CMCResponseModel {
    */
   List<X509Certificate> getReturnCertificates();
 
+  CMCRequestType getCmcRequestType();
 }
