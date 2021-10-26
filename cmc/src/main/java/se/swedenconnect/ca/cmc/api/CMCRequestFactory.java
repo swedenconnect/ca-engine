@@ -11,6 +11,7 @@ import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
@@ -30,6 +31,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,25 +54,27 @@ public class CMCRequestFactory {
   public CMCRequest getCMCRequest(CMCRequestModel cmcRequestModel) throws IOException {
     CMCRequest.CMCRequestBuilder requestBuilder = CMCRequest.builder();
     CMCRequestType cmcRequestType = cmcRequestModel.getCmcRequestType();
+    Date messageTime = new Date();
     requestBuilder
       .cmcRequestType(cmcRequestType)
-      .nonce(cmcRequestModel.getNonce());
+      .nonce(cmcRequestModel.getNonce())
+      .messageTime(messageTime);
     PKIData pkiData = null;
     try {
       switch (cmcRequestType) {
       case issueCert:
-        pkiData = createCertRequest((CMCCertificateRequestModel) cmcRequestModel);
+        pkiData = createCertRequest((CMCCertificateRequestModel) cmcRequestModel, messageTime);
         addCertRequestData(pkiData, requestBuilder);
         break;
       case revoke:
-        pkiData = new PKIData(getCertRevocationControlSequence((CMCRevokeRequestModel) cmcRequestModel),
+        pkiData = new PKIData(getCertRevocationControlSequence((CMCRevokeRequestModel) cmcRequestModel, messageTime),
           new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
         break;
       case admin:
-        pkiData = createAdminRequest((CMCAdminRequestModel) cmcRequestModel);
+        pkiData = createAdminRequest((CMCAdminRequestModel) cmcRequestModel, messageTime);
         break;
       case getCert:
-        pkiData = createGetCertRequest((CMCGetCertRequestModel) cmcRequestModel);
+        pkiData = createGetCertRequest((CMCGetCertRequestModel) cmcRequestModel, messageTime);
         break;
       }
       requestBuilder
@@ -85,13 +89,13 @@ public class CMCRequestFactory {
     return requestBuilder.build();
   }
 
-  private PKIData createGetCertRequest(CMCGetCertRequestModel cmcRequestModel) {
-    return new PKIData(getGetCertsControlSequence(cmcRequestModel), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
+  private PKIData createGetCertRequest(CMCGetCertRequestModel cmcRequestModel, Date messageTime) {
+    return new PKIData(getGetCertsControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
   }
 
-  private TaggedAttribute[] getGetCertsControlSequence(CMCGetCertRequestModel cmcRequestModel) {
+  private TaggedAttribute[] getGetCertsControlSequence(CMCGetCertRequestModel cmcRequestModel, Date messageTime) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
+    addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     GeneralName gn = new GeneralName(cmcRequestModel.getIssuerName());
     GetCert getCert = new GetCert(gn, cmcRequestModel.getSerialNumber());
@@ -99,23 +103,23 @@ public class CMCRequestFactory {
     return taggedAttributeList.toArray(new TaggedAttribute[taggedAttributeList.size()]);
   }
 
-  private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel) throws IOException {
-    return new PKIData(getAdminControlSequence(cmcRequestModel), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
+  private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel, Date messageTime) throws IOException {
+    return new PKIData(getAdminControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
   }
 
-  private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel) throws IOException {
+  private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel, Date messageTime) throws IOException {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
+    addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     return taggedAttributeList.toArray(new TaggedAttribute[taggedAttributeList.size()]);
   }
 
-  public PKIData createCertRequest(CMCCertificateRequestModel cmcRequestModel)
+  public PKIData createCertRequest(CMCCertificateRequestModel cmcRequestModel, Date messageTime)
     throws NoSuchAlgorithmException, OperatorCreationException, IOException, CRMFException {
 
     TaggedRequest taggedCertificateRequest;
     BodyPartID certReqBodyPartId = getBodyPartId();
-    TaggedAttribute[] controlSequence = getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(), certReqBodyPartId);
+    TaggedAttribute[] controlSequence = getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(), messageTime, certReqBodyPartId);
     PrivateKey certReqPrivate = cmcRequestModel.getCertReqPrivate();
     if (certReqPrivate != null) {
       ContentSigner p10Signer = new JcaContentSignerBuilder(CAAlgorithmRegistry.getSigAlgoName(cmcRequestModel.getP10Algorithm()))
@@ -149,11 +153,11 @@ public class CMCRequestFactory {
     return new BodyPartID(id);
   }
 
-  private TaggedAttribute[] getCertRevocationControlSequence(CMCRevokeRequestModel cmcRequestModel)
+  private TaggedAttribute[] getCertRevocationControlSequence(CMCRevokeRequestModel cmcRequestModel, Date messageTime)
     throws CertificateEncodingException, IOException {
     CMCRequest cmcRequest = new CMCRequest();
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
+    addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     RevokeRequest revokeRequest = new RevokeRequest(
       cmcRequestModel.getIssuerName(),
@@ -165,10 +169,10 @@ public class CMCRequestFactory {
     return taggedAttributeList.toArray(new TaggedAttribute[taggedAttributeList.size()]);
   }
 
-  private TaggedAttribute[] getCertRequestControlSequence(CMCCertificateRequestModel cmcRequestModel, byte[] nonce,
+  private TaggedAttribute[] getCertRequestControlSequence(CMCCertificateRequestModel cmcRequestModel, byte[] nonce, Date messageTime,
     BodyPartID certReqBodyPartId) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceControl(taggedAttributeList, nonce);
+    addNonceAndMessageTimeControls(taggedAttributeList, nonce, messageTime);
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     if (cmcRequestModel.isLraPopWitness()) {
       ASN1EncodableVector lraPopWitSeq = new ASN1EncodableVector();
@@ -186,9 +190,10 @@ public class CMCRequestFactory {
     }
   }
 
-  public static void addNonceControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce) {
+  public static void addNonceAndMessageTimeControls(List<TaggedAttribute> taggedAttributeList, byte[] nonce, Date meesageTime) {
     if (nonce != null) {
       taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_senderNonce, new DEROctetString(nonce)));
+      taggedAttributeList.add(getControl(CMCControlObjectID.messageTime.getOid(), new DERGeneralizedTime(meesageTime)));
     }
   }
 

@@ -7,13 +7,12 @@ import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle.util.encoders.Base64;
 import se.swedenconnect.ca.cmc.api.data.*;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
-import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -114,6 +113,10 @@ public class CMCDataPrint {
         case senderNonce:
         case recipientNonce:
           valueStr = Base64.toBase64String(ASN1OctetString.getInstance(asn1Encodable).getOctets());
+          b.append("    value: ").append(valueStr).append("\n");
+          break;
+        case messageTime:
+          valueStr = DERGeneralizedTime.getInstance(asn1Encodable).getDate().toString();
           b.append("    value: ").append(valueStr).append("\n");
           break;
         case regInfo:

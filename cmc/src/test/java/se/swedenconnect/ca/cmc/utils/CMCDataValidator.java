@@ -44,19 +44,32 @@ import java.util.List;
  */
 public class CMCDataValidator {
 
-  public static CollectionType certDataListType = CMCUtils.OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, CertificateData.class);
-  public static CollectionType bigIntListType = CMCUtils.OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, BigInteger.class);
+  public static CollectionType certDataListType = CMCUtils.OBJECT_MAPPER.getTypeFactory()
+    .constructCollectionType(List.class, CertificateData.class);
+  public static CollectionType bigIntListType = CMCUtils.OBJECT_MAPPER.getTypeFactory()
+    .constructCollectionType(List.class, BigInteger.class);
 
   public static void validateCMCRequest(CMCRequest cmcRequest, CMCRequestModel requestModel) throws IOException, ParseException {
     CMCRequestType cmcRequestType = requestModel.getCmcRequestType();
     PKIData pkiData = cmcRequest.getPkiData();
 
     // Check nonce
-    if (!Arrays.equals(cmcRequest.getNonce(), requestModel.getNonce())){
+    if (!Arrays.equals(cmcRequest.getNonce(), requestModel.getNonce())) {
       throw new IOException("Nonce mismatch");
     }
+
+    // Check message time
+    if (cmcRequest.getMessageTime() == null){
+      throw new IOException("Missing message time");
+    }
+    long currentTime = System.currentTimeMillis();
+    final long messageTime = cmcRequest.getMessageTime().getTime();
+    if (currentTime > messageTime + 2000 || currentTime < messageTime - 2000){
+      throw new IOException("Message time to far from current time (within 2 sec)");
+    }
+
     // Check request type
-    if (cmcRequestType == null || !cmcRequestType.equals(cmcRequest.getCmcRequestType())){
+    if (cmcRequestType == null || !cmcRequestType.equals(cmcRequest.getCmcRequestType())) {
       throw new IOException("Request type mismatch");
     }
 
@@ -64,17 +77,19 @@ public class CMCDataValidator {
     if (CMCRequestType.issueCert.equals(cmcRequestType)) {
       CertificationRequest p10Request = cmcRequest.getCertificationRequest();
       CertificateRequestMessage crmfRequest = cmcRequest.getCertificateRequestMessage();
-      if (p10Request == null && crmfRequest == null){
+      if (p10Request == null && crmfRequest == null) {
         throw new IOException("No valid request");
       }
       CMCCertificateRequestModel certReqModel = (CMCCertificateRequestModel) requestModel;
-      if (certReqModel.getCertReqPrivate() == null && certReqModel.getP10Algorithm() == null){
-        if (crmfRequest == null){
+      if (certReqModel.getCertReqPrivate() == null && certReqModel.getP10Algorithm() == null) {
+        if (crmfRequest == null) {
           throw new IOException("No cert request signing key and algorithm. Request must be CRMF but no such request was created");
         }
-      } else {
+      }
+      else {
         if (p10Request == null) {
-          throw new IOException("Cert request private key and/or cert request signing algorithm was provided, but no PKCS#10 request was created");
+          throw new IOException(
+            "Cert request private key and/or cert request signing algorithm was provided, but no PKCS#10 request was created");
         }
       }
 
@@ -82,85 +97,87 @@ public class CMCDataValidator {
       long certReqBPIDVal = cmcRequest.getCertReqBodyPartId().getID();
 
       // Check LRA pop whiteness
-      if (certReqModel.isLraPopWitness()){
+      if (certReqModel.isLraPopWitness()) {
         CMCControlObject lpwObj = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_lraPOPWitness, pkiData);
         LraPopWitness lpw = (LraPopWitness) lpwObj.getValue();
         BodyPartID[] bodyIds = lpw.getBodyIds();
-        if (certReqBPIDVal != bodyIds[0].getID()){
+        if (certReqBPIDVal != bodyIds[0].getID()) {
           throw new IOException("LRA POP Witness cert request ID does not match cert request");
         }
       }
     }
 
     // Check revocation request data
-    if (CMCRequestType.revoke.equals(cmcRequestType)){
-      RevokeRequest revokeRequest = (RevokeRequest) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_revokeRequest, pkiData).getValue();
+    if (CMCRequestType.revoke.equals(cmcRequestType)) {
+      RevokeRequest revokeRequest = (RevokeRequest) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_revokeRequest, pkiData)
+        .getValue();
       CMCRevokeRequestModel revokeReqModel = (CMCRevokeRequestModel) requestModel;
-      if (!revokeReqModel.getIssuerName().equals(revokeRequest.getName())){
+      if (!revokeReqModel.getIssuerName().equals(revokeRequest.getName())) {
         throw new IOException("Certificate issuer DN mismatch in CMC revoke request");
       }
-      if (!revokeReqModel.getSerialNumber().equals(revokeRequest.getSerialNumber())){
+      if (!revokeReqModel.getSerialNumber().equals(revokeRequest.getSerialNumber())) {
         throw new IOException("Certificate serial number mismatch in CMC revoke request");
       }
       long modelRevTimeSec = revokeReqModel.getRevocationDate().getTime() / 1000;
       long revTimeSec = revokeRequest.getInvalidityDate().getDate().getTime() / 1000;
-      if (modelRevTimeSec != revTimeSec){
+      if (modelRevTimeSec != revTimeSec) {
         Date modelRevocationDate = revokeReqModel.getRevocationDate();
         Date revokeDate = revokeRequest.getInvalidityDate().getDate();
-        throw new IOException("Certificate revocation date mismatch CMC revoke request - expected: " + modelRevocationDate + " found: " + revokeDate );
+        throw new IOException(
+          "Certificate revocation date mismatch CMC revoke request - expected: " + modelRevocationDate + " found: " + revokeDate);
       }
-      if (revokeReqModel.getReason() != revokeRequest.getReason().getValue().intValue()){
+      if (revokeReqModel.getReason() != revokeRequest.getReason().getValue().intValue()) {
         throw new IOException("Certificate serial number mismatch in CMC revoke request");
       }
     }
 
     // Check get cert data
-    if (CMCRequestType.getCert.equals(cmcRequestType)){
+    if (CMCRequestType.getCert.equals(cmcRequestType)) {
       GetCert getCert = (GetCert) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_getCert, pkiData).getValue();
       CMCGetCertRequestModel getCertReqModel = (CMCGetCertRequestModel) requestModel;
 
-      if (!getCertReqModel.getIssuerName().equals(X500Name.getInstance(getCert.getIssuerName().getName()))){
+      if (!getCertReqModel.getIssuerName().equals(X500Name.getInstance(getCert.getIssuerName().getName()))) {
         throw new IOException("Certificate issuer DN mismatch in CMC get cert request");
       }
-      if (!getCertReqModel.getSerialNumber().equals(getCert.getSerialNumber())){
+      if (!getCertReqModel.getSerialNumber().equals(getCert.getSerialNumber())) {
         throw new IOException("Certificate serial number mismatch in CMC get cert request");
       }
     }
 
     // Check admin request data
-    if (CMCRequestType.admin.equals(cmcRequestType)){
+    if (CMCRequestType.admin.equals(cmcRequestType)) {
       AdminCMCData adminCMCData = (AdminCMCData) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_regInfo, pkiData).getValue();
       CMCAdminRequestModel adminReqModel = (CMCAdminRequestModel) requestModel;
       AdminRequestType adminRequestType = adminCMCData.getAdminRequestType();
-      if (adminRequestType == null){
+      if (adminRequestType == null) {
         throw new IOException("Admin request type must be specified in Admin request data");
       }
       AdminCMCData modelAdminData = CMCUtils.OBJECT_MAPPER.readValue(adminReqModel.getRegistrationInfo(), AdminCMCData.class);
 
-      if (!adminRequestType.equals(modelAdminData.getAdminRequestType())){
+      if (!adminRequestType.equals(modelAdminData.getAdminRequestType())) {
         throw new IOException("Admin request type mismatch");
       }
       switch (adminRequestType) {
       case caInfo:
-        if (adminCMCData.getData()!= null){
+        if (adminCMCData.getData() != null) {
           throw new IOException("Illegal admin request data for ca info request - Expected null");
         }
         break;
       case allCertSerials:
-        if (adminCMCData.getData()!= null){
+        if (adminCMCData.getData() != null) {
           throw new IOException("Illegal admin request data for all cert serial request - Expected null");
         }
         break;
       case listCerts:
         ListCerts listCerts = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), ListCerts.class);
         ListCerts modelListCerts = CMCUtils.OBJECT_MAPPER.readValue(modelAdminData.getData(), ListCerts.class);
-        if (listCerts.isValid() ^ modelListCerts.isValid()){
+        if (listCerts.isValid() ^ modelListCerts.isValid()) {
           throw new IOException("Admin request data for list cert mismatch - isValid mismatch");
         }
-        if (listCerts.getPageIndex() != modelListCerts.getPageIndex()){
+        if (listCerts.getPageIndex() != modelListCerts.getPageIndex()) {
           throw new IOException("Admin request data for list cert mismatch - pageIndex mismatch");
         }
-        if (listCerts.getPageSize() != modelListCerts.getPageSize()){
+        if (listCerts.getPageSize() != modelListCerts.getPageSize()) {
           throw new IOException("Admin request data for list cert mismatch - pageSize mismatch");
         }
         if (!listCerts.getSortBy().equals(modelListCerts.getSortBy())) {
@@ -177,57 +194,68 @@ public class CMCDataValidator {
     PKIResponse pkiResponse = cmcResponse.getPkiResponse();
 
     // Check nonce
-    if (Arrays.compare(cmcResponse.getNonce(), cmcResponse.getNonce()) != 0){
+    if (Arrays.compare(cmcResponse.getNonce(), cmcResponse.getNonce()) != 0) {
       throw new IOException("Nonce mismatch");
     }
 
-    //Check return certificates
-    List<X509Certificate> returnCertificates = responseModel.getReturnCertificates();
+    // Check message time
+    if (cmcResponse.getMessageTime() == null){
+      throw new IOException("Missing message time");
+    }
+    long currentTime = System.currentTimeMillis();
+    final long messageTime = cmcResponse.getMessageTime().getTime();
+    if (currentTime > messageTime + 2000 || currentTime < messageTime - 2000){
+      throw new IOException("Message time to far from current time (within 2 sec)");
+    }
+
+      //Check return certificates
+      List<X509Certificate> returnCertificates = responseModel.getReturnCertificates();
     CMSSignedData cmsSignedData = new CMSSignedData(cmcResponse.getCmcResponseBytes());
     Collection<X509CertificateHolder> certsInCMS = cmsSignedData.getCertificates().getMatches(null);
 
-    if (returnCertificates != null && !returnCertificates.isEmpty()){
+    if (returnCertificates != null && !returnCertificates.isEmpty()) {
       // response model contains return certificates. Verify that all of them is present in the CMS certs
-      for(X509Certificate returnCert: returnCertificates) {
+      for (X509Certificate returnCert : returnCertificates) {
         // Make sure all of these are in the CMS certs field
         boolean present = false;
-        for (X509CertificateHolder certHoldserInCms: certsInCMS) {
+        for (X509CertificateHolder certHoldserInCms : certsInCMS) {
           X509Certificate certInCms = CAUtils.getCert(certHoldserInCms);
-          if (certInCms.equals(returnCert)){
-            present=true;
+          if (certInCms.equals(returnCert)) {
+            present = true;
           }
         }
-        if (!present){
+        if (!present) {
           throw new IOException("Certificate in response model not present in CMS bag of certs");
         }
       }
     }
-    
+
     // Check control messages
     // Check the mandatory status message
     List<BodyPartID> processedRequestObjects = responseModel.getCmcResponseStatus().getBodyPartIDList();
     TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
-    CMCStatusInfoV2 statusInfo = (CMCStatusInfoV2) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_statusInfoV2, responseControlSequence).getValue();
+    CMCStatusInfoV2 statusInfo = (CMCStatusInfoV2) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_statusInfoV2,
+      responseControlSequence).getValue();
     CMCResponseStatus cmcResponseStatus = responseModel.getCmcResponseStatus();
-    if (!cmcResponseStatus.getStatus().getCmcStatus().equals(statusInfo.getcMCStatus())){
+    if (!cmcResponseStatus.getStatus().getCmcStatus().equals(statusInfo.getcMCStatus())) {
       throw new IOException("Response status mismatch");
     }
     // Check processed body part ID:s
 
-    for (BodyPartID reqObjId:processedRequestObjects) {
+    for (BodyPartID reqObjId : processedRequestObjects) {
       boolean present = Arrays.stream(statusInfo.getBodyList())
         .anyMatch(bodyPartID -> bodyPartID.equals(reqObjId));
-      if (!present){
+      if (!present) {
         throw new IOException("Processed body part ID declaration not present");
       }
     }
-    if (cmcResponseStatus.getFailType() != null){
-      if (!cmcResponseStatus.getFailType().getCmcFailInfo().equals(CMCDataPrint.getCmcFailType(statusInfo).getCmcFailInfo())){
+    if (cmcResponseStatus.getFailType() != null) {
+      if (!cmcResponseStatus.getFailType().getCmcFailInfo().equals(CMCDataPrint.getCmcFailType(statusInfo).getCmcFailInfo())) {
         throw new IOException("Response fail type mismatch");
       }
     }
-    if (cmcResponseStatus.getMessage()!= null){
-      if (!cmcResponseStatus.getMessage().equals(statusInfo.getStatusString().getString())){
+    if (cmcResponseStatus.getMessage() != null) {
+      if (!cmcResponseStatus.getMessage().equals(statusInfo.getStatusString().getString())) {
         throw new IOException("Response fail type mismatch");
       }
     }
@@ -235,50 +263,51 @@ public class CMCDataValidator {
     // Check response data
     CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo, responseControlSequence);
     Object respInfoObj = cmcControlObject.getValue();
-    if (respInfoObj instanceof AdminCMCData){
+    if (respInfoObj instanceof AdminCMCData) {
       AdminCMCData adminCMCData = (AdminCMCData) respInfoObj;
       AdminCMCData modelAdminCMCData = CMCUtils.OBJECT_MAPPER.readValue(responseModel.getResponseInfo(), AdminCMCData.class);
       AdminRequestType adminRequestType = adminCMCData.getAdminRequestType();
-      if (!adminRequestType.equals(modelAdminCMCData.getAdminRequestType())){
+      if (!adminRequestType.equals(modelAdminCMCData.getAdminRequestType())) {
         throw new IOException("Admin data type mismatch");
       }
       switch (adminRequestType) {
       case caInfo:
         CAInformation caInformation = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
         CAInformation modelCaInformation = CMCUtils.OBJECT_MAPPER.readValue(modelAdminCMCData.getData(), CAInformation.class);
-        if (caInformation.getCertificateChain().size() != modelCaInformation.getCertificateChain().size()){
+        if (caInformation.getCertificateChain().size() != modelCaInformation.getCertificateChain().size()) {
           throw new IOException("CA chain size mismatch");
         }
-        if (caInformation.getCertificateCount() != modelCaInformation.getCertificateCount()){
+        if (caInformation.getCertificateCount() != modelCaInformation.getCertificateCount()) {
           throw new IOException("CA certificate count mismatch");
         }
-        if (modelCaInformation.getOcspCertificate() != null){
-          if (!Arrays.equals(modelCaInformation.getOcspCertificate(), caInformation.getOcspCertificate())){
+        if (modelCaInformation.getOcspCertificate() != null) {
+          if (!Arrays.equals(modelCaInformation.getOcspCertificate(), caInformation.getOcspCertificate())) {
             throw new IOException("OCSP certificate mismatch");
           }
         }
-        if (modelCaInformation.getValidCertificateCount() != caInformation.getValidCertificateCount()){
+        if (modelCaInformation.getValidCertificateCount() != caInformation.getValidCertificateCount()) {
           throw new IOException("Valid certificate count mismatch");
         }
         break;
       case listCerts:
         List<CertificateData> certDataList = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), certDataListType);
         List<CertificateData> modelCertDataList = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), certDataListType);
-        if (certDataList.size() != modelCertDataList.size()){
+        if (certDataList.size() != modelCertDataList.size()) {
           throw new IOException("Cert data list size mismatch");
         }
         break;
       case allCertSerials:
         List<BigInteger> allSerialsList = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), bigIntListType);
         List<BigInteger> modelallSerialsList = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), bigIntListType);
-        if (allSerialsList.size() != modelallSerialsList.size()){
+        if (allSerialsList.size() != modelallSerialsList.size()) {
           throw new IOException("All cert serials list size mismatch");
         }
         break;
       }
-    } else {
+    }
+    else {
       byte[] respInfoBytes = (byte[]) respInfoObj;
-      if (!Arrays.equals(respInfoBytes, responseModel.getResponseInfo())){
+      if (!Arrays.equals(respInfoBytes, responseModel.getResponseInfo())) {
         throw new IOException("Response info bytes mismatch");
       }
     }

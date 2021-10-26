@@ -220,6 +220,9 @@ public class CMCUtils {
       if (CMCControlObjectID.statusInfoV2.equals(controlOid)){
         return CMCStatusInfoV2.getInstance(firstObject);
       }
+      if (CMCControlObjectID.messageTime.equals(controlOid)){
+        return DERGeneralizedTime.getInstance(firstObject).getDate();
+      }
     } catch (Exception ex){
       throw new IOException("Error extracting CMC control value", ex);
     }

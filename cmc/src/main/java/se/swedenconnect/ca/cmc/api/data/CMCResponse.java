@@ -8,6 +8,7 @@ import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,12 +23,20 @@ import java.util.List;
 @Builder
 public class CMCResponse {
 
-  CMCRequestType cmcRequestType;
+  /** The type of request this response is responding to */
+  private CMCRequestType cmcRequestType;
+  /** the bytes of the CMC Response */
   private byte[] cmcResponseBytes;
+  /** the response nonce value */
   private byte[] nonce;
-  List<X509Certificate> returnCertificates;
-  PKIResponse pkiResponse;
-  CMCResponseStatus responseStatus;
+  /** the certificates returned in the response except for the CMS signing certificates */
+  private List<X509Certificate> returnCertificates;
+  /** The PKIResponse data of the response */
+  private PKIResponse pkiResponse;
+  /** Response status of the response */
+  private CMCResponseStatus responseStatus;
+  /** Message time carried in the custom messageTime control attribute */
+  private Date messageTime;
 
 
 

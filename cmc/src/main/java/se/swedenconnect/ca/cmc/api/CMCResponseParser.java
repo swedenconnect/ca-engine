@@ -17,10 +17,7 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Description
@@ -68,11 +65,13 @@ public class CMCResponseParser {
       responseBuilder.pkiResponse(pkiResponse);
       TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
       byte[] nonce = (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_recipientNonce, responseControlSequence).getValue();
+      Date messageTime = (Date) CMCUtils.getCMCControlObject(CMCControlObjectID.messageTime.getOid(), responseControlSequence).getValue();
       CMCStatusInfoV2 statusInfoV2 = (CMCStatusInfoV2) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_statusInfoV2,
         responseControlSequence).getValue();
       CMCResponseStatus responseStatus = getResponseStatus(statusInfoV2);
       responseBuilder
         .nonce(nonce)
+        .messageTime(messageTime)
         .responseStatus(responseStatus);
       if (responseStatus.getStatus().equals(CMCStatusType.success) && expectCertsOnSuccess) {
         // Success response where return certificates are expected. Get return certificates

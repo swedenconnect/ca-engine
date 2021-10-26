@@ -9,7 +9,9 @@ import org.bouncycastle.asn1.cmc.*;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle.cms.CMSSignedData;
+import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
+import se.swedenconnect.ca.cmc.auth.CMCReplayChecker;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.auth.CMCValidationResult;
 import se.swedenconnect.ca.cmc.auth.CMCValidator;
@@ -18,6 +20,7 @@ import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Parser for CMC Request data
@@ -29,13 +32,15 @@ import java.util.Arrays;
 public class CMCRequestParser {
 
   private final CMCValidator validator;
+  private final CMCReplayChecker replayChecker;
 
   /**
    * Constructor for the CMC data parser
    * @param validator the validator used to validate the signature and authorization of the CMC signer to provide a CMC request
    */
-  public CMCRequestParser(CMCValidator validator) {
+  public CMCRequestParser(CMCValidator validator, CMCReplayChecker cmcReplayChecker) {
     this.validator = validator;
+    this.replayChecker = cmcReplayChecker;
   }
 
   public CMCRequest parseCMCrequest(byte[] cmcRequestBytes) throws IOException {
@@ -49,6 +54,7 @@ public class CMCRequestParser {
     try {
       CMSSignedData signedData = cmcValidationResult.getSignedData();
       PKIData pkiData = PKIData.getInstance(new ASN1InputStream((byte[]) signedData.getSignedContent().getContent()).readObject());
+      replayChecker.validate(pkiData);
       cmcRequest.setPkiData(pkiData);
       // Get certification request
       TaggedRequest[] reqSequence = pkiData.getReqSequence();
@@ -80,8 +86,13 @@ public class CMCRequestParser {
       setRequestType(cmcRequest);
       byte[] nonce = (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_senderNonce, pkiData).getValue();
       cmcRequest.setNonce(nonce);
+      cmcRequest.setMessageTime((Date) CMCUtils.getCMCControlObject(CMCControlObjectID.messageTime.getOid(), pkiData).getValue());
+
     }
     catch (Exception ex) {
+      if (ex instanceof IOException){
+        throw (IOException) ex;
+      }
       log.debug("Error parsing PKI Data from CMC request", ex.toString());
       throw new IOException("Error parsing PKI Data from CMC request", ex);
     }
