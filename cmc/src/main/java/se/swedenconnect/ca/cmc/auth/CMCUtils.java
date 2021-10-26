@@ -1,5 +1,6 @@
 package se.swedenconnect.ca.cmc.auth;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.*;
@@ -28,8 +29,11 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
+import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 import se.swedenconnect.ca.cmc.model.PEMType;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
+import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
+import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
@@ -45,6 +49,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Utility functions for parsing and creating CMC messages
@@ -277,6 +282,30 @@ public class CMCUtils {
       certByteList.add(cert.getEncoded());
     }
     return certByteList;
+  }
+
+  public static CAInformation getCAInformation(CMCResponse cmcResponse) throws IOException {
+    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
+    return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
+  }
+  public static AdminCMCData getAdminCMCData(CMCResponse cmcResponse) throws IOException {
+    final CMCControlObject responseControlObject = getResponseControlObject(cmcResponse, CMCObjectIdentifiers.id_cmc_responseInfo);
+    return (AdminCMCData) responseControlObject.getValue();
+  }
+  public static CMCControlObject getResponseControlObject(CMCResponse cmcResponse, ASN1ObjectIdentifier controlObjOid) throws IOException {
+    final TaggedAttribute[] taggedAttributes = CMCUtils.getResponseControlSequence(cmcResponse.getPkiResponse());
+    return CMCUtils.getCMCControlObject(controlObjOid, taggedAttributes);
+  }
+
+  public static List<BigInteger> getAllSerials(CMCResponse cmcResponse) throws IOException {
+    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
+    final List<String> serials = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
+    return serials.stream().map(s -> new BigInteger(s, 16)).collect(Collectors.toList());
+  }
+
+  public static List<CertificateData> getCertList(CMCResponse cmcResponse) throws IOException {
+    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
+    return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
   }
 
 }

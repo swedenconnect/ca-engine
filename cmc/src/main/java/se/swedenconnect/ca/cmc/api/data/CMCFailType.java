@@ -10,7 +10,7 @@ import org.bouncycastle.asn1.cmc.CMCStatus;
 import java.util.Arrays;
 
 /**
- * Description
+ * Enumeration of CMC fail types
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

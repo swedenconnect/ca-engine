@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import org.bouncycastle.asn1.cmc.BodyPartID;
 
 /**
- * Description
+ * Data class for a CMC control object
+ *
+ * These are also referred to in CMC as TaggedAttribute in CMC requests and responses
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

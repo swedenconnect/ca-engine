@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * Description
+ * Data class for CMC response data
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

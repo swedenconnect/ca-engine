@@ -171,30 +171,6 @@ public class TestUtils {
     return Base64.toBase64String(responseInfoData);
   }
 
-  public static CAInformation getCAInformation(CMCResponse cmcResponse) throws IOException {
-    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
-    return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
-  }
-  public static AdminCMCData getAdminCMCData(CMCResponse cmcResponse) throws IOException {
-    final CMCControlObject responseControlObject = getResponseControlObject(cmcResponse, CMCObjectIdentifiers.id_cmc_responseInfo);
-    return (AdminCMCData) responseControlObject.getValue();
-  }
-  public static CMCControlObject getResponseControlObject(CMCResponse cmcResponse, ASN1ObjectIdentifier controlObjOid) throws IOException {
-    final TaggedAttribute[] taggedAttributes = CMCUtils.getResponseControlSequence(cmcResponse.getPkiResponse());
-    return CMCUtils.getCMCControlObject(controlObjOid, taggedAttributes);
-  }
-
-  public static List<BigInteger> getAllSerials(CMCResponse cmcResponse) throws IOException {
-    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
-    final List<String> serials = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
-    return serials.stream().map(s -> new BigInteger(s, 16)).collect(Collectors.toList());
-  }
-
-  public static List<CertificateData> getCertList(CMCResponse cmcResponse) throws IOException {
-    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
-    return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
-  }
-
   public enum KeyType {
     RSA, EC, ECDSA;
   }

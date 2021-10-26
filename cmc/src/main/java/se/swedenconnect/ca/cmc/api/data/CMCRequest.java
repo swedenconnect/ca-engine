@@ -8,7 +8,7 @@ import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 /**
- * Description
+ * Data class for CMC request data
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

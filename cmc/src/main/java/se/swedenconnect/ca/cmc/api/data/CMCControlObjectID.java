@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * Description
+ * Enumeration of CMC Control object identifiers
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

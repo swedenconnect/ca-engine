@@ -417,7 +417,7 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Get Certificate:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
-    CAInformation caInformation = TestUtils.getCAInformation(cmcResponse);
+    CAInformation caInformation = CMCUtils.getCAInformation(cmcResponse);
     Assertions.assertEquals(5, caInformation.getCertificateCount());
     Assertions.assertEquals(4, caInformation.getValidCertificateCount());
     Assertions.assertArrayEquals(ca.getOCSPResponderCertificate().getEncoded(), caInformation.getOcspCertificate());
@@ -432,7 +432,7 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List cert serials:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
-    final List<BigInteger> allSerials = TestUtils.getAllSerials(cmcResponse);
+    final List<BigInteger> allSerials = CMCUtils.getAllSerials(cmcResponse);
     Assertions.assertEquals(5, allSerials.size());
     Assertions.assertTrue(allSerials.contains(testCert01.getSerialNumber()));
     Assertions.assertTrue(allSerials.contains(testCert02.getSerialNumber()));
@@ -475,7 +475,7 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List 2nd page valid certs:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
-    List<CertificateData> certList = TestUtils.getCertList(cmcResponse);
+    List<CertificateData> certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(1, certList.size());
     Assertions.assertArrayEquals(p10Cert.getEncoded(), certList.get(0).getCertificate());
     Assertions.assertEquals(true, certList.get(0).isValid());
@@ -497,7 +497,7 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List 2nd page valid certs:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
-    certList = TestUtils.getCertList(cmcResponse);
+    certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(2, certList.size());
     Assertions.assertArrayEquals(crmfCert.getEncoded(), certList.get(1).getCertificate());
     Assertions.assertEquals(false, certList.get(1).isValid());

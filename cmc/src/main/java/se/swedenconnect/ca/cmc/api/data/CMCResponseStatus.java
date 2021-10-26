@@ -11,7 +11,7 @@ import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
 import java.util.List;
 
 /**
- * Description
+ * Data class for CMC response status information
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -27,9 +27,13 @@ public class CMCResponseStatus {
     this.bodyPartIDList = bodyPartIDList;
   }
 
+  /** The major status indicating success or failure */
   private CMCStatusType status;
+  /** Detailed failure information as provided by {@link CMCFailType} */
   private CMCFailType failType;
+  /** Status message, normally null on success responses */
   private String message;
+  /** List of request control message body part ID:s that was processed in the request to obtain the response */
   private List<BodyPartID> bodyPartIDList;
 
 }
