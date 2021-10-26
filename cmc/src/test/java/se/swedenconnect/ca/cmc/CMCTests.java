@@ -9,16 +9,20 @@ import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.ReasonFlags;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import se.idsec.sigval.cert.chain.ExtendedCertPathValidatorException;
 import se.idsec.sigval.cert.chain.PathValidationResult;
 import se.swedenconnect.ca.cmc.api.*;
+import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
+import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
 import se.swedenconnect.ca.cmc.api.impl.DefaultCMCCaApi;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
+import se.swedenconnect.ca.cmc.auth.CMCValidator;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCValidator;
 import se.swedenconnect.ca.cmc.ca.*;
 import se.swedenconnect.ca.cmc.data.CMCRequestData;
@@ -108,11 +112,11 @@ public class CMCTests {
       KeyPair subjectKeyPair2 = TestUtils.generateECKeyPair(TestUtils.NistCurve.P256);
       DefaultCertificateModelBuilder subj2CertModelBuilder = ca.getCertificateModelBuilder(
         CMCRequestData.subjectMap.get(CMCRequestData.USER2), subjectKeyPair2.getPublic());
-      testCert02 = ca.issueCertificate(subj1CertModelBuilder.build());
+      testCert02 = ca.issueCertificate(subj2CertModelBuilder.build());
       KeyPair subjectKeyPair3 = TestUtils.generateECKeyPair(TestUtils.NistCurve.P256);
       DefaultCertificateModelBuilder subj3CertModelBuilder = ca.getCertificateModelBuilder(
         CMCRequestData.subjectMap.get(CMCRequestData.USER3), subjectKeyPair3.getPublic());
-      testCert03 = ca.issueCertificate(subj1CertModelBuilder.build());
+      testCert03 = ca.issueCertificate(subj3CertModelBuilder.build());
 
     }
     catch (Exception e) {
@@ -320,9 +324,12 @@ public class CMCTests {
     KeyPair subjectKeyPair = TestUtils.generateECKeyPair(TestUtils.NistCurve.P256);
     final CertValidatorComponents certValidator = TestServices.getValidator(ValidatorProfile.NORMAL, true);
 
-    DefaultCertificateModelBuilder certificateModelBuilder = ca.getCertificateModelBuilder(
-      CMCRequestData.subjectMap.get(CMCRequestData.USER1), subjectKeyPair.getPublic());
-    CertificateModel certificateModel = certificateModelBuilder.build();
+    DefaultCertificateModelBuilder p10CertificateModelBuilder = ca.getCertificateModelBuilder(
+      CMCRequestData.subjectMap.get(CMCRequestData.PKCS10_USER), subjectKeyPair.getPublic());
+    CertificateModel p10CertificateModel = p10CertificateModelBuilder.build();
+    DefaultCertificateModelBuilder crmfCertificateModelBuilder = ca.getCertificateModelBuilder(
+      CMCRequestData.subjectMap.get(CMCRequestData.CRMF_USER), subjectKeyPair.getPublic());
+    CertificateModel crmfCertificateModel = crmfCertificateModelBuilder.build();
 
     CMCCaApi cmcCaApi = new DefaultCMCCaApi(ca, cmcRequestParser, cmcResponseFactory);
 
@@ -332,45 +339,75 @@ public class CMCTests {
     CMCResponse parsedCMCResponse;
 
     // Issue cert with PKCS#10
-    requestModel = getCMCRequest(ca, certificateModel, subjectKeyPair, false, cmcRequestFactory);
+    requestModel = getCMCRequest(ca, p10CertificateModel, subjectKeyPair, false, cmcRequestFactory);
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    Assertions.assertTrue(cmcResponse.getResponseStatus().getStatus().equals(CMCStatusType.success));
+    Assertions.assertTrue(cmcResponse.getReturnCertificates().size() == 1);
+    Assertions.assertTrue(parsedCMCResponse.getResponseStatus().getStatus().equals(CMCStatusType.success));
+    Assertions.assertTrue(parsedCMCResponse.getReturnCertificates().size() == 1);
+    final X509Certificate p10Cert = cmcResponse.getReturnCertificates().get(0);
+
 
     // Issue Cert with CRMF
-    requestModel = getCMCRequest(ca, certificateModel, subjectKeyPair, true, cmcRequestFactory);
+    requestModel = getCMCRequest(ca, crmfCertificateModel, subjectKeyPair, true, cmcRequestFactory);
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Certificate request with CRMF:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Certificate request with CRMF:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    Assertions.assertTrue(cmcResponse.getResponseStatus().getStatus().equals(CMCStatusType.success));
+    Assertions.assertTrue(cmcResponse.getReturnCertificates().size() == 1);
+    Assertions.assertTrue(parsedCMCResponse.getResponseStatus().getStatus().equals(CMCStatusType.success));
+    Assertions.assertTrue(parsedCMCResponse.getReturnCertificates().size() == 1);
+    final X509Certificate crmfCert = cmcResponse.getReturnCertificates().get(0);
 
     // Revoke certificate
-    final X509Certificate targetCert = cmcResponse.getReturnCertificates().get(0);
-    checkCertStatus(certValidator, targetCert, true);
-    requestModel = new CMCRevokeRequestModel(targetCert.getSerialNumber(), CRLReason.keyCompromise, new Date(), ca.getCaCertificate().getIssuer());
+    requestModel = new CMCRevokeRequestModel(crmfCert.getSerialNumber(), CRLReason.keyCompromise, new Date(), ca.getCaCertificate().getIssuer());
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Certificate Revocation:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    checkCertStatus(certValidator, crmfCert, true);
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Certificate Revocation:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
-    checkCertStatus(certValidator, targetCert, false);
+    checkCertStatus(certValidator, crmfCert, false);
+
+    // Revoke non-existant cert with serial number 1
+    requestModel = new CMCRevokeRequestModel(BigInteger.ONE, CRLReason.unspecified, new Date(), ca.getCaCertificate().getIssuer());
+    cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
+    log.info("CMC API Certificate Revocation of unknown serial number:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, false));
+    CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
+    log.info("CMC response from API Certificate Revocation of unknown serial number:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    Assertions.assertTrue(cmcResponse.getResponseStatus().getStatus().equals(CMCStatusType.failed));
+    Assertions.assertTrue(cmcResponse.getResponseStatus().getFailType().equals(CMCFailType.badCertId));
+    Assertions.assertTrue(parsedCMCResponse.getResponseStatus().getStatus().equals(CMCStatusType.failed));
+    Assertions.assertTrue(parsedCMCResponse.getResponseStatus().getFailType().equals(CMCFailType.badCertId));
+
 
     // Get Cert
-    requestModel = new CMCGetCertRequestModel(targetCert.getSerialNumber(), ca.getCaCertificate().getSubject());
+    requestModel = new CMCGetCertRequestModel(crmfCert.getSerialNumber(), ca.getCaCertificate().getSubject());
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Get Certificate:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     X509Certificate getCertCertificate = cmcResponse.getReturnCertificates().get(0);
-    Assertions.assertEquals(targetCert, getCertCertificate);
+    Assertions.assertEquals(crmfCert, getCertCertificate);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Get Certificate:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    Assertions.assertTrue(cmcResponse.getResponseStatus().getStatus().equals(CMCStatusType.success));
+    Assertions.assertTrue(cmcResponse.getReturnCertificates().size() == 1);
+    Assertions.assertEquals(crmfCert, cmcResponse.getReturnCertificates().get(0));
+    Assertions.assertTrue(parsedCMCResponse.getResponseStatus().getStatus().equals(CMCStatusType.success));
+    Assertions.assertTrue(parsedCMCResponse.getReturnCertificates().size() == 1);
+    Assertions.assertEquals(crmfCert, parsedCMCResponse.getReturnCertificates().get(0));
 
     // CAInfo
     requestModel = new CMCAdminRequestModel(AdminCMCData.builder().adminRequestType(AdminRequestType.caInfo).build());
@@ -380,6 +417,12 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Get Certificate:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    CAInformation caInformation = TestUtils.getCAInformation(cmcResponse);
+    Assertions.assertEquals(5, caInformation.getCertificateCount());
+    Assertions.assertEquals(4, caInformation.getValidCertificateCount());
+    Assertions.assertArrayEquals(ca.getOCSPResponderCertificate().getEncoded(), caInformation.getOcspCertificate());
+    Assertions.assertEquals(1, caInformation.getCertificateChain().size());
+    Assertions.assertArrayEquals(ca.getCaCertificate().getEncoded(), caInformation.getCertificateChain().get(0));
 
     // List cert serials
     requestModel = new CMCAdminRequestModel(AdminCMCData.builder().adminRequestType(AdminRequestType.allCertSerials).build());
@@ -389,13 +432,19 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List cert serials:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    final List<BigInteger> allSerials = TestUtils.getAllSerials(cmcResponse);
+    Assertions.assertEquals(5, allSerials.size());
+    Assertions.assertTrue(allSerials.contains(testCert01.getSerialNumber()));
+    Assertions.assertTrue(allSerials.contains(testCert02.getSerialNumber()));
+    Assertions.assertTrue(allSerials.contains(testCert03.getSerialNumber()));
+    Assertions.assertTrue(allSerials.contains(p10Cert.getSerialNumber()));
+    Assertions.assertTrue(allSerials.contains(crmfCert.getSerialNumber()));
 
     //Get all certs
     AdminCMCData adminData = (AdminCMCData) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo, CMCUtils.getResponseControlSequence(cmcResponse.getPkiResponse())).getValue();
     List<String> serialHexStrList = CMCUtils.OBJECT_MAPPER.readValue(adminData.getData(), new TypeReference<List<String>>() {});
     log.info("Getting all certificates for all serial numbers {}", String.join(", ", serialHexStrList));
-    List<BigInteger> serialList = serialHexStrList.stream().map(s -> new BigInteger(s, 16)).collect(Collectors.toList());
-    for (BigInteger certSerial : serialList) {
+    for (BigInteger certSerial : allSerials) {
       requestModel = new CMCGetCertRequestModel(certSerial, ca.getCaCertificate().getSubject());
       cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
       cmcResponse = cmcCaApi.processRequest(cmcRequest);
@@ -404,10 +453,10 @@ public class CMCTests {
       try {
         certValidator.getCertificateValidator().validate(cert, null);
         log.info("Certificate is valid");
-        Assertions.assertNotEquals(targetCert.getSerialNumber(), certSerial);
+        Assertions.assertNotEquals(crmfCert.getSerialNumber(), certSerial);
       } catch (Exception ex){
         log.info("Certificate is invalid/revoked");
-        Assertions.assertEquals(targetCert.getSerialNumber(), certSerial);
+        Assertions.assertEquals(crmfCert.getSerialNumber(), certSerial);
       }
     }
 
@@ -426,6 +475,12 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List 2nd page valid certs:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    List<CertificateData> certList = TestUtils.getCertList(cmcResponse);
+    Assertions.assertEquals(1, certList.size());
+    Assertions.assertArrayEquals(p10Cert.getEncoded(), certList.get(0).getCertificate());
+    Assertions.assertEquals(true, certList.get(0).isValid());
+
+
 
     // List certs
     requestModel = new CMCAdminRequestModel(AdminCMCData.builder().adminRequestType(AdminRequestType.listCerts)
@@ -442,11 +497,13 @@ public class CMCTests {
     cmcResponse = cmcCaApi.processRequest(cmcRequest);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List 2nd page valid certs:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
+    certList = TestUtils.getCertList(cmcResponse);
+    Assertions.assertEquals(2, certList.size());
+    Assertions.assertArrayEquals(crmfCert.getEncoded(), certList.get(1).getCertificate());
+    Assertions.assertEquals(false, certList.get(1).isValid());
 
-
-    int sdf = 0;
-    // TODO implement a CA API
   }
+
 
   private void checkCertStatus(CertValidatorComponents certValidator, X509Certificate targetCert, boolean expValid) throws Exception{
     log.info("Validating certificate: {}", targetCert.getSubjectX500Principal());

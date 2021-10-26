@@ -48,7 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This class when instantiated creates a test CSCA services and related revocation services for CRL adn OCSP revocation checking.
+ * This class when instantiated creates a test CA services and related revocation services for CRL adn OCSP revocation checking.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

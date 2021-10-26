@@ -23,9 +23,11 @@ import java.util.Map;
  */
 public class CMCRequestData {
 
-  public static final String USER1 = "def";
-  public static final String USER2 = "def";
-  public static final String USER3 = "def";
+  public static final String USER1 = "User1";
+  public static final String USER2 = "User2";
+  public static final String USER3 = "User3";
+  public static final String PKCS10_USER = "User4";
+  public static final String CRMF_USER = "User5";
   public static final String LIST_CERTS = "listCerts";
   public static final String CA_INFO = "caInfo";
   public static final String LIST_CERT_SERIALS = "listSerials";
@@ -38,24 +40,38 @@ public class CMCRequestData {
     subjectMap = new HashMap<>();
     subjectMap.put(USER1, new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Nisse Hult").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User One").build(),
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678901").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Nisse").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Hult").build()
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("One").build()
     )));
     subjectMap.put(USER2, new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("User Two").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User Two").build(),
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678902").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("User").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Two").build()
     )));
     subjectMap.put(USER3, new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("User three").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User Three").build(),
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("User").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
       AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Three").build()
+    )));
+    subjectMap.put(PKCS10_USER, new ExplicitCertNameModel(Arrays.asList(
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("PKCS10 User Four").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("PKCS10 User").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Four").build()
+    )));
+    subjectMap.put(CRMF_USER, new ExplicitCertNameModel(Arrays.asList(
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("CRMF User Five").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("CRMF User").build(),
+      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Five").build()
     )));
 
     adminRequestMap = new HashMap<>();

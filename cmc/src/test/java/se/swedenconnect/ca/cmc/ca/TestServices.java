@@ -26,7 +26,13 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 
 /**
- * Test data used for unit testing
+ * This is the top level class for accessing test data and services for unit testing
+ *
+ * The structure for CA services is the following
+ *  - TestCAHolder is a super class for a CA service and related data
+ *  - TestCAService holds a CA service. The CA Service in turn consist of a Certificate issuer component that creates the certificates
+ *    and the CA repository and revocation services.
+ *  - The TestCARepository is a simple implementation of a repository used to store information about issued Certificates
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
