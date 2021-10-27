@@ -1,8 +1,23 @@
+/*
+ * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package se.swedenconnect.ca.cmc.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.cmc.*;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData;
@@ -14,13 +29,15 @@ import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.engine.utils.CAUtils;
 
 import java.io.IOException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
 /**
- * Description
+ * Parser of CMC response data
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -28,14 +45,28 @@ import java.util.*;
 @Slf4j
 public class CMCResponseParser {
 
+  /** A validator used to validate signatures on a CMC request as well as the authorization granted to the CMC signer to make this request */
   private final CMCValidator validator;
+  /** The public key of the CA used to verify which of the return certificates that actually are issued by the responding CA */
   private final PublicKey caPublicKey;
 
+  /**
+   * Constructor
+   * @param validator validator for validating signature on the response and the authorization of the responder
+   * @param caPublicKey public key of the CA
+   */
   public CMCResponseParser(CMCValidator validator, PublicKey caPublicKey) {
     this.validator = validator;
     this.caPublicKey = caPublicKey;
   }
 
+  /**
+   * Parsing a CMC response
+   * @param cmcResponseBytes the bytes of a CMC response
+   * @param cmcRequestType the type of CMC request this response is related to
+   * @return {@link CMCResponse}
+   * @throws IOException on error parsing the CMC response bytes
+   */
   public CMCResponse parseCMCresponse(byte[] cmcResponseBytes, CMCRequestType cmcRequestType) throws IOException {
 
     CMCResponse.CMCResponseBuilder responseBuilder = CMCResponse.builder();

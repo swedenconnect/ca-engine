@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package se.swedenconnect.ca.cmc.api;
 
 import org.bouncycastle.asn1.*;
@@ -28,29 +44,42 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Description
+ * This class is intended to be used as a bean for creating CMC requests
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CMCRequestFactory {
 
+  /** Random source */
   private final static SecureRandom RNG = new SecureRandom();
+  /** Signer certificate chain for signing CMC requests */
   private final List<X509Certificate> signerCertChain;
+  /** A CMS Content signer used to sign CMC requests */
   private final ContentSigner signer;
 
+  /**
+   * Constructor
+   * @param signerCertChain signer certificate chain for signing CMC requests
+   * @param signer a CMS Content signer used to sign CMC requests
+   */
   public CMCRequestFactory(List<X509Certificate> signerCertChain, ContentSigner signer) {
     this.signerCertChain = signerCertChain;
     this.signer = signer;
   }
 
+  /**
+   * Create a CMC Request
+   * @param cmcRequestModel model holding the data necessary to create a CMC request
+   * @return CMC Request
+   * @throws IOException on failure to create a valid CMC request
+   */
   public CMCRequest getCMCRequest(CMCRequestModel cmcRequestModel) throws IOException {
     CMCRequest.CMCRequestBuilder requestBuilder = CMCRequest.builder();
     CMCRequestType cmcRequestType = cmcRequestModel.getCmcRequestType();
@@ -100,21 +129,21 @@ public class CMCRequestFactory {
     GeneralName gn = new GeneralName(cmcRequestModel.getIssuerName());
     GetCert getCert = new GetCert(gn, cmcRequestModel.getSerialNumber());
     taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_getCert, getCert));
-    return taggedAttributeList.toArray(new TaggedAttribute[taggedAttributeList.size()]);
+    return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel, Date messageTime) throws IOException {
+  private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel, Date messageTime) {
     return new PKIData(getAdminControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
   }
 
-  private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel, Date messageTime) throws IOException {
+  private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel, Date messageTime) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
-    return taggedAttributeList.toArray(new TaggedAttribute[taggedAttributeList.size()]);
+    return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  public PKIData createCertRequest(CMCCertificateRequestModel cmcRequestModel, Date messageTime)
+  private PKIData createCertRequest(CMCCertificateRequestModel cmcRequestModel, Date messageTime)
     throws NoSuchAlgorithmException, OperatorCreationException, IOException, CRMFException {
 
     TaggedRequest taggedCertificateRequest;
@@ -139,23 +168,25 @@ public class CMCRequestFactory {
     return new PKIData(controlSequence, new TaggedRequest[] { taggedCertificateRequest }, new TaggedContentInfo[] {}, new OtherMsg[] {});
   }
 
+  /**
+   * Extension point for manipulating and extending the CRMF certificate template
+   * @param crmfBuilder the CRMF builder holding default certificate template data
+   * @param cmcRequestModel CMC request model holding data about the CMC request to be built
+   */
   protected void extendCertTemplate(CertificateRequestMessageBuilder crmfBuilder, CMCCertificateRequestModel cmcRequestModel) {
     // Extend crmf cert template based on cmcRequestModel
   }
 
-  public static BodyPartID getBodyPartId() {
+  private static BodyPartID getBodyPartId() {
     return getBodyPartId(new BigInteger(31, RNG).add(BigInteger.ONE));
   }
 
-  public static BodyPartID getBodyPartId(BigInteger bodyPartId) {
-
-    long id = Long.valueOf(bodyPartId.toString(10));
+  private static BodyPartID getBodyPartId(BigInteger bodyPartId) {
+    long id = Long.parseLong(bodyPartId.toString(10));
     return new BodyPartID(id);
   }
 
-  private TaggedAttribute[] getCertRevocationControlSequence(CMCRevokeRequestModel cmcRequestModel, Date messageTime)
-    throws CertificateEncodingException, IOException {
-    CMCRequest cmcRequest = new CMCRequest();
+  private TaggedAttribute[] getCertRevocationControlSequence(CMCRevokeRequestModel cmcRequestModel, Date messageTime) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
@@ -166,7 +197,7 @@ public class CMCRequestFactory {
       new ASN1GeneralizedTime(cmcRequestModel.getRevocationDate()), null, null
     );
     taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_revokeRequest, revokeRequest));
-    return taggedAttributeList.toArray(new TaggedAttribute[taggedAttributeList.size()]);
+    return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
   private TaggedAttribute[] getCertRequestControlSequence(CMCCertificateRequestModel cmcRequestModel, byte[] nonce, Date messageTime,
@@ -180,7 +211,7 @@ public class CMCRequestFactory {
       lraPopWitSeq.add(new DERSequence(certReqBodyPartId));
       taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_lraPOPWitness, new DERSequence(lraPopWitSeq)));
     }
-    return taggedAttributeList.toArray(new TaggedAttribute[taggedAttributeList.size()]);
+    return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
   private void addRegistrationInfoControl(List<TaggedAttribute> taggedAttributeList, CMCRequestModel cmcRequestModel) {

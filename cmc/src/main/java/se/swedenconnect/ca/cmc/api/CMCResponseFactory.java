@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package se.swedenconnect.ca.cmc.api;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -17,21 +33,34 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Description
+ * This class is intended to be used as a bean for creating CMC responses
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CMCResponseFactory {
 
+  /** Signer certificate chain for signing CMC requests */
   private final List<X509Certificate> signerCertChain;
+  /** A CMS Content signer used to sign CMC requests */
   private final ContentSigner signer;
 
+  /**
+   * Constructor
+   * @param signerCertChain signer certificate chain for signing CMC requests
+   * @param signer a CMS Content signer used to sign CMC requests
+   */
   public CMCResponseFactory(List<X509Certificate> signerCertChain, ContentSigner signer) {
     this.signerCertChain = signerCertChain;
     this.signer = signer;
   }
 
+  /**
+   * Create a CMC response
+   * @param cmcResponseModel response model holding data necessary to create the CMC response
+   * @return {@link CMCResponse}
+   * @throws IOException on errors creating a CMC response
+   */
   public CMCResponse getCMCResponse(CMCResponseModel cmcResponseModel) throws IOException {
     try {
       Date messageTime = new Date();
@@ -39,7 +68,7 @@ public class CMCResponseFactory {
       List<X509Certificate> cmsCertList = new ArrayList<>(signerCertChain);
       List<X509Certificate> outputCerts = cmcResponseModel.getReturnCertificates();
       if (outputCerts != null) {
-        outputCerts.stream().forEach(x509Certificate -> cmsCertList.add(x509Certificate));
+        cmsCertList.addAll(outputCerts);
       } else {
         outputCerts = new ArrayList<>();
       }
@@ -59,7 +88,7 @@ public class CMCResponseFactory {
     }
   }
 
-  private PKIResponse getPKIResponseData(CMCResponseModel cmcResponseModel, Date messageTime) throws Exception{
+  private PKIResponse getPKIResponseData(CMCResponseModel cmcResponseModel, Date messageTime) {
 
     ASN1EncodableVector pkiResponseSeq = new ASN1EncodableVector();
     ASN1EncodableVector controlSeq = new ASN1EncodableVector();
@@ -74,11 +103,10 @@ public class CMCResponseFactory {
     pkiResponseSeq.add(new DERSequence(cmsSeq));
     pkiResponseSeq.add(new DERSequence(otherMsgSeq));
 
-    PKIResponse pkiResponse = PKIResponse.getInstance(new DERSequence(pkiResponseSeq));
-    return pkiResponse;
+    return PKIResponse.getInstance(new DERSequence(pkiResponseSeq));
   }
 
-  private List<TaggedAttribute> getControlAttributes(CMCResponseModel cmcResponseModel, Date messageTime)  throws Exception {
+  private List<TaggedAttribute> getControlAttributes(CMCResponseModel cmcResponseModel, Date messageTime)  {
 
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceAndMessageTimeControl(taggedAttributeList, cmcResponseModel.getNonce(), messageTime);
@@ -102,7 +130,7 @@ public class CMCResponseFactory {
 
 
 
-  private void addStatusControl(List<TaggedAttribute> taggedAttributeList, CMCResponseModel cmcResponseModel) throws Exception {
+  private void addStatusControl(List<TaggedAttribute> taggedAttributeList, CMCResponseModel cmcResponseModel) {
     CMCResponseStatus cmcResponseStatus = cmcResponseModel.getCmcResponseStatus();
     CMCStatusType cmcStatusType = cmcResponseStatus.getStatus();
     CMCFailType cmcFailType = cmcResponseStatus.getFailType();

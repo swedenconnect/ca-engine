@@ -16,14 +16,10 @@
 
 package se.swedenconnect.ca.cmc.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
-import org.bouncycastle.asn1.cmc.TaggedAttribute;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
@@ -35,22 +31,19 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.encoders.Base64;
-import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
-import se.swedenconnect.ca.cmc.api.data.CMCResponse;
-import se.swedenconnect.ca.cmc.auth.CMCUtils;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import se.swedenconnect.ca.cmc.ca.TestCA;
 import se.swedenconnect.ca.cmc.ca.TestCAHolder;
 import se.swedenconnect.ca.cmc.ca.TestServices;
-import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
-import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
-import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
@@ -63,7 +56,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Utility functions for test
@@ -187,5 +179,18 @@ public class TestUtils {
     String curveName;
     ASN1ObjectIdentifier curveOid;
   }
+
+  public static String getPemFormatedObject(byte[] data, PEMType pemType) throws IOException {
+    PemObject pemObject = new PemObject(pemType.getHeader(), data);
+    StringWriter strWr = new StringWriter();
+    PemWriter pemWriter = new PemWriter(strWr);
+    pemWriter.writeObject(pemObject);
+    pemWriter.close();
+    strWr.close();
+    PEMParser pp;
+    return strWr.toString();
+  }
+
+
 
 }

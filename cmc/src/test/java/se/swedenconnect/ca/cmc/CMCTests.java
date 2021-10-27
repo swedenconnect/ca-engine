@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package se.swedenconnect.ca.cmc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -287,15 +303,15 @@ public class CMCTests {
         .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(Arrays.asList(
           CertificateData.builder()
             .certificate(testCert01.getEncoded())
-            .valid(true)
+            .revoked(true)
             .build(),
           CertificateData.builder()
             .certificate(testCert02.getEncoded())
-            .valid(true)
+            .revoked(true)
             .build(),
           CertificateData.builder()
             .certificate(testCert03.getEncoded())
-            .valid(false)
+            .revoked(false)
             .revocationDate(System.currentTimeMillis())
             .revocationReason(0)
             .build()
@@ -496,7 +512,7 @@ public class CMCTests {
     List<CertificateData> certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(1, certList.size());
     Assertions.assertArrayEquals(p10Cert.getEncoded(), certList.get(0).getCertificate());
-    Assertions.assertTrue(certList.get(0).isValid());
+    Assertions.assertTrue(certList.get(0).isRevoked());
 
     // List certs
     requestModel = new CMCAdminRequestModel(AdminCMCData.builder().adminRequestType(AdminRequestType.listCerts)
@@ -516,7 +532,7 @@ public class CMCTests {
     certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(2, certList.size());
     Assertions.assertArrayEquals(crmfCert.getEncoded(), certList.get(1).getCertificate());
-    Assertions.assertFalse(certList.get(1).isValid());
+    Assertions.assertFalse(certList.get(1).isRevoked());
 
   }
 

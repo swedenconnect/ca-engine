@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package se.swedenconnect.ca.cmc.auth;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -18,19 +34,15 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
-import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.Store;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
-import se.swedenconnect.ca.cmc.model.PEMType;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
 import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
@@ -40,7 +52,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 import se.swedenconnect.ca.engine.utils.CAUtils;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
@@ -63,6 +74,14 @@ public class CMCUtils {
   public static final SecureRandom RNG = new SecureRandom();
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  /**
+   * Create a CRMF request message builder for a CRMF certificate request
+   * @param requestId the ID of the created request
+   * @param certificateModel model holding data about the certificate to be issued
+   * @param attributeValueEncoder encoder for attribute values
+   * @return CRMF request message builder
+   * @throws IOException on error creating the builder
+   */
   public static CertificateRequestMessageBuilder getCRMFRequestMessageBuilder(BodyPartID requestId, CertificateModel certificateModel, AttributeValueEncoder attributeValueEncoder)
     throws IOException {
     CertificateRequestMessageBuilder crmfBuilder = new CertificateRequestMessageBuilder(new BigInteger(String.valueOf(requestId.getID())));
@@ -82,6 +101,14 @@ public class CMCUtils {
     return crmfBuilder;
   }
 
+  /**
+   * Creates a PKCS10 request
+   * @param certificateModel data about the certificate to be requested
+   * @param signer the signer of the PKCS10 request
+   * @param attributeValueEncoder attribute value encoder
+   * @return PKCS10 request
+   * @throws IOException on errors creating the request
+   */
   public static CertificationRequest getCertificationRequest(CertificateModel certificateModel, ContentSigner signer, AttributeValueEncoder attributeValueEncoder)
     throws IOException {
 
@@ -123,17 +150,6 @@ public class CMCUtils {
       log.error("{}", msg, e);
       throw new IOException(msg, e);
     }
-  }
-
-  public static String getPemFormatedObject(byte[] data, PEMType pemType) throws IOException {
-    PemObject pemObject = new PemObject(pemType.getHeader(), data);
-    StringWriter strWr = new StringWriter();
-    PemWriter pemWriter = new PemWriter(strWr);
-    pemWriter.writeObject(pemObject);
-    pemWriter.close();
-    strWr.close();
-    PEMParser pp;
-    return strWr.toString();
   }
 
   public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData)

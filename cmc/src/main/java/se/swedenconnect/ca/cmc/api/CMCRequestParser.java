@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package se.swedenconnect.ca.cmc.api;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +47,9 @@ import java.util.Date;
 @Slf4j
 public class CMCRequestParser {
 
+  /** A validator used to validate signatures on a CMC request as well as the authorization granted to the CMC signer to make this request */
   private final CMCValidator validator;
+  /** Replay checker used to verify that the CMC message is not a replay of an old request */
   private final CMCReplayChecker replayChecker;
 
   /**
@@ -43,6 +61,12 @@ public class CMCRequestParser {
     this.replayChecker = cmcReplayChecker;
   }
 
+  /**
+   * Parse CMC request
+   * @param cmcRequestBytes the bytes of a CMC request
+   * @return {@link CMCRequest}
+   * @throws IOException on error parsing the CMC request bytes
+   */
   public CMCRequest parseCMCrequest(byte[] cmcRequestBytes) throws IOException {
     CMCRequest cmcRequest = new CMCRequest();
     cmcRequest.setCmcRequestBytes(cmcRequestBytes);
@@ -93,7 +117,7 @@ public class CMCRequestParser {
       if (ex instanceof IOException){
         throw (IOException) ex;
       }
-      log.debug("Error parsing PKI Data from CMC request", ex.toString());
+      log.debug("Error parsing PKI Data from CMC request: {}", ex.toString());
       throw new IOException("Error parsing PKI Data from CMC request", ex);
     }
     return cmcRequest;
@@ -103,8 +127,7 @@ public class CMCRequestParser {
     LraPopWitness lraPopWitness = (LraPopWitness) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_lraPOPWitness, pkiData).getValue();
     if (lraPopWitness != null) {
       BodyPartID[] bodyIds = lraPopWitness.getBodyIds();
-      return Arrays.stream(bodyIds)
-        .anyMatch(bodyPartID -> bodyPartID.equals(certReqBodyPartId));
+      return Arrays.asList(bodyIds).contains(certReqBodyPartId);
     }
     return false;
   }
@@ -123,7 +146,7 @@ public class CMCRequestParser {
       return;
     }
     Object regInfoObj = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_regInfo, cmcRequest.getPkiData()).getValue();
-    if (regInfoObj != null && regInfoObj instanceof AdminCMCData){
+    if (regInfoObj instanceof AdminCMCData){
       cmcRequest.setCmcRequestType(CMCRequestType.admin);
       return;
     }
