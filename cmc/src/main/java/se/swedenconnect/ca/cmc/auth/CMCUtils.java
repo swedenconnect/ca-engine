@@ -21,6 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cmc.*;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Extension;
@@ -29,10 +32,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -58,6 +58,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -236,9 +237,6 @@ public class CMCUtils {
       if (CMCControlObjectID.statusInfoV2.equals(controlOid)){
         return CMCStatusInfoV2.getInstance(firstObject);
       }
-      if (CMCControlObjectID.messageTime.equals(controlOid)){
-        return DERGeneralizedTime.getInstance(firstObject).getDate();
-      }
     } catch (Exception ex){
       throw new IOException("Error extracting CMC control value", ex);
     }
@@ -325,6 +323,29 @@ public class CMCUtils {
   public static List<CertificateData> getCertList(CMCResponse cmcResponse) throws IOException {
     final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
     return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
+  }
+
+  /**
+   * Get the value of the signed signingTime attribute from a CMS signed CMC message
+   * @param cmsContentInfo CMS content info bytes
+   * @return signing time attribute value if present, or null
+   * @throws CMSException error parsing CMS data
+   */
+  public static Date getSigningTime(byte[] cmsContentInfo) throws CMSException {
+    return getSigningTime(new CMSSignedData(cmsContentInfo));
+  }
+
+  /**
+   * Get the value of the signed signingTime attribute from a CMS signed CMC message
+   * @param signedData CMS signed data
+   * @return signing time attribute value if present, or null
+   */
+  public static Date getSigningTime(CMSSignedData signedData) {
+    final SignerInformation signerInformation = signedData.getSignerInfos().iterator().next();
+    final Attribute signingTimeAttr = signerInformation.getSignedAttributes().get(CMSAttributes.signingTime);
+    return signingTimeAttr == null
+      ? null
+      : Time.getInstance(signingTimeAttr.getAttrValues().getObjectAt(0)).getDate();
   }
 
 }

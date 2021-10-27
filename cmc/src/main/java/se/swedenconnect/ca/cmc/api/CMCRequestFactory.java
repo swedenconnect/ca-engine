@@ -27,7 +27,6 @@ import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
@@ -86,8 +85,7 @@ public class CMCRequestFactory {
     Date messageTime = new Date();
     requestBuilder
       .cmcRequestType(cmcRequestType)
-      .nonce(cmcRequestModel.getNonce())
-      .messageTime(messageTime);
+      .nonce(cmcRequestModel.getNonce());
     PKIData pkiData = null;
     try {
       switch (cmcRequestType) {
@@ -96,11 +94,11 @@ public class CMCRequestFactory {
         addCertRequestData(pkiData, requestBuilder);
         break;
       case revoke:
-        pkiData = new PKIData(getCertRevocationControlSequence((CMCRevokeRequestModel) cmcRequestModel, messageTime),
+        pkiData = new PKIData(getCertRevocationControlSequence((CMCRevokeRequestModel) cmcRequestModel),
           new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
         break;
       case admin:
-        pkiData = createAdminRequest((CMCAdminRequestModel) cmcRequestModel, messageTime);
+        pkiData = createAdminRequest((CMCAdminRequestModel) cmcRequestModel);
         break;
       case getCert:
         pkiData = createGetCertRequest((CMCGetCertRequestModel) cmcRequestModel, messageTime);
@@ -124,7 +122,7 @@ public class CMCRequestFactory {
 
   private TaggedAttribute[] getGetCertsControlSequence(CMCGetCertRequestModel cmcRequestModel, Date messageTime) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
+    addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     GeneralName gn = new GeneralName(cmcRequestModel.getIssuerName());
     GetCert getCert = new GetCert(gn, cmcRequestModel.getSerialNumber());
@@ -132,13 +130,13 @@ public class CMCRequestFactory {
     return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel, Date messageTime) {
-    return new PKIData(getAdminControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
+  private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel) {
+    return new PKIData(getAdminControlSequence(cmcRequestModel), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
   }
 
-  private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel, Date messageTime) {
+  private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
+    addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
@@ -148,7 +146,7 @@ public class CMCRequestFactory {
 
     TaggedRequest taggedCertificateRequest;
     BodyPartID certReqBodyPartId = getBodyPartId();
-    TaggedAttribute[] controlSequence = getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(), messageTime, certReqBodyPartId);
+    TaggedAttribute[] controlSequence = getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(), certReqBodyPartId);
     PrivateKey certReqPrivate = cmcRequestModel.getCertReqPrivate();
     if (certReqPrivate != null) {
       ContentSigner p10Signer = new JcaContentSignerBuilder(CAAlgorithmRegistry.getSigAlgoName(cmcRequestModel.getP10Algorithm()))
@@ -186,9 +184,9 @@ public class CMCRequestFactory {
     return new BodyPartID(id);
   }
 
-  private TaggedAttribute[] getCertRevocationControlSequence(CMCRevokeRequestModel cmcRequestModel, Date messageTime) {
+  private TaggedAttribute[] getCertRevocationControlSequence(CMCRevokeRequestModel cmcRequestModel) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceAndMessageTimeControls(taggedAttributeList, cmcRequestModel.getNonce(), messageTime);
+    addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     RevokeRequest revokeRequest = new RevokeRequest(
       cmcRequestModel.getIssuerName(),
@@ -200,10 +198,10 @@ public class CMCRequestFactory {
     return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  private TaggedAttribute[] getCertRequestControlSequence(CMCCertificateRequestModel cmcRequestModel, byte[] nonce, Date messageTime,
+  private TaggedAttribute[] getCertRequestControlSequence(CMCCertificateRequestModel cmcRequestModel, byte[] nonce,
     BodyPartID certReqBodyPartId) {
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceAndMessageTimeControls(taggedAttributeList, nonce, messageTime);
+    addNonceControl(taggedAttributeList, nonce);
     addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     if (cmcRequestModel.isLraPopWitness()) {
       ASN1EncodableVector lraPopWitSeq = new ASN1EncodableVector();
@@ -221,10 +219,9 @@ public class CMCRequestFactory {
     }
   }
 
-  public static void addNonceAndMessageTimeControls(List<TaggedAttribute> taggedAttributeList, byte[] nonce, Date meesageTime) {
+  public static void addNonceControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce) {
     if (nonce != null) {
       taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_senderNonce, new DEROctetString(nonce)));
-      taggedAttributeList.add(getControl(CMCControlObjectID.messageTime.getOid(), new DERGeneralizedTime(meesageTime)));
     }
   }
 

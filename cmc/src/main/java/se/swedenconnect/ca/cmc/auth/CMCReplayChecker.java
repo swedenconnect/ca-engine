@@ -17,9 +17,11 @@
 package se.swedenconnect.ca.cmc.auth;
 
 import org.bouncycastle.asn1.cmc.PKIData;
+import org.bouncycastle.cms.CMSSignedData;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * Interface for implementation of a replay checker used by the CMC parser to determine if a CMC request is new and not
@@ -32,9 +34,10 @@ public interface CMCReplayChecker {
 
   /**
    * Validates a CMC request against replay according to a defined policy
-   * @param pkiData The signed content of a CMC request to validate
+   * @param nonce the nonce of the CMC request to validate
+   * @param signingTime The signing time collected from the CMS signature signed attributes (1.2.840.113549.1.9.5)
    * @throws IOException if a violation of the replay protection policy is detected
    */
-  void validate(PKIData pkiData) throws IOException;
+  void validate(CMSSignedData cmsSignedData) throws IOException;
 
 }

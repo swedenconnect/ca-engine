@@ -51,10 +51,5 @@ public class CMCResponse {
   private PKIResponse pkiResponse;
   /** Response status of the response */
   private CMCResponseStatus responseStatus;
-  /** Message time carried in the custom messageTime control attribute */
-  private Date messageTime;
-
-
-
 
 }

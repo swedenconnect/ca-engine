@@ -74,16 +74,6 @@ public class CMCDataValidator {
       throw new IOException("Nonce mismatch");
     }
 
-    // Check message time
-    if (cmcRequest.getMessageTime() == null){
-      throw new IOException("Missing message time");
-    }
-    long currentTime = System.currentTimeMillis();
-    final long messageTime = cmcRequest.getMessageTime().getTime();
-    if (currentTime > messageTime + 2000 || currentTime < messageTime - 2000){
-      throw new IOException("Message time to far from current time (within 2 sec)");
-    }
-
     // Check request type
     if (cmcRequestType == null || !cmcRequestType.equals(cmcRequest.getCmcRequestType())) {
       throw new IOException("Request type mismatch");
@@ -212,16 +202,6 @@ public class CMCDataValidator {
     // Check nonce
     if (Arrays.compare(cmcResponse.getNonce(), cmcResponse.getNonce()) != 0) {
       throw new IOException("Nonce mismatch");
-    }
-
-    // Check message time
-    if (cmcResponse.getMessageTime() == null){
-      throw new IOException("Missing message time");
-    }
-    long currentTime = System.currentTimeMillis();
-    final long messageTime = cmcResponse.getMessageTime().getTime();
-    if (currentTime > messageTime + 2000 || currentTime < messageTime - 2000){
-      throw new IOException("Message time to far from current time (within 2 sec)");
     }
 
       //Check return certificates

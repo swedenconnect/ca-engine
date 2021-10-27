@@ -18,8 +18,17 @@ package se.swedenconnect.ca.cmc.auth.impl;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
 import org.bouncycastle.asn1.cmc.PKIData;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.Time;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformation;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
 import se.swedenconnect.ca.cmc.auth.CMCReplayChecker;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
@@ -62,19 +71,20 @@ public class DefaultCMCReplayChecker implements CMCReplayChecker {
     this.futureTimeSkewMillis = 1000L * 60L;
   }
 
-  @Override public void validate(PKIData pkiData) throws IOException {
+  @Override public void validate(CMSSignedData signedData) throws IOException {
     try {
       consolidateReplayData();
-      Date messateTime = (Date) CMCUtils.getCMCControlObject(CMCControlObjectID.messageTime.getOid(), pkiData).getValue();
+      PKIData pkiData = PKIData.getInstance(new ASN1InputStream((byte[]) signedData.getSignedContent().getContent()).readObject());
+      Date messageTime = CMCUtils.getSigningTime(signedData);
       Date notBefore = new Date(System.currentTimeMillis() - maxAgeMillis);
       Date notAfter = new Date(System.currentTimeMillis() + futureTimeSkewMillis);
-      if (messateTime == null){
+      if (messageTime == null){
         throw new IOException("Replay check failed: Message time is missing in CMC request");
       }
-      if (messateTime.before(notBefore)) {
+      if (messageTime.before(notBefore)) {
         throw new IOException("Replay check failed: Request is to lod");
       }
-      if (messateTime.after(notAfter)){
+      if (messageTime.after(notAfter)){
         throw new IOException("Replay check failed: Request time in future time");
       }
       byte[] nonce = (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_senderNonce, pkiData).getValue();
@@ -85,7 +95,7 @@ public class DefaultCMCReplayChecker implements CMCReplayChecker {
       if (nonceList.stream().anyMatch(replayData -> Arrays.equals(nonce, replayData.getNonce()))){
         throw new IOException("Replay check failed: Replay of request nonce");
       }
-      nonceList.add(new ReplayData (nonce, messateTime));
+      nonceList.add(new ReplayData (nonce, messageTime));
 
     } catch (Exception ex) {
       if (ex instanceof IOException){

@@ -78,7 +78,7 @@ public class CMCRequestParser {
     try {
       CMSSignedData signedData = cmcValidationResult.getSignedData();
       PKIData pkiData = PKIData.getInstance(new ASN1InputStream((byte[]) signedData.getSignedContent().getContent()).readObject());
-      replayChecker.validate(pkiData);
+      replayChecker.validate(signedData);
       cmcRequest.setPkiData(pkiData);
       // Get certification request
       TaggedRequest[] reqSequence = pkiData.getReqSequence();
@@ -110,8 +110,6 @@ public class CMCRequestParser {
       setRequestType(cmcRequest);
       byte[] nonce = (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_senderNonce, pkiData).getValue();
       cmcRequest.setNonce(nonce);
-      cmcRequest.setMessageTime((Date) CMCUtils.getCMCControlObject(CMCControlObjectID.messageTime.getOid(), pkiData).getValue());
-
     }
     catch (Exception ex) {
       if (ex instanceof IOException){

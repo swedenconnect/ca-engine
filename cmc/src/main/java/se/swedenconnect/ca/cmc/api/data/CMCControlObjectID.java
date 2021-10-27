@@ -64,8 +64,7 @@ public enum CMCControlObjectID {
   publishCert(CMCObjectIdentifiers.id_cmc_publishCert),
   modCertTemplate(CMCObjectIdentifiers.id_cmc_modCertTemplate),
   controlProcessed(CMCObjectIdentifiers.id_cmc_controlProcessed),
-  identityProofV2(CMCObjectIdentifiers.id_cmc_identityProofV2),
-  messageTime(new ASN1ObjectIdentifier("1.2.752.201.6.1"));
+  identityProofV2(CMCObjectIdentifiers.id_cmc_identityProofV2);
 
 
   private ASN1ObjectIdentifier oid;

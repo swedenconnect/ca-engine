@@ -17,7 +17,6 @@
 package se.swedenconnect.ca.cmc.api;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cmc.*;
@@ -63,8 +62,7 @@ public class CMCResponseFactory {
    */
   public CMCResponse getCMCResponse(CMCResponseModel cmcResponseModel) throws IOException {
     try {
-      Date messageTime = new Date();
-      PKIResponse pkiResponseData = getPKIResponseData(cmcResponseModel, messageTime);
+      PKIResponse pkiResponseData = getPKIResponseData(cmcResponseModel);
       List<X509Certificate> cmsCertList = new ArrayList<>(signerCertChain);
       List<X509Certificate> outputCerts = cmcResponseModel.getReturnCertificates();
       if (outputCerts != null) {
@@ -75,7 +73,6 @@ public class CMCResponseFactory {
 
       CMCResponse.CMCResponseBuilder responseBuilder = CMCResponse.builder()
         .nonce(cmcResponseModel.getNonce())
-        .messageTime(messageTime)
         .pkiResponse(pkiResponseData)
         .cmcResponseBytes(CMCUtils.signEncapsulatedCMSContent(CMCObjectIdentifiers.id_cct_PKIResponse, pkiResponseData, cmsCertList, signer))
         .returnCertificates(outputCerts)
@@ -88,14 +85,14 @@ public class CMCResponseFactory {
     }
   }
 
-  private PKIResponse getPKIResponseData(CMCResponseModel cmcResponseModel, Date messageTime) {
+  private PKIResponse getPKIResponseData(CMCResponseModel cmcResponseModel) {
 
     ASN1EncodableVector pkiResponseSeq = new ASN1EncodableVector();
     ASN1EncodableVector controlSeq = new ASN1EncodableVector();
     ASN1EncodableVector cmsSeq = new ASN1EncodableVector();
     ASN1EncodableVector otherMsgSeq = new ASN1EncodableVector();
 
-    List<TaggedAttribute> controlAttrList = getControlAttributes(cmcResponseModel, messageTime);
+    List<TaggedAttribute> controlAttrList = getControlAttributes(cmcResponseModel);
     for (TaggedAttribute contrAttr : controlAttrList) {
       controlSeq.add(contrAttr.toASN1Primitive());
     }
@@ -106,10 +103,10 @@ public class CMCResponseFactory {
     return PKIResponse.getInstance(new DERSequence(pkiResponseSeq));
   }
 
-  private List<TaggedAttribute> getControlAttributes(CMCResponseModel cmcResponseModel, Date messageTime)  {
+  private List<TaggedAttribute> getControlAttributes(CMCResponseModel cmcResponseModel)  {
 
     List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
-    addNonceAndMessageTimeControl(taggedAttributeList, cmcResponseModel.getNonce(), messageTime);
+    addNonceControl(taggedAttributeList, cmcResponseModel.getNonce());
     // Add response status and fail info
     addStatusControl(taggedAttributeList, cmcResponseModel);
 
@@ -121,10 +118,9 @@ public class CMCResponseFactory {
     return taggedAttributeList;
   }
 
-  public static void addNonceAndMessageTimeControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce, Date messageTime) {
+  public static void addNonceControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce) {
     if (nonce != null) {
       taggedAttributeList.add(CMCRequestFactory.getControl(CMCObjectIdentifiers.id_cmc_recipientNonce, new DEROctetString(nonce)));
-      taggedAttributeList.add(CMCRequestFactory.getControl(CMCControlObjectID.messageTime.getOid(), new DERGeneralizedTime(messageTime)));
     }
   }
 

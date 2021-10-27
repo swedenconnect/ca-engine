@@ -51,7 +51,5 @@ public class CMCRequest {
   private BodyPartID certReqBodyPartId;
   /** The PKIData structure of this CMC request */
   private PKIData pkiData;
-  /** Message time of this request, if present in the custom control attribute defined here */
-  private Date messageTime;
 
 }

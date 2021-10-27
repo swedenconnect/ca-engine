@@ -51,6 +51,7 @@ public class CMCDataPrint {
       CMCRequestType cmcRequestType = cmcRequest.getCmcRequestType();
       b.append("CMC request type: ").append(cmcRequestType).append("\n");
       PKIData pkiData = cmcRequest.getPkiData();
+      b.append("  time: ").append(CMCUtils.getSigningTime(cmcRequest.getCmcRequestBytes())).append("\n");
       TaggedAttribute[] controlSequence = pkiData.getControlSequence();
       if (controlSequence.length > 0) {
         b.append("CMC Control sequence (size=").append(controlSequence.length).append(")\n");
@@ -89,6 +90,7 @@ public class CMCDataPrint {
       PKIResponse pkiResponse = cmcResponse.getPkiResponse();
       TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
       b.append("CMC Request type: ").append(cmcResponse.getCmcRequestType()).append("\n");
+      b.append("  time: ").append(CMCUtils.getSigningTime(cmcResponse.getCmcResponseBytes())).append("\n");
       if (responseControlSequence.length > 0) {
         b.append("CMC Control sequence (size=").append(responseControlSequence.length).append(")\n");
         for (TaggedAttribute csAttr: responseControlSequence){
@@ -129,10 +131,6 @@ public class CMCDataPrint {
         case senderNonce:
         case recipientNonce:
           valueStr = Base64.toBase64String(ASN1OctetString.getInstance(asn1Encodable).getOctets());
-          b.append("    value: ").append(valueStr).append("\n");
-          break;
-        case messageTime:
-          valueStr = DERGeneralizedTime.getInstance(asn1Encodable).getDate().toString();
           b.append("    value: ").append(valueStr).append("\n");
           break;
         case regInfo:
