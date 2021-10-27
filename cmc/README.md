@@ -70,7 +70,7 @@ Responses to a successful certificate request is provided in a signed PKIRespons
 
 Revocation requests make use of the revokeRequest control attribute, specifying the issuer name, certificate serial number of the certificate to revoke, reason code and revocation date.
 
-Successful revocation status is deliverd in the response useing the statusInfoV2 control attribute.
+Successful revocation status is deliverd in the response using the statusInfoV2 control attribute.
 
 #### Get cert requests
 
