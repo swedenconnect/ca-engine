@@ -166,7 +166,7 @@ CMCResponseParser cmcResponseParser = new CMCResponseParser(new DefaultCMCValida
 
 A CMC request is then created by providing a CMCRequestModel as input to the cmcRequestFactory as follows:
 
-CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
+> CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
 
 Four different implementations of CMCRequestModel are provided:
 
