@@ -111,7 +111,7 @@ allCertSerials  | absent  | List&lt;String> (Serialnumbers as hex strings)
 
 ## CMC API
 
-This CMC API integration library provides java classes that can be used by both the cleint and the CA to implement this API.
+This CMC API integration library provides java classes that can be used by both the client and the CA to implement this API.
 
 ### CA integration
 
@@ -139,7 +139,7 @@ CMCRequestParser cmcRequestParser = new CMCRequestParser(new DefaultCMCValidator
 CMCCaApi cmcCaApi = new DefaultCMCCaApi(ca, cmcRequestParser, cmcResponseFactory);
 ```
 
-All requests to the CA is then handled by processing incomming CMC reqeusts and returning the resulting CMC response by executing the function as follows:
+All requests to the CA is then handled by processing incoming CMC requests and returning the resulting CMC response by executing the function as follows:
 
 CMCResponse response = cmcCaApi.processRequest(cmcRequest)
 
