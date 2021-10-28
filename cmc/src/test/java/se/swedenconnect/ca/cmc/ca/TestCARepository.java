@@ -159,6 +159,26 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     return resultCertList;
   }
 
+  @Override public synchronized List<BigInteger> removeExpiredCerts(int gracePeriodSeconds) {
+    List<BigInteger> removedSerialList = new ArrayList<>();
+    Date notBefore = new Date(System.currentTimeMillis() - (1000 * gracePeriodSeconds));
+    issuedCerts = issuedCerts.stream()
+      .filter(certificateRecord -> {
+        final Date expiryDate = certificateRecord.getExpiryDate();
+        // Check if certificate expired before the current time minus grace period
+        if (expiryDate.before(notBefore)){
+          // Yes - Remove certificate
+          removedSerialList.add(certificateRecord.getSerialNumber());
+          return false;
+        }
+        // No - keep certificate on repository
+        return true;
+      })
+      .collect(Collectors.toList());
+    return removedSerialList;
+  }
+
+
   @SneakyThrows @Override public void publishNewCrl(X509CRLHolder crl) {
     FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
   }
