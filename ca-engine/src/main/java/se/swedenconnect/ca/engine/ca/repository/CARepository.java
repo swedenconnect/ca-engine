@@ -90,4 +90,11 @@ public interface CARepository {
    */
   List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean valid, SortBy sortBy);
 
+  /**
+   * Remove all expired certificates that has been expired for at least the specified grace period
+   * @param gracePeriodSeconds number of seconds a certificate can be expired without being removed
+   * @return list of the serial numbers of the certificates that were removed from the repository
+   */
+  List<BigInteger> removeExpiredCerts(int gracePeriodSeconds);
+
 }
