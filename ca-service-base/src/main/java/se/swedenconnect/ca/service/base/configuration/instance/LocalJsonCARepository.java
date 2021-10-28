@@ -25,10 +25,9 @@ import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
+import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
@@ -36,7 +35,6 @@ import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -169,6 +167,14 @@ public class LocalJsonCARepository implements CARepository, CRLRevocationDataPro
 
   @Override public CRLRevocationDataProvider getCRLRevocationDataProvider() {
     return this;
+  }
+
+  @Override public int getCertificateCount(boolean b) {
+    return 0;
+  }
+
+  @Override public List<CertificateRecord> getCertificateRange(int i, int i1, boolean b, SortBy sortBy) {
+    return null;
   }
 
   @Override public List<RevokedCertificate> getRevokedCertificates() {
