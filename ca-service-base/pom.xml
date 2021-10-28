@@ -15,7 +15,8 @@
     <description>Certification Authority service base project</description>
     <properties>
         <java.version>11</java.version>
-        <ca.engine.version>1.0.2</ca.engine.version>
+        <ca.engine.version>1.0.4-SNAPSHOT</ca.engine.version>
+        <ca.cmc.version>1.0.2-SNAPSHOT</ca.cmc.version>
     </properties>
     <dependencies>
         <dependency>
@@ -69,6 +70,11 @@
             <groupId>se.swedenconnect.ca</groupId>
             <artifactId>ca-engine</artifactId>
             <version>${ca.engine.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>se.swedenconnect.ca</groupId>
+            <artifactId>cmc</artifactId>
+            <version>${ca.cmc.version}</version>
         </dependency>
         <dependency>
             <groupId>se.swedenconnect.opensaml</groupId>

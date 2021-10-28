@@ -75,26 +75,26 @@ public interface CARepository {
 
   /**
    * Get the number of certificates in the certificate repository
-   * @param valid true to count only the current valid certificates and false for the count of all certificates in the repository
+   * @param notRevoked true to count only the current not revoked certificates and false for the count of all certificates in the repository
    * @return number of certificates
    */
-  int getCertificateCount(boolean valid);
+  int getCertificateCount(boolean notRevoked);
 
   /**
    * Get a range of certificates from the certificate repository
    * @param page the index of the page of certificates to return
    * @param pageSize the size of each page of certificates
-   * @param valid true if the pages of certificates holds only valid non-revoked certificates
+   * @param notRevoked true if the pages of certificates holds only not revoked certificates
    * @param sortBy set to define sorting preferences or null if unsorted
    * @return list of certificates in the selected page
    */
-  List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean valid, SortBy sortBy);
+  List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean notRevoked, SortBy sortBy);
 
   /**
    * Remove all expired certificates that has been expired for at least the specified grace period
    * @param gracePeriodSeconds number of seconds a certificate can be expired without being removed
    * @return list of the serial numbers of the certificates that were removed from the repository
    */
-  List<BigInteger> removeExpiredCerts(int gracePeriodSeconds);
+  List<BigInteger> removeExpiredCerts(int gracePeriodSeconds) throws IOException;
 
 }
