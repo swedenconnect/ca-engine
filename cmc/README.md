@@ -66,7 +66,7 @@ In all other cases where the RA can't provide a PKCS#10 request signed by the ce
 
 Responses to a successful certificate request is provided in a signed PKIResponse object. The certificate that was issued, if any, is provided among the CMS certificates as defined in RFC 5272.
 
-#### Revocatioin requests
+#### Revocation requests
 
 Revocation requests make use of the revokeRequest control attribute, specifying the issuer name, certificate serial number of the certificate to revoke, reason code and revocation date.
 
