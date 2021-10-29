@@ -73,7 +73,7 @@ import java.util.stream.Collectors;
 /**
  * This implementation of CA Services assumes a set file structure within an instances folder
  * Where each instance has its onw folder with the name of the instance key.
- * each instance folder hav the following sub folders:
+ * each instance folder have the following sub folders:
  * <ul>
  *   <li>keys</li>
  *   <li>certs</li>

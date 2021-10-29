@@ -121,6 +121,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.5.5</version>
                 <executions>
                     <!-- This execution allows other apps to access classes in this jar when adding it as dependency -->
                     <execution>
