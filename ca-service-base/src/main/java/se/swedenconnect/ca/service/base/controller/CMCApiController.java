@@ -27,8 +27,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
+import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventEnum;
 import se.swedenconnect.ca.service.base.configuration.audit.AuditEventFactory;
@@ -50,8 +53,20 @@ import java.util.Map;
 @RestController
 public class CMCApiController implements ApplicationEventPublisherAware {
 
+  private static final String CMC_MIME_TYPE = "application/pkcs7-mime";
+
   private ApplicationEventPublisher applicationEventPublisher;
   private final Map<String, CMCCaApi> cmcCaApiMap;
+
+  private static final MultiValueMap<String,String> headerMap;
+
+  static {
+    headerMap = new LinkedMultiValueMap<>();
+    headerMap.add("Cache-Control", "no-cache, no-store, must-revalidate");
+    headerMap.add("Pragma", "no-cache");
+    headerMap.add("Expires", "0");
+  }
+
 
   @Autowired
   public CMCApiController(Map<String, CMCCaApi> cmcCaApiMap) {
@@ -70,7 +85,7 @@ public class CMCApiController implements ApplicationEventPublisherAware {
     @PathVariable("instance") String instance, HttpEntity<byte[]> requestPayload,
     @RequestHeader("Content-Type") String contentType,
     HttpServletRequest request) {
-    if (!contentType.equalsIgnoreCase("application/pkcs7-mime")){
+    if (!contentType.equalsIgnoreCase(CMC_MIME_TYPE)){
       log.debug("Received CMC post request for with illegal Content-Type {}", contentType);
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -80,31 +95,21 @@ public class CMCApiController implements ApplicationEventPublisherAware {
     }
 
     try {
-
       final CMCCaApi cmcCaApi = cmcCaApiMap.get(instance);
-      cmcCaApi.processRequest()
-      // Handle CMC request
+      final CMCResponse cmcResponse = cmcCaApi.processRequest(requestPayload.getBody());
 
+      return ResponseEntity
+        .ok()
+        .headers(new HttpHeaders(headerMap))
+        .contentLength(cmcResponse.getCmcResponseBytes().length)
+        .contentType(MediaType.parseMediaType(CMC_MIME_TYPE))
+        .body(new InputStreamResource(new ByteArrayInputStream(cmcResponse.getCmcResponseBytes())));
 
     } catch (Exception ex) {
       log.debug("Unable to parse CMC request: {}", ex.getMessage());
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
   }
-
-
-
-  private HttpHeaders getHeaders(String fileName) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-    headers.add("content-disposition", "attachment; filename=" + fileName);
-    headers.add("Pragma", "no-cache");
-    headers.add("Expires", "0");
-    return headers;
-  }
-
-
-
 
   @Override public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
     this.applicationEventPublisher = applicationEventPublisher;

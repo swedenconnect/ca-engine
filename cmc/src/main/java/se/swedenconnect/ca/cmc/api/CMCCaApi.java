@@ -35,9 +35,9 @@ public interface CMCCaApi {
    * errors in the request. Any such error condition is captured in an error response with appropriate error code
    * and a suitable error message.
    *
-   * @param cmcRequest the CMC request providing a request for service
+   * @param cmcRequestBytes the CMC request providing a request for service
    * @return a CMC response providing the status and result data as a result of the service request
    */
-  CMCResponse processRequest (CMCRequest cmcRequest);
+  CMCResponse processRequest (byte[] cmcRequestBytes);
 
 }

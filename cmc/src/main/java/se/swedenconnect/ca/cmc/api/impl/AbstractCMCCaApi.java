@@ -62,9 +62,13 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     this.cmcResponseFactory = cmcResponseFactory;
   }
 
-  @Override public CMCResponse processRequest(CMCRequest cmcRequest) {
+  @Override public CMCResponse processRequest(byte[] cmcRequestBytes) {
+
+    byte[] nonce = new byte[]{};
 
     try {
+      CMCRequest cmcRequest = cmcRequestParser.parseCMCrequest(cmcRequestBytes);
+      nonce = cmcRequest.getNonce();
       CMCRequestType cmcRequestType = cmcRequest.getCmcRequestType();
       switch (cmcRequestType) {
 
@@ -86,7 +90,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
           // Processing CMC request resulted in a error exception.
           CMCCaApiException cmcException = (CMCCaApiException) ex;
           CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
-            cmcRequest.getNonce(),
+            nonce,
             CMCResponseStatus.builder()
               .status(CMCStatusType.failed)
               .failType(cmcException.getCmcFailType())
@@ -101,7 +105,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
         else {
           // Processing CMC request resulted in a general exception caused by internal CA error.
           CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
-            cmcRequest.getNonce(),
+            nonce,
             CMCResponseStatus.builder()
               .status(CMCStatusType.failed)
               .failType(CMCFailType.internalCAError)
