@@ -74,14 +74,14 @@ public class CMCApiController implements ApplicationEventPublisherAware {
   }
 
   /**
-   * Processing a POST request for an OCSP response for a given CA service instance
-   * @param instance the CA service instance used to generate the OCSP response
+   * Processing a POST CMC request for an CMC response for a given CA service instance
+   * @param instance the CA service instance used to generate the CMC response
    * @param requestPayload the bytes received with the POST as the payload bytes
    * @param contentType HTTP Content-Type header
-   * @return OCSP response
+   * @return CMC response
    */
   @PostMapping(value = "/cmc/{instance}")
-  public ResponseEntity<InputStreamResource> ocspPostRespondse(
+  public ResponseEntity<InputStreamResource> cmcRequest(
     @PathVariable("instance") String instance, HttpEntity<byte[]> requestPayload,
     @RequestHeader("Content-Type") String contentType,
     HttpServletRequest request) {
