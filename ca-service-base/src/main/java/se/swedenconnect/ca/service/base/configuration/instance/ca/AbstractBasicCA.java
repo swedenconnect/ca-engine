@@ -32,7 +32,6 @@ import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -82,6 +81,18 @@ public abstract class AbstractBasicCA extends AbstractCAService<DefaultCertifica
 
   @Override public X509CertificateHolder getOCSPResponderCertificate() {
     return ocspCertificate;
+  }
+
+  @Override public String getCaAlgorithm() {
+    return certificateIssuer.getCertificateIssuerModel().getAlgorithm();
+  }
+
+  @Override public List<String> getCrlDpURLs() {
+    return crlDistributionPoints;
+  }
+
+  @Override public String getOCSPResponderURL() {
+    return ocspResponderUrl;
   }
 
 }

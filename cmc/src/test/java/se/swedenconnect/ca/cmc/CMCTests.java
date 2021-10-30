@@ -473,7 +473,7 @@ public class CMCTests {
 
     //Get all certs
     AdminCMCData adminData = (AdminCMCData) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo,
-      CMCUtils.getResponseControlSequence(cmcResponse.getPkiResponse())).getValue();
+      cmcResponse.getPkiResponse()).getValue();
     List<String> serialHexStrList = CMCUtils.OBJECT_MAPPER.readValue(adminData.getData(), new TypeReference<>() {
     });
     log.info("Getting all certificates for all serial numbers {}", String.join(", ", serialHexStrList));

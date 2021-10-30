@@ -130,7 +130,7 @@ public class TestValidators {
 
     @Override public OCSPResp requestOCSPResponse(String url, OCSPReq ocspReq, int connectTimeout, int readTimeout) throws IOException {
       OCSPResponder ocspResponder = ca01.getOCSPResponder();
-      if (ca01.getOcspResponderUrl().equals(url) || !enforceUrlMatch) {
+      if (ca01.getOCSPResponderURL().equals(url) || !enforceUrlMatch) {
         OCSPResp ocspResp = ocspResponder.handleRequest(
           OCSPRequest.getInstance(new ASN1InputStream(ocspReq.getEncoded()).readObject()));
         lastResponseB64 = Base64.toBase64String(ocspResp.getEncoded());

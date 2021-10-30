@@ -287,7 +287,7 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
         // Set the OCSP responder URL
         caService.setOcspResponderUrl(basicServiceConfig.getServiceUrl() + "/ocsp/" + instance);
         caService.setOcspCertificate(ocspIssuerCert);
-        log.debug("Setting OCSP service URL for instance {} to {}", instance, caService.getOcspResponderUrl());
+        log.debug("Setting OCSP service URL for instance {} to {}", instance, caService.getOCSPResponderURL());
       } else {
         log.debug("OCSP responder disabled for instance {}", instance);
       }

@@ -132,5 +132,23 @@ public interface CAService {
    */
   X509CertificateHolder getOCSPResponderCertificate();
 
+  /**
+   * Getter for the URI identifier of the algorithm used by the CA to sign certificates
+   * @return CA signing algorithm URI identifier
+   */
+  String getCaAlgorithm();
+
+  /**
+   * Getter for the CRL distribution point URLs of this CA
+   * @return List of CRL distribution point URL
+   */
+  List<String> getCrlDpURLs();
+
+  /**
+   * The OCSP responder URL for this CA, if present
+   * @return OCSP responder URL
+   */
+  String getOCSPResponderURL();
+
 
 }

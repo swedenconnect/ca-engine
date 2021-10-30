@@ -112,6 +112,9 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
       .ocspCertificate(caService.getOCSPResponderCertificate() != null
         ? caService.getOCSPResponderCertificate().getEncoded()
         : null)
+      .caAlgorithm(caService.getCaAlgorithm())
+      .ocspResponserUrl(caService.getOCSPResponderURL())
+      .crlDpURLs(caService.getCrlDpURLs())
       .build();
     return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
   }

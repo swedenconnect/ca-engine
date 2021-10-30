@@ -153,24 +153,18 @@ public class CMCUtils {
     }
   }
 
+  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIResponse pkiResponse)
+    throws IOException {
+    return getCMCControlObject(asn1controlOid, getResponseControlSequence(pkiResponse));
+
+  }
   public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData)
     throws IOException {
-    CMCControlObjectID controlOid = CMCControlObjectID.getControlObjectID(asn1controlOid);
     TaggedAttribute[] controlSequence = pkiData.getControlSequence();
-
-    CMCControlObject.CMCControlObjectBuilder resultBuilder = CMCControlObject.builder().type(controlOid);
-    for (TaggedAttribute controlAttr : controlSequence){
-      ASN1ObjectIdentifier attrType = controlAttr.getAttrType();
-      if (attrType != null && attrType.equals(controlOid.getOid())){
-        resultBuilder
-          .bodyPartID(controlAttr.getBodyPartID())
-          .value(getRequestControlValue(controlOid, controlAttr.getAttrValues()));
-      }
-    }
-    return resultBuilder.build();
+    return getCMCControlObject(asn1controlOid, controlSequence);
   }
 
-  public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, TaggedAttribute[] controlSequence)
+  private static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, TaggedAttribute[] controlSequence)
     throws IOException {
     CMCControlObjectID controlOid = CMCControlObjectID.getControlObjectID(asn1controlOid);
     CMCControlObject.CMCControlObjectBuilder resultBuilder = CMCControlObject.builder().type(controlOid);

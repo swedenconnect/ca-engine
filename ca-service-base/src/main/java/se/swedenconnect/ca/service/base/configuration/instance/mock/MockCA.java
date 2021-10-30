@@ -65,5 +65,4 @@ public class MockCA extends AbstractBasicCA {
 
     return certModelBuilder;
   }
-
 }

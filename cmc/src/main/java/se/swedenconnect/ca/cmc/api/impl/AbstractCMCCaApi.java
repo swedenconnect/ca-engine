@@ -167,19 +167,25 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
       CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_revokeRequest, pkiData);
       BodyPartID revokeBodyPartId = cmcControlObject.getBodyPartID();
       RevokeRequest revokeRequest = (RevokeRequest) cmcControlObject.getValue();
-      Date revokeDate = revokeRequest.getInvalidityDate().getDate();
-      int reason = revokeRequest.getReason().getValue().intValue();
-      BigInteger serialNumber = revokeRequest.getSerialNumber();
-      try {
-        caService.revokeCertificate(serialNumber, reason, revokeDate);
-      } catch (Exception ex2) {
-        throw new CMCCaApiException(ex2, Arrays.asList(revokeBodyPartId), CMCFailType.badCertId);
+      // Check issuer name
+      final X500Name issuerName = revokeRequest.getName();
+      if (caService.getCaCertificate().getSubject().equals(issuerName)) {
+        Date revokeDate = revokeRequest.getInvalidityDate().getDate();
+        int reason = revokeRequest.getReason().getValue().intValue();
+        BigInteger serialNumber = revokeRequest.getSerialNumber();
+        try {
+          caService.revokeCertificate(serialNumber, reason, revokeDate);
+        } catch (Exception ex2) {
+          throw new CMCCaApiException(ex2, Arrays.asList(revokeBodyPartId), CMCFailType.badCertId);
+        }
+        CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
+          cmcRequest.getNonce(),
+          new CMCResponseStatus(CMCStatusType.success, Arrays.asList(revokeBodyPartId)), null, null
+        );
+        return cmcResponseFactory.getCMCResponse(responseModel);
+      } else {
+        throw new CMCCaApiException("Revocation request does not match CA issuer name", Arrays.asList(revokeBodyPartId), CMCFailType.badRequest);
       }
-      CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
-        cmcRequest.getNonce(),
-        new CMCResponseStatus(CMCStatusType.success, Arrays.asList(revokeBodyPartId)), null, null
-      );
-      return cmcResponseFactory.getCMCResponse(responseModel);
     } catch (Exception ex) {
       if (ex instanceof CMCCaApiException) {
         throw (CMCCaApiException) ex;
@@ -213,7 +219,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
       requestBodyParts = Arrays.asList(cmcControlObject.getBodyPartID());
       GetCert getCert = (GetCert) cmcControlObject.getValue();
       X500Name issuerName = (X500Name) getCert.getIssuerName().getName();
-      if (caService.getCaCertificate().getIssuer().equals(issuerName)) {
+      if (caService.getCaCertificate().getSubject().equals(issuerName)) {
         CertificateRecord certificateRecord = caService.getCaRepository().getCertificate(getCert.getSerialNumber());
         X509CertificateHolder targetCertificateHolder = new X509CertificateHolder(certificateRecord.getCertificate());
         CMCResponseModel responseModel = new CMCBasicCMCResponseModel(

@@ -43,5 +43,11 @@ public class CAInformation {
   List<byte[]> certificateChain;
   /** The optional OCSP certificate used by the OCSP responder of this CA */
   byte[] ocspCertificate;
+  /** The location of the CRL of this CA service */
+  List<String> crlDpURLs;
+  /** The URL to the OCSP responder of this CA if present */
+  String ocspResponserUrl;
+  /** The algorithm used by this CA to sign certificates */
+  String caAlgorithm;
 
 }

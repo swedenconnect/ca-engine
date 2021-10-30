@@ -94,10 +94,9 @@ public class CMCResponseParser {
       PKIResponse pkiResponse = PKIResponse.getInstance(
         new ASN1InputStream((byte[]) signedData.getSignedContent().getContent()).readObject());
       responseBuilder.pkiResponse(pkiResponse);
-      TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
-      byte[] nonce = (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_recipientNonce, responseControlSequence).getValue();
+      byte[] nonce = (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_recipientNonce, pkiResponse).getValue();
       CMCStatusInfoV2 statusInfoV2 = (CMCStatusInfoV2) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_statusInfoV2,
-        responseControlSequence).getValue();
+        pkiResponse).getValue();
       CMCResponseStatus responseStatus = getResponseStatus(statusInfoV2);
       responseBuilder
         .nonce(nonce)
