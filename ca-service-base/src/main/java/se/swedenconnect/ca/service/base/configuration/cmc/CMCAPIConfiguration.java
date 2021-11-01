@@ -74,14 +74,8 @@ public class CMCAPIConfiguration {
     final List<String> caServiceKeys = caServices.getCAServiceKeys();
     for (String instanceKey : caServiceKeys) {
 
-      CMCConfigProperties.CMCConfigData cmcConfigData;
-      if (cmcInstanceConfMap.containsKey(instanceKey)) {
-        cmcConfigData = cmcInstanceConfMap.get(instanceKey);
-      }
-      else if (cmcInstanceConfMap.containsKey("default")) {
-        cmcConfigData = cmcInstanceConfMap.get("default");
-      }
-      else {
+      CMCConfigProperties.CMCConfigData cmcConfigData = getConfigData (cmcInstanceConfMap, instanceKey);
+      if (cmcConfigData == null) {
         continue;
       }
 
@@ -108,6 +102,45 @@ public class CMCAPIConfiguration {
       }
     }
     return cmcCaApiMap;
+  }
+
+  private CMCConfigProperties.CMCConfigData getConfigData(Map<String, CMCConfigProperties.CMCConfigData> cmcInstanceConfMap, String instanceKey) {
+
+    CMCConfigProperties.CMCConfigData defaultConf = null;
+    CMCConfigProperties.CMCConfigData instanceConf = null;
+
+    if (cmcInstanceConfMap.containsKey("default")) {
+      defaultConf = cmcInstanceConfMap.get("default");
+    }
+    if (cmcInstanceConfMap.containsKey(instanceKey)) {
+      instanceConf = cmcInstanceConfMap.get(instanceKey);
+    }
+
+    if (defaultConf == null && instanceConf == null) {
+      return null;
+    }
+
+    if (defaultConf == null) {
+      return instanceConf;
+    }
+    if (instanceConf == null) {
+      return defaultConf;
+    }
+
+    // Both instance and default config exists. Get a complete value set. Prefer set instance values and fill in with default values if instance value is null
+    CMCConfigProperties.CMCConfigData conf = CMCConfigProperties.CMCConfigData.builder()
+      .algorithm(cfgProp(instanceConf.getAlgorithm(), defaultConf.getAlgorithm()))
+      .alias(cfgProp(instanceConf.getAlias(), defaultConf.getAlias()))
+      .location(cfgProp(instanceConf.getLocation(), defaultConf.getLocation()))
+      .password(cfgProp(instanceConf.getPassword(), defaultConf.getPassword()))
+      .trustedClientCertsLocation(cfgProp(instanceConf.getTrustedClientCertsLocation(), defaultConf.getTrustedClientCertsLocation()))
+      .build();
+
+    return conf;
+  }
+
+  private String cfgProp(String val, String def) {
+    return val != null ? val : def;
   }
 
   private X509CertificateHolder[] getClientCerts(String trustedClientCertsLocation) throws IOException {

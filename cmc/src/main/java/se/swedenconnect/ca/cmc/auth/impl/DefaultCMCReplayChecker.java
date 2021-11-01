@@ -34,6 +34,8 @@ import se.swedenconnect.ca.cmc.auth.CMCReplayChecker;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -49,26 +51,31 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DefaultCMCReplayChecker implements CMCReplayChecker {
 
+  private static final Date startupTime;
+
+  static {
+    RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+    startupTime = new Date(runtimeMXBean.getStartTime());
+  }
+
   private List<ReplayData> nonceList = new ArrayList<>();
   long maxAgeMillis;
   long retentionMillis;
   long futureTimeSkewMillis;
 
+
   public DefaultCMCReplayChecker(int maxAgeSec, long retentionSec, long futureTimeSkewSec) {
     this.maxAgeMillis = 1000L * maxAgeSec;
     this.retentionMillis = 1000L * retentionSec;
     this.futureTimeSkewMillis = 1000L * futureTimeSkewSec;
+    log.info("Replay checker created with system start time = {}, max age sec={}, retention sec={}, future time skew sec={}", startupTime, maxAgeSec, retentionSec, futureTimeSkewSec);
   }
   public DefaultCMCReplayChecker(int maxAgeSec, long retentionSec) {
-    this.maxAgeMillis = 1000L * maxAgeSec;
-    this.retentionMillis = 1000L * retentionSec;
-    this.futureTimeSkewMillis = 1000L * 60L;
+    this (maxAgeSec, retentionSec, 60);
   }
 
   public DefaultCMCReplayChecker() {
-    this.maxAgeMillis = 1000L * 120L;
-    this.retentionMillis = 1000L * 200L;
-    this.futureTimeSkewMillis = 1000L * 60L;
+    this(120, 200, 60);
   }
 
   @Override public void validate(CMSSignedData signedData) throws IOException {
@@ -80,6 +87,10 @@ public class DefaultCMCReplayChecker implements CMCReplayChecker {
       Date notAfter = new Date(System.currentTimeMillis() + futureTimeSkewMillis);
       if (messageTime == null){
         throw new IOException("Replay check failed: Message time is missing in CMC request");
+      }
+      if (messageTime.before(startupTime)){
+        // We do not allow under any circumstances a message created before startup time as we have no knowledge of what happened before this instant.
+        throw new IOException("Replay check failed: Request older than system startup time");
       }
       if (messageTime.before(notBefore)) {
         throw new IOException("Replay check failed: Request is to lod");
@@ -118,6 +129,5 @@ public class DefaultCMCReplayChecker implements CMCReplayChecker {
     byte[] nonce;
     Date messageTime;
   }
-
 
 }

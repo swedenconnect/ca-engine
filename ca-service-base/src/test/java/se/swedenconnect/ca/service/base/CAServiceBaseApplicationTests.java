@@ -24,7 +24,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(locations = "classpath:application-test.properties")
 @SpringBootTest
 @ActiveProfiles("mock")
-class RootCaApplicationTests {
+class CAServiceBaseApplicationTests {
 
   @Test
   void contextLoads() {

@@ -177,7 +177,7 @@ public class CMCDataValidator {
       case listCerts:
         ListCerts listCerts = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), ListCerts.class);
         ListCerts modelListCerts = CMCUtils.OBJECT_MAPPER.readValue(modelAdminData.getData(), ListCerts.class);
-        if (listCerts.isValid() ^ modelListCerts.isValid()) {
+        if (listCerts.isNotRevoked() ^ modelListCerts.isNotRevoked()) {
           throw new IOException("Admin request data for list cert mismatch - isValid mismatch");
         }
         if (listCerts.getPageIndex() != modelListCerts.getPageIndex()) {

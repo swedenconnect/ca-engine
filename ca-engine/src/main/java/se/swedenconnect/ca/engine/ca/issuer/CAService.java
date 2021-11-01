@@ -74,7 +74,8 @@ public interface CAService {
   void revokeCertificate(BigInteger serialNumber, Date revocationDate) throws CertificateRevocationException;
 
   /**
-   * Revoke a certificate issued by the CA service
+   * Revoke a certificate issued by the CA service. The revocation request MUST be rejected if the specified serial number
+   * does not exist or if the certificate with this serial number has already been revoked with a reason other than certificate hold
    *
    * @param serialNumber   serial number of the issued certificate
    * @param reason         reason code

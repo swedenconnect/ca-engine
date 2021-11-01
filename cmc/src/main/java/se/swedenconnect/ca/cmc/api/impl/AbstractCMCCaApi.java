@@ -173,10 +173,11 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
         Date revokeDate = revokeRequest.getInvalidityDate().getDate();
         int reason = revokeRequest.getReason().getValue().intValue();
         BigInteger serialNumber = revokeRequest.getSerialNumber();
+
         try {
           caService.revokeCertificate(serialNumber, reason, revokeDate);
         } catch (Exception ex2) {
-          throw new CMCCaApiException(ex2, Arrays.asList(revokeBodyPartId), CMCFailType.badCertId);
+          throw new CMCCaApiException(ex2.getMessage(), ex2, Arrays.asList(revokeBodyPartId), CMCFailType.badCertId);
         }
         CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
           cmcRequest.getNonce(),

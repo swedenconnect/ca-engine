@@ -499,7 +499,7 @@ public class CMCTests {
       .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
         .pageIndex(1)
         .pageSize(3)
-        .valid(true)
+        .notRevoked(true)
         .sortBy(SortBy.issueDate)
         .build()))
       .build());
@@ -512,14 +512,14 @@ public class CMCTests {
     List<CertificateData> certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(1, certList.size());
     Assertions.assertArrayEquals(p10Cert.getEncoded(), certList.get(0).getCertificate());
-    Assertions.assertTrue(certList.get(0).isRevoked());
+    Assertions.assertFalse(certList.get(0).isRevoked());
 
     // List certs
     requestModel = new CMCAdminRequestModel(AdminCMCData.builder().adminRequestType(AdminRequestType.listCerts)
       .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
         .pageIndex(1)
         .pageSize(3)
-        .valid(false)
+        .notRevoked(false)
         .sortBy(SortBy.issueDate)
         .build()))
       .build());
@@ -532,7 +532,7 @@ public class CMCTests {
     certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(2, certList.size());
     Assertions.assertArrayEquals(crmfCert.getEncoded(), certList.get(1).getCertificate());
-    Assertions.assertFalse(certList.get(1).isRevoked());
+    Assertions.assertTrue(certList.get(1).isRevoked());
 
   }
 

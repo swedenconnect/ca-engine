@@ -83,7 +83,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
     List<CertificateRecord> certificateRange = caRepository.getCertificateRange(
       listCertsReqeust.getPageIndex(),
       listCertsReqeust.getPageSize(),
-      listCertsReqeust.isValid(),
+      listCertsReqeust.isNotRevoked(),
       listCertsReqeust.getSortBy()
     );
 
@@ -91,7 +91,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
     for (CertificateRecord certificateRecord : certificateRange) {
       CertificateData.CertificateDataBuilder builder = CertificateData.builder()
         .certificate(certificateRecord.getCertificate())
-        .revoked(!certificateRecord.isRevoked());
+        .revoked(certificateRecord.isRevoked());
 
       if (certificateRecord.isRevoked()) {
         builder

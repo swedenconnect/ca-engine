@@ -16,10 +16,7 @@
 
 package se.swedenconnect.ca.service.base.configuration.cmc;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -43,6 +40,7 @@ public class CMCConfigProperties {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
+  @Builder
   public static class CMCConfigData {
 
     private String location;

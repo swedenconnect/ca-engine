@@ -97,7 +97,7 @@ public class CMCRequestData {
           .data(TestUtils.OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
               .pageIndex(0)
               .pageSize(10)
-              .valid(false)
+              .notRevoked(false)
               .sortBy(SortBy.issueDate)
             .build()))
         .build());
