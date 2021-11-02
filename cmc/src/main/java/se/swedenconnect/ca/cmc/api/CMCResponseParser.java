@@ -88,6 +88,9 @@ public class CMCResponseParser {
     if (!CMCObjectIdentifiers.id_cct_PKIResponse.equals(cmcValidationResult.getContentType())) {
       throw new IOException("Illegal CMS content type for CMC request");
     }
+    if (!cmcValidationResult.isValid()) {
+      throw new IOException(cmcValidationResult.getErrorMessage(), cmcValidationResult.getException());
+    }
 
     try {
       CMSSignedData signedData = cmcValidationResult.getSignedData();

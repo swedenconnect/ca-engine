@@ -16,32 +16,13 @@
 
 package se.swedenconnect.ca.cmc.auth;
 
-import lombok.Getter;
-
 /**
- * Exception thrown during CMC validation
+ * Description
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCValidationException extends RuntimeException {
+public enum AuthorizedCmcOperation {
+  issue, revoke, read
 
-  public CMCValidationException() {
-  }
-
-  public CMCValidationException(String message) {
-    super(message);
-  }
-
-  public CMCValidationException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public CMCValidationException(Throwable cause) {
-    super(cause);
-  }
-
-  public CMCValidationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
 }

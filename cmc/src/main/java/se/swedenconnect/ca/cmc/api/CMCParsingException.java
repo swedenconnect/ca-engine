@@ -14,34 +14,38 @@
  * limitations under the License.
  */
 
-package se.swedenconnect.ca.cmc.auth;
+package se.swedenconnect.ca.cmc.api;
 
 import lombok.Getter;
 
+import java.io.IOException;
+
 /**
- * Exception thrown during CMC validation
+ * Description
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCValidationException extends RuntimeException {
+public class CMCParsingException extends IOException {
 
-  public CMCValidationException() {
+  @Getter private final byte[] nonce;
+
+  public CMCParsingException(byte[] nonce) {
+    this.nonce = nonce;
   }
 
-  public CMCValidationException(String message) {
+  public CMCParsingException(String message, byte[] nonce) {
     super(message);
+    this.nonce = nonce;
   }
 
-  public CMCValidationException(String message, Throwable cause) {
+  public CMCParsingException(String message, Throwable cause, byte[] nonce) {
     super(message, cause);
+    this.nonce = nonce;
   }
 
-  public CMCValidationException(Throwable cause) {
+  public CMCParsingException(Throwable cause, byte[] nonce) {
     super(cause);
-  }
-
-  public CMCValidationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
+    this.nonce = nonce;
   }
 }

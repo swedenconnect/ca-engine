@@ -19,7 +19,9 @@ package se.swedenconnect.ca.service.base.configuration.cmc;
 import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import se.swedenconnect.ca.cmc.auth.AuthorizedCmcOperation;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +38,7 @@ public class CMCConfigProperties {
 
   private boolean enabled;
   private Map<String, CMCConfigData> instance;
+  private List<ClientAuthorization> client;
 
   @Data
   @NoArgsConstructor
@@ -47,7 +50,15 @@ public class CMCConfigProperties {
     private String password;
     private String alias;
     private String algorithm;
-    private String trustedClientCertsLocation;
-
   }
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class ClientAuthorization {
+    private String certLocation;
+    private Map<String, List<AuthorizedCmcOperation>> authorization;
+  }
+
 }

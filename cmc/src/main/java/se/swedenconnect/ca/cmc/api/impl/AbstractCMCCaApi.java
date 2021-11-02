@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.cmc.*;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.cmc.api.CMCCaApi;
-import se.swedenconnect.ca.cmc.api.CMCCaApiException;
-import se.swedenconnect.ca.cmc.api.CMCRequestParser;
-import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
+import se.swedenconnect.ca.cmc.api.*;
 import se.swedenconnect.ca.cmc.api.data.*;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
@@ -86,6 +83,20 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     }
     catch (Exception ex) {
       try {
+        if (ex instanceof CMCParsingException) {
+          CMCParsingException cmcParsingException = (CMCParsingException) ex;
+          CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
+            cmcParsingException.getNonce(),
+            CMCResponseStatus.builder()
+              .status(CMCStatusType.failed)
+              .failType(CMCFailType.badRequest)
+              .message(ex.getMessage())
+              .bodyPartIDList(new ArrayList<>())
+              .build(),
+            null, null
+          );
+          return cmcResponseFactory.getCMCResponse(responseModel);
+        }
         if (ex instanceof CMCCaApiException) {
           // Processing CMC request resulted in a error exception.
           CMCCaApiException cmcException = (CMCCaApiException) ex;

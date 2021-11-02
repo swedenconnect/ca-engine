@@ -173,8 +173,7 @@ public class CMCUtils {
       if (attrType != null && attrType.equals(controlOid.getOid())){
         resultBuilder
           .bodyPartID(controlAttr.getBodyPartID())
-          .value(getRequestControlValue(controlOid, controlAttr.getAttrValues()))
-          .type(controlOid);
+          .value(getRequestControlValue(controlOid, controlAttr.getAttrValues()));
       }
     }
     return resultBuilder.build();

@@ -75,6 +75,18 @@ public class CMCRequestParser {
     if (!CMCObjectIdentifiers.id_cct_PKIData.equals(cmcValidationResult.getContentType())) {
       throw new IOException("Illegal CMS content type for CMC request");
     }
+    if (!cmcValidationResult.isValid()){
+      // Validation failed attempt to get nonce for an error response;
+      byte[] nonce = null;
+      try {
+        CMSSignedData signedData = cmcValidationResult.getSignedData();
+        PKIData pkiData = PKIData.getInstance(new ASN1InputStream((byte[]) signedData.getSignedContent().getContent()).readObject());
+        nonce = (byte[]) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_senderNonce, pkiData).getValue();
+      } catch (Exception ex){
+        throw new IOException("Unable to retrieve nonce value");
+      }
+        throw new CMCParsingException(cmcValidationResult.getErrorMessage(),nonce);
+    }
     try {
       CMSSignedData signedData = cmcValidationResult.getSignedData();
       PKIData pkiData = PKIData.getInstance(new ASN1InputStream((byte[]) signedData.getSignedContent().getContent()).readObject());

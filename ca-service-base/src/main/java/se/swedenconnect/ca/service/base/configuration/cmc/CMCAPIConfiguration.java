@@ -30,6 +30,7 @@ import org.springframework.context.annotation.DependsOn;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
 import se.swedenconnect.ca.cmc.api.CMCRequestParser;
 import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
+import se.swedenconnect.ca.cmc.auth.AuthorizedCmcOperation;
 import se.swedenconnect.ca.cmc.auth.CMCValidator;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCValidator;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
@@ -78,30 +79,55 @@ public class CMCAPIConfiguration {
       if (cmcConfigData == null) {
         continue;
       }
+      log.info("Enabling CMC API for instance {}", instanceKey);
 
       // Collect data from config
       SignerKey signerKey = getSignerKey(cmcConfigData);
-      X509CertificateHolder[] cmcClientCerts = getClientCerts(cmcConfigData.getTrustedClientCertsLocation());
+      //X509CertificateHolder[] cmcClientCerts = getClientCerts(cmcConfigData.getTrustedClientCertsLocation());
 
       // Make CMC CA API
       final CAService caService = caServices.getCAService(instanceKey);
-      CMCValidator cmcValidator = new DefaultCMCValidator(cmcClientCerts);
+      //CMCValidator cmcValidator = new DefaultCMCValidator(cmcClientCerts);
       ContentSigner contentSigner = new JcaContentSignerBuilder(CAAlgorithmRegistry.getSigAlgoName(cmcConfigData.getAlgorithm())).build(
         signerKey.privateKey);
-      CMCRequestParser requestParser = new CMCRequestParser(cmcValidator, replayCheckerProvider.getCMCReplayChecker(instanceKey));
+      CMCRequestParser requestParser = new CMCRequestParser(getCMCValidator(instanceKey, cmcConfigProperties), replayCheckerProvider.getCMCReplayChecker(instanceKey));
       CMCResponseFactory responseFactory = new CMCResponseFactory(Arrays.asList(signerKey.signerCert), contentSigner);
       CMCCaApi cmcCaApi = cmcApiProvider.getCmcCaApi(instanceKey, caService, requestParser, responseFactory);
       cmcCaApiMap.put(instanceKey, cmcCaApi);
-      log.info("CMC API enabled for instance {}", instanceKey);
       if (log.isDebugEnabled()){
         log.debug("CMC Response signer: {}", signerKey.signerCert.getSubjectX500Principal());
         log.debug("CMC API implementation: {}", cmcCaApi.getClass());
         log.debug("CMC Signing algorithm: {}", cmcConfigData.getAlgorithm());
-        log.debug("Trusted clients: {}", String.join(", ",
-          Arrays.stream(cmcClientCerts).map(c -> c.getSubject().toString()).collect(Collectors.toList())));
       }
     }
     return cmcCaApiMap;
+  }
+
+  private CMCValidator getCMCValidator(String instanceKey, CMCConfigProperties cmcConfigProp) throws IOException {
+
+    final List<CMCConfigProperties.ClientAuthorization> authorizationList = cmcConfigProp.getClient();
+    List<X509CertificateHolder> clientCerts = new ArrayList<>();
+    Map<X509CertificateHolder, List<AuthorizedCmcOperation>> authMap = new HashMap<>();
+    if (authorizationList == null || authorizationList.isEmpty()){
+      // No authorized clients found
+      return new DefaultCMCValidator(new X509CertificateHolder[0]);
+    }
+    for (CMCConfigProperties.ClientAuthorization clientAuthorization: authorizationList) {
+      final X509CertificateHolder cert = getCertFromLocation(clientAuthorization.getCertLocation());
+      final Map<String, List<AuthorizedCmcOperation>> instanceAuthzMap = clientAuthorization.getAuthorization();
+      if (instanceAuthzMap.containsKey(instanceKey)){
+        // This client is authorized for this instance. Add authorizations
+        clientCerts.add(cert);
+        authMap.put(cert, instanceAuthzMap.get(instanceKey));
+        if (log.isDebugEnabled()) {
+          log.debug("Instance {} authorized CMC client: {} - with authorization rights: {}", instanceKey, cert.getSubject().toString(),
+            String.join(", ", instanceAuthzMap.get(instanceKey).stream().map(AuthorizedCmcOperation::toString).collect(Collectors.toList())));
+        }
+      }
+    }
+    DefaultCMCValidator cmcValidator = new DefaultCMCValidator(clientCerts.toArray(new X509CertificateHolder[0]));
+    cmcValidator.setClientAuthorizationMap(authMap);
+    return cmcValidator;
   }
 
   private CMCConfigProperties.CMCConfigData getConfigData(Map<String, CMCConfigProperties.CMCConfigData> cmcInstanceConfMap, String instanceKey) {
@@ -133,7 +159,6 @@ public class CMCAPIConfiguration {
       .alias(cfgProp(instanceConf.getAlias(), defaultConf.getAlias()))
       .location(cfgProp(instanceConf.getLocation(), defaultConf.getLocation()))
       .password(cfgProp(instanceConf.getPassword(), defaultConf.getPassword()))
-      .trustedClientCertsLocation(cfgProp(instanceConf.getTrustedClientCertsLocation(), defaultConf.getTrustedClientCertsLocation()))
       .build();
 
     return conf;
@@ -143,24 +168,14 @@ public class CMCAPIConfiguration {
     return val != null ? val : def;
   }
 
-  private X509CertificateHolder[] getClientCerts(String trustedClientCertsLocation) throws IOException {
-    File location = GeneralCAUtils.locateFileOrResource(trustedClientCertsLocation);
-    List<File> certFiles;
-    if (location.isDirectory()) {
-      certFiles = Arrays.asList(Objects.requireNonNull(location.listFiles((dir, name) -> name.endsWith(".pem") ||
-            name.endsWith("crt") ||
-            name.endsWith("cer"))));
+  private X509CertificateHolder getCertFromLocation(String certLocation) throws IOException {
+    File location = GeneralCAUtils.locateFileOrResource(certLocation);
+    final List<X509CertificateHolder> certsFromFile = GeneralCAUtils.getPEMCertsFromFile(location);
+    if (certsFromFile.size() != 1) {
+      throw new IllegalArgumentException("A single certificate file is required");
     }
-    else {
-      certFiles = List.of(location);
-    }
-    List<X509CertificateHolder> clientCertList = new ArrayList<>();
-    for (File certFile: certFiles) {
-      clientCertList.addAll(GeneralCAUtils.getPEMCertsFromFile(certFile));
-    }
-    return clientCertList.toArray(new X509CertificateHolder[0]);
+    return certsFromFile.get(0);
   }
-
 
   private SignerKey getSignerKey(CMCConfigProperties.CMCConfigData cmcConfigData)
     throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
