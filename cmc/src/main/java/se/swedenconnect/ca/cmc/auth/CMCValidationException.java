@@ -26,31 +26,22 @@ import lombok.Getter;
  */
 public class CMCValidationException extends RuntimeException {
 
-  @Getter
-  CMCValidationResult validationResult;
-
-  public CMCValidationException(CMCValidationResult validationResult) {
-    this.validationResult = validationResult;
+  public CMCValidationException() {
   }
 
-  public CMCValidationException(String message, CMCValidationResult validationResult) {
+  public CMCValidationException(String message) {
     super(message);
-    this.validationResult = validationResult;
   }
 
-  public CMCValidationException(String message, Throwable cause, CMCValidationResult validationResult) {
+  public CMCValidationException(String message, Throwable cause) {
     super(message, cause);
-    this.validationResult = validationResult;
   }
 
-  public CMCValidationException(Throwable cause, CMCValidationResult validationResult) {
+  public CMCValidationException(Throwable cause) {
     super(cause);
-    this.validationResult = validationResult;
   }
 
-  public CMCValidationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace,
-    CMCValidationResult validationResult) {
+  public CMCValidationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
-    this.validationResult = validationResult;
   }
 }

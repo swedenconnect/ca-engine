@@ -73,7 +73,7 @@ import java.util.stream.Collectors;
 /**
  * This implementation of CA Services assumes a set file structure within an instances folder
  * Where each instance has its onw folder with the name of the instance key.
- * each instance folder hav the following sub folders:
+ * each instance folder have the following sub folders:
  * <ul>
  *   <li>keys</li>
  *   <li>certs</li>
@@ -220,11 +220,11 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
         List<X509CertificateHolder> ocspServiceChain = new ArrayList<>(caChain);
         String ocspAlgorithm = caConfig.getAlgorithm();
 
+        X509CertificateHolder ocspIssuerCert = null;
         if (separateOcspEntity) {
           log.debug("Setting up OCSP responder as separate entity with its own signing key");
           // OCSP provider is a separate entity. Get or generate the OCSP certificate and set algorithm to the OCSP configured algorithm
           ocspAlgorithm = ocspConfig.getAlgorithm();
-          X509CertificateHolder ocspIssuerCert;
           String ocspCertFileName = locateFile(certsDir, "ocsp.crt", null);
 
           if (ocspCertFileName == null) {
@@ -267,7 +267,7 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
           // Pick the first cert in the chain as the OCSP certificate
           ocspIssuerCert = ocspServiceChain.get(0);
           // Validate that this cert has the correct public key
-          log.debug("Validating OCSP signing certificate math with OCSP signing key for instance {}", instance);
+          log.debug("Validating OCSP signing certificate match with OCSP signing key for instance {}", instance);
           validateCertAndKey(ocspKeySource, ocspIssuerCert);
         }
         else {
@@ -286,7 +286,8 @@ public abstract class AbstractDefaultCAServices extends AbstractCAServices {
         caService.setOcspResponder(ocspResponder);
         // Set the OCSP responder URL
         caService.setOcspResponderUrl(basicServiceConfig.getServiceUrl() + "/ocsp/" + instance);
-        log.debug("Setting OCSP service URL for instance {} to {}", instance, caService.getOcspResponderUrl());
+        caService.setOcspCertificate(ocspIssuerCert);
+        log.debug("Setting OCSP service URL for instance {} to {}", instance, caService.getOCSPResponderURL());
       } else {
         log.debug("OCSP responder disabled for instance {}", instance);
       }

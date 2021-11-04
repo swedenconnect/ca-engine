@@ -112,6 +112,18 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
     return ocspResponderCertificate;
   }
 
+  @Override public String getCaAlgorithm() {
+    return certificateIssuer.getCertificateIssuerModel().getAlgorithm();
+  }
+
+  @Override public List<String> getCrlDpURLs() {
+    return crlDistributionPoints;
+  }
+
+  @Override public String getOCSPResponderURL() {
+    return ocspResponderUrl;
+  }
+
   @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject, PublicKey publicKey,
     X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel) throws CertificateIssuanceException {
     DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey, getCaCertificate(),

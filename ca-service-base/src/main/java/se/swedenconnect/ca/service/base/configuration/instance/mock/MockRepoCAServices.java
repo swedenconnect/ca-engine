@@ -68,7 +68,7 @@ public class MockRepoCAServices extends AbstractDefaultCAServices {
     CARepository caRepository, CertificateIssuerModel certIssuerModel, CRLIssuerModel crlIssuerModel, List<String> crlDistributionPoints)
     throws NoSuchAlgorithmException {
     // Returning the same Basic CA service for any instance;
-    return new MockCA(privateKey, caChain.get(0), caRepository, certIssuerModel, crlIssuerModel, crlDistributionPoints);
+    return new MockCA(privateKey, caChain, caRepository, certIssuerModel, crlIssuerModel, crlDistributionPoints);
   }
 
   /** {@inheritDoc} */

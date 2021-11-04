@@ -149,7 +149,7 @@ public class TestValidatorFactory {
       TestCAHolder caHolder = getTestCSCAService(ocspReq);
       TestCAService cscaService = caHolder.getCscaService();
       OCSPResponder ocspResponder = cscaService.getOCSPResponder();
-      if (cscaService.getOcspResponderUrl().equals(url) || !enforceUrlMatch) {
+      if (cscaService.getOCSPResponderURL().equals(url) || !enforceUrlMatch) {
         OCSPResp ocspResp = ocspResponder.handleRequest(
           OCSPRequest.getInstance(new ASN1InputStream(ocspReq.getEncoded()).readObject()));
         lastResponseB64 = Base64.toBase64String(ocspResp.getEncoded());

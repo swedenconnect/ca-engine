@@ -177,7 +177,7 @@ public class CMCDataValidator {
       case listCerts:
         ListCerts listCerts = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), ListCerts.class);
         ListCerts modelListCerts = CMCUtils.OBJECT_MAPPER.readValue(modelAdminData.getData(), ListCerts.class);
-        if (listCerts.isValid() ^ modelListCerts.isValid()) {
+        if (listCerts.isNotRevoked() ^ modelListCerts.isNotRevoked()) {
           throw new IOException("Admin request data for list cert mismatch - isValid mismatch");
         }
         if (listCerts.getPageIndex() != modelListCerts.getPageIndex()) {
@@ -229,9 +229,8 @@ public class CMCDataValidator {
     // Check control messages
     // Check the mandatory status message
     List<BodyPartID> processedRequestObjects = responseModel.getCmcResponseStatus().getBodyPartIDList();
-    TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
     CMCStatusInfoV2 statusInfo = (CMCStatusInfoV2) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_statusInfoV2,
-      responseControlSequence).getValue();
+      pkiResponse).getValue();
     CMCResponseStatus cmcResponseStatus = responseModel.getCmcResponseStatus();
     if (!cmcResponseStatus.getStatus().getCmcStatus().equals(statusInfo.getcMCStatus())) {
       throw new IOException("Response status mismatch");
@@ -257,7 +256,7 @@ public class CMCDataValidator {
     }
 
     // Check response data
-    CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo, responseControlSequence);
+    CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo, pkiResponse);
     Object respInfoObj = cmcControlObject.getValue();
     if (respInfoObj instanceof AdminCMCData) {
       AdminCMCData adminCMCData = (AdminCMCData) respInfoObj;

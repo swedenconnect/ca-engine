@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.cmc.*;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.cmc.api.CMCCaApi;
-import se.swedenconnect.ca.cmc.api.CMCCaApiException;
-import se.swedenconnect.ca.cmc.api.CMCRequestParser;
-import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
+import se.swedenconnect.ca.cmc.api.*;
 import se.swedenconnect.ca.cmc.api.data.*;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
@@ -62,9 +59,13 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     this.cmcResponseFactory = cmcResponseFactory;
   }
 
-  @Override public CMCResponse processRequest(CMCRequest cmcRequest) {
+  @Override public CMCResponse processRequest(byte[] cmcRequestBytes) {
+
+    byte[] nonce = new byte[]{};
 
     try {
+      CMCRequest cmcRequest = cmcRequestParser.parseCMCrequest(cmcRequestBytes);
+      nonce = cmcRequest.getNonce();
       CMCRequestType cmcRequestType = cmcRequest.getCmcRequestType();
       switch (cmcRequestType) {
 
@@ -82,11 +83,25 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     }
     catch (Exception ex) {
       try {
+        if (ex instanceof CMCParsingException) {
+          CMCParsingException cmcParsingException = (CMCParsingException) ex;
+          CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
+            cmcParsingException.getNonce(),
+            CMCResponseStatus.builder()
+              .status(CMCStatusType.failed)
+              .failType(CMCFailType.badRequest)
+              .message(ex.getMessage())
+              .bodyPartIDList(new ArrayList<>())
+              .build(),
+            null, null
+          );
+          return cmcResponseFactory.getCMCResponse(responseModel);
+        }
         if (ex instanceof CMCCaApiException) {
           // Processing CMC request resulted in a error exception.
           CMCCaApiException cmcException = (CMCCaApiException) ex;
           CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
-            cmcRequest.getNonce(),
+            nonce,
             CMCResponseStatus.builder()
               .status(CMCStatusType.failed)
               .failType(cmcException.getCmcFailType())
@@ -101,7 +116,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
         else {
           // Processing CMC request resulted in a general exception caused by internal CA error.
           CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
-            cmcRequest.getNonce(),
+            nonce,
             CMCResponseStatus.builder()
               .status(CMCStatusType.failed)
               .failType(CMCFailType.internalCAError)
@@ -163,19 +178,26 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
       CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_revokeRequest, pkiData);
       BodyPartID revokeBodyPartId = cmcControlObject.getBodyPartID();
       RevokeRequest revokeRequest = (RevokeRequest) cmcControlObject.getValue();
-      Date revokeDate = revokeRequest.getInvalidityDate().getDate();
-      int reason = revokeRequest.getReason().getValue().intValue();
-      BigInteger serialNumber = revokeRequest.getSerialNumber();
-      try {
-        caService.revokeCertificate(serialNumber, reason, revokeDate);
-      } catch (Exception ex2) {
-        throw new CMCCaApiException(ex2, Arrays.asList(revokeBodyPartId), CMCFailType.badCertId);
+      // Check issuer name
+      final X500Name issuerName = revokeRequest.getName();
+      if (caService.getCaCertificate().getSubject().equals(issuerName)) {
+        Date revokeDate = revokeRequest.getInvalidityDate().getDate();
+        int reason = revokeRequest.getReason().getValue().intValue();
+        BigInteger serialNumber = revokeRequest.getSerialNumber();
+
+        try {
+          caService.revokeCertificate(serialNumber, reason, revokeDate);
+        } catch (Exception ex2) {
+          throw new CMCCaApiException(ex2.getMessage(), ex2, Arrays.asList(revokeBodyPartId), CMCFailType.badCertId);
+        }
+        CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
+          cmcRequest.getNonce(),
+          new CMCResponseStatus(CMCStatusType.success, Arrays.asList(revokeBodyPartId)), null, null
+        );
+        return cmcResponseFactory.getCMCResponse(responseModel);
+      } else {
+        throw new CMCCaApiException("Revocation request does not match CA issuer name", Arrays.asList(revokeBodyPartId), CMCFailType.badRequest);
       }
-      CMCResponseModel responseModel = new CMCBasicCMCResponseModel(
-        cmcRequest.getNonce(),
-        new CMCResponseStatus(CMCStatusType.success, Arrays.asList(revokeBodyPartId)), null, null
-      );
-      return cmcResponseFactory.getCMCResponse(responseModel);
     } catch (Exception ex) {
       if (ex instanceof CMCCaApiException) {
         throw (CMCCaApiException) ex;
@@ -209,7 +231,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
       requestBodyParts = Arrays.asList(cmcControlObject.getBodyPartID());
       GetCert getCert = (GetCert) cmcControlObject.getValue();
       X500Name issuerName = (X500Name) getCert.getIssuerName().getName();
-      if (caService.getCaCertificate().getIssuer().equals(issuerName)) {
+      if (caService.getCaCertificate().getSubject().equals(issuerName)) {
         CertificateRecord certificateRecord = caService.getCaRepository().getCertificate(getCert.getSerialNumber());
         X509CertificateHolder targetCertificateHolder = new X509CertificateHolder(certificateRecord.getCertificate());
         CMCResponseModel responseModel = new CMCBasicCMCResponseModel(

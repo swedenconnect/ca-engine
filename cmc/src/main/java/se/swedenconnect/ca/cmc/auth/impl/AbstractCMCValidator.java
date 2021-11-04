@@ -31,6 +31,8 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
+import se.swedenconnect.ca.cmc.auth.CMCAuthorizationException;
+import se.swedenconnect.ca.cmc.auth.CMCValidationException;
 import se.swedenconnect.ca.cmc.auth.CMCValidationResult;
 import se.swedenconnect.ca.cmc.auth.CMCValidator;
 
@@ -73,17 +75,26 @@ public abstract class AbstractCMCValidator implements CMCValidator {
       }
       result.setSignedData(cmsSignedData);
 
-      Collection<X509CertificateHolder> certsInCMS = cmsSignedData.getCertificates().getMatches(null);
       List<X509CertificateHolder> trustedSignerCertChain = verifyCMSSignature(cmsSignedData);
+      verifyAuthorization(trustedSignerCertChain.get(0), contentType, cmsSignedData);
       // Set result conclusion
       result.setSignerCertificatePath(trustedSignerCertChain);
       result.setSimpleResponse(false);
       result.setValid(true);
     }
-    catch (Exception ex) {
+    catch (CMCAuthorizationException aex) {
+      result.setValid(false);
+      result.setException(aex);
+      result.setErrorMessage(aex.getMessage());
+    }
+    catch (CMCValidationException vex) {
+      result.setValid(false);
+      result.setException(vex);
+      result.setErrorMessage("CMC signature validation failed: " + vex.getMessage());
+    } catch (Exception ex) {
       result.setValid(false);
       result.setException(ex);
-      result.setErrorMessage("CMC signature validation failed");
+      result.setErrorMessage("Error parsing CMC message: " + ex.toString());
     }
 
     return result;
@@ -95,7 +106,18 @@ public abstract class AbstractCMCValidator implements CMCValidator {
    * @return The signing certificate chain if the verification was successful
    * @throws IOException if signature validation failed
    */
-  protected abstract List<X509CertificateHolder> verifyCMSSignature(CMSSignedData cmsSignedData) throws Exception;
+  protected abstract List<X509CertificateHolder> verifyCMSSignature(CMSSignedData cmsSignedData) throws CMCValidationException;
+
+  /**
+   * Verifies the authorization of the signer to provide this CMC message or request the specified operations
+   * @param signer the verified signer of this CMC message
+   * @param contentType the CMC encapsulated data content type
+   * @param cmsSignedData the CMC message signed data to be authorized
+   * @throws Exception if authorization fails
+   */
+  protected abstract void verifyAuthorization(X509CertificateHolder signer, ASN1ObjectIdentifier contentType, CMSSignedData cmsSignedData) throws
+    CMCAuthorizationException;
+
 
   private boolean isSimpleCMCResponse(CMCValidationResult result, byte[] cmcMessage) {
     List<X509CertificateHolder> certificateList = new ArrayList<>();

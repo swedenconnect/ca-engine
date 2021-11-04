@@ -37,10 +37,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -102,12 +99,14 @@ public class LocalJsonCARepository implements CARepository, CRLRevocationDataPro
     return crlNumberFromCrl.getCRLNumber();
   }
 
+  /** {@inheritDoc} */
   @Override public List<BigInteger> getAllCertificates() {
     return issuedCerts.stream()
       .map(certificateRecord -> certificateRecord.getSerialNumber())
       .collect(Collectors.toList());
   }
 
+  /** {@inheritDoc} */
   @Override public CertificateRecord getCertificate(BigInteger bigInteger) {
     Optional<SerializableCertificateRecord> recordOptional = issuedCerts.stream()
       .filter(certificateRecord -> certificateRecord.getSerialNumber().equals(bigInteger))
@@ -115,66 +114,61 @@ public class LocalJsonCARepository implements CARepository, CRLRevocationDataPro
     return recordOptional.isPresent() ? recordOptional.get() : null;
   }
 
-  @Override public synchronized void addCertificate(X509CertificateHolder certificate) throws IOException {
-    if (criticalError){
-      throw new IOException("This repository encountered a critical error and is not operational - unable to store certificates");
-    }
-    if (certificate != null) {
-      CertificateRecord record = getCertificate(certificate.getSerialNumber());
-      if (record != null) {
-        throw new IOException("This certificate already exists in the certificate repository");
-      }
-      issuedCerts.add(new SerializableCertificateRecord(certificate.getEncoded(), certificate.getSerialNumber(),
-        certificate.getNotBefore(), certificate.getNotAfter(), false, null, null));
-    }
-    if (!saveRepositoryData()){
-      throw new IOException("Unable to save issued certificate");
-    }
-  }
-
-  @Override public void revokeCertificate(BigInteger serialNumber, int reason, Date revocationTime) throws CertificateRevocationException {
-    if (serialNumber == null) {
-      throw new CertificateRevocationException("Null Serial number");
-    }
-    CertificateRecord certificateRecord = getCertificate(serialNumber);
-    if (certificateRecord == null) {
-      throw new CertificateRevocationException("No such certificate (" + serialNumber.toString(16) + ")");
-    }
-    certificateRecord.setRevoked(true);
-    certificateRecord.setReason(reason);
-    certificateRecord.setRevocationTime(revocationTime);
-    // Save revoked certificate
-    if (!saveRepositoryData()){
-      throw new CertificateRevocationException("Unable to save revoked status data");
-    }
-  }
-
-  /**
-   * IMPORTANT - This is the ONLY function that is allowed to write to the repository storage file to avoid write conflicts
-   */
-  private synchronized boolean saveRepositoryData(){
-    try {
-      // Attempt to save repository data
-      mapper.writeValue(certificateRecordsFile, issuedCerts);
-      return true;
-    }
-    catch (IOException e) {
-      log.error("Error writing to the ca repository storage file", e);
-      criticalError = true;
-    }
-    return false;
-  }
-
+  /** {@inheritDoc} */
   @Override public CRLRevocationDataProvider getCRLRevocationDataProvider() {
     return this;
   }
 
-  @Override public int getCertificateCount(boolean b) {
-    return 0;
+  /** {@inheritDoc} */
+  @Override public int getCertificateCount(boolean notRevoked) {
+    if (notRevoked) {
+      return (int) issuedCerts.stream()
+        .filter(certificateRecord -> !certificateRecord.isRevoked())
+        .count();
+    }
+    return issuedCerts.size();
   }
 
-  @Override public List<CertificateRecord> getCertificateRange(int i, int i1, boolean b, SortBy sortBy) {
-    return null;
+  /** {@inheritDoc} */
+  @Override public List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean notRevoked, SortBy sortBy) {
+
+    List<CertificateRecord> records = issuedCerts.stream()
+      .filter(certificateRecord -> {
+        if (notRevoked) {
+          return !certificateRecord.isRevoked();
+        }
+        return true;
+      })
+      .collect(Collectors.toList());
+
+    if (sortBy != null) {
+      switch (sortBy) {
+      case serialNumber:
+        Collections.sort(records, Comparator.comparing(CertificateRecord::getSerialNumber));
+        break;
+      case issueDate:
+        Collections.sort(records, Comparator.comparing(CertificateRecord::getIssueDate));
+        break;
+      }
+    }
+
+    int startIdx = page * pageSize;
+    int endIdx = startIdx + pageSize;
+
+    if (startIdx > records.size()){
+      return new ArrayList<>();
+    }
+
+    if (endIdx > records.size()) {
+      endIdx = records.size();
+    }
+
+    List<CertificateRecord> resultCertList = new ArrayList<>();
+    for (int i = startIdx; i<endIdx;i++) {
+      resultCertList.add(records.get(i));
+    }
+
+    return resultCertList;
   }
 
   @Override public List<RevokedCertificate> getRevokedCertificates() {
@@ -206,4 +200,144 @@ public class LocalJsonCARepository implements CARepository, CRLRevocationDataPro
       return null;
     }
   }
+
+  /**
+   * From this point we only deal with functions that updates the repository
+   */
+
+
+  /** {@inheritDoc} */
+  @Override public void addCertificate(X509CertificateHolder certificate) throws IOException {
+    try {
+      internalRepositoryUpdate(UpdateType.addCert, new Object[]{certificate});
+    }
+    catch (Exception e) {
+      throw e instanceof IOException
+        ? (IOException) e
+        : new IOException(e);
+    }
+  }
+
+  private void internalAddCertificate(X509CertificateHolder certificate) throws IOException {
+    if (criticalError){
+      throw new IOException("This repository encountered a critical error and is not operational - unable to store certificates");
+    }
+    if (certificate != null) {
+      CertificateRecord record = getCertificate(certificate.getSerialNumber());
+      if (record != null) {
+        throw new IOException("This certificate already exists in the certificate repository");
+      }
+      issuedCerts.add(new SerializableCertificateRecord(certificate.getEncoded(), certificate.getSerialNumber(),
+        certificate.getNotBefore(), certificate.getNotAfter(), false, null, null));
+    }
+    if (!saveRepositoryData()){
+      throw new IOException("Unable to save issued certificate");
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override public void revokeCertificate(BigInteger serialNumber, int reason, Date revocationTime) throws CertificateRevocationException {
+    try {
+      internalRepositoryUpdate(UpdateType.revokeCert, new Object[]{serialNumber, reason, revocationTime});
+    }
+    catch (Exception e) {
+      throw e instanceof CertificateRevocationException
+        ? (CertificateRevocationException) e
+        : new CertificateRevocationException(e);
+    }
+  }
+
+  private void internalRevokeCertificate(BigInteger serialNumber, int reason, Date revocationTime) throws CertificateRevocationException {
+    if (serialNumber == null) {
+      throw new CertificateRevocationException("Null Serial number");
+    }
+    CertificateRecord certificateRecord = getCertificate(serialNumber);
+    if (certificateRecord == null) {
+      throw new CertificateRevocationException("No such certificate (" + serialNumber.toString(16) + ")");
+    }
+    certificateRecord.setRevoked(true);
+    certificateRecord.setReason(reason);
+    certificateRecord.setRevocationTime(revocationTime);
+    // Save revoked certificate
+    if (!saveRepositoryData()){
+      throw new CertificateRevocationException("Unable to save revoked status data");
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override public List<BigInteger> removeExpiredCerts(int gracePeriodSeconds) throws IOException{
+    try {
+      return (List<BigInteger>) internalRepositoryUpdate(UpdateType.removeExpiredCerts, new Object[]{gracePeriodSeconds});
+    }
+    catch (Exception e) {
+      throw e instanceof IOException
+        ? (IOException) e
+        : new IOException(e);
+    }
+  }
+
+  private List<BigInteger> internalRemoveExpiredCerts(int gracePeriodSeconds) throws IOException {
+    List<BigInteger> removedSerialList = new ArrayList<>();
+    Date notBefore = new Date(System.currentTimeMillis() - (1000 * gracePeriodSeconds));
+    issuedCerts = issuedCerts.stream()
+      .filter(certificateRecord -> {
+        final Date expiryDate = certificateRecord.getExpiryDate();
+        // Check if certificate expired before the current time minus grace period
+        if (expiryDate.before(notBefore)){
+          // Yes - Remove certificate
+          removedSerialList.add(certificateRecord.getSerialNumber());
+          return false;
+        }
+        // No - keep certificate on repository
+        return true;
+      })
+      .collect(Collectors.toList());
+    if (!saveRepositoryData()){
+      throw new IOException("Unable to save consolidated certificate list");
+    }
+    return removedSerialList;
+  }
+
+  /**
+   * All requests to modify the CA repository must go through this function to ensure that all updates are thread safe
+   * @param updateType type of repository update
+   * @param args input arguments to the update request
+   * @return the return object of this update request
+   * @throws Exception On errors performing the update request
+   */
+  private synchronized Object internalRepositoryUpdate(UpdateType updateType, Object[] args) throws Exception {
+    switch (updateType){
+    case addCert:
+      internalAddCertificate((X509CertificateHolder) args[0]);
+      return null;
+    case revokeCert:
+      internalRevokeCertificate((BigInteger) args[0], (int) args[1], (Date) args[2]);
+      return null;
+    case removeExpiredCerts:
+      return internalRemoveExpiredCerts((int) args[0]);
+    }
+    throw new IOException("Unsupported action");
+  }
+
+  private boolean saveRepositoryData(){
+    try {
+      // Attempt to save repository data
+      mapper.writeValue(certificateRecordsFile, issuedCerts);
+      return true;
+    }
+    catch (IOException e) {
+      log.error("Error writing to the ca repository storage file", e);
+      criticalError = true;
+    }
+    return false;
+  }
+
+
+  public enum UpdateType {
+    //TODO Fill in rest
+    addCert, revokeCert, removeExpiredCerts
+  }
+
+
+
 }

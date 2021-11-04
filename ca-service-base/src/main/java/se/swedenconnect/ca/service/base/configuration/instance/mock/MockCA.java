@@ -41,10 +41,10 @@ import java.util.List;
  */
 public class MockCA extends AbstractBasicCA {
 
-  public MockCA(PrivateKey privateKey, X509CertificateHolder caCertificate,
+  public MockCA(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain,
     CARepository caRepository, CertificateIssuerModel certIssuerModel,
     CRLIssuerModel crlIssuerModel, List<String> crlDistributionPoints) throws NoSuchAlgorithmException {
-    super(privateKey, caCertificate, caRepository, certIssuerModel, crlIssuerModel, crlDistributionPoints);
+    super(privateKey, caCertificateChain, caRepository, certIssuerModel, crlIssuerModel, crlDistributionPoints);
   }
 
   @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject, PublicKey publicKey,

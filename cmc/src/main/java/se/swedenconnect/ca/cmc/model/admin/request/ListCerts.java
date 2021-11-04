@@ -35,7 +35,7 @@ import se.swedenconnect.ca.engine.ca.repository.SortBy;
 public class ListCerts {
 
   /** indicates of the returned certificates should be limited to currently valid and not revoked certificates */
-  private boolean valid;
+  private boolean notRevoked;
   /** Indicates the preferred sort order */
   private SortBy sortBy;
   /** The page size specifying the number of certificates to be returned, if available */

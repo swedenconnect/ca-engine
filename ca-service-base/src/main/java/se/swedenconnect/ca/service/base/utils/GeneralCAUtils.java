@@ -21,14 +21,12 @@ import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.openssl.PEMParser;
 import se.swedenconnect.ca.service.base.configuration.keys.BasicX509Utils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.security.cert.CertificateEncodingException;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Description
@@ -61,5 +59,39 @@ public class GeneralCAUtils {
     }
     return false;
   }
+
+  /**
+   * Retrieve a list of PEM objects found in the provided input stream that are of the types PrivateKey (Encrypted or Plaintext), KeyPair or certificate
+   *
+   * @param file the resource file holding certificate data
+   * @return list of present certificates
+   * @throws IOException on error decoding the data in the specified file
+   */
+  public static List<X509CertificateHolder> getPEMCertsFromFile(File file) throws IOException {
+    List<X509CertificateHolder> pemObjList = new ArrayList<>();
+    Reader rdr = new BufferedReader(new FileReader(file));
+    PEMParser parser = new PEMParser(rdr);
+    Object o;
+    while ((o = parser.readObject()) != null) {
+      if (o instanceof X509CertificateHolder) {
+        pemObjList.add((X509CertificateHolder) o);
+      }
+    }
+    return pemObjList;
+  }
+
+  /**
+   * Locate the file specified by either an absolute path or a classpath resource
+   *
+   * @param filename the absolute path of the file name or resource
+   * @return the first file in the directory that match the suffix or null if absent
+   */
+  public static File locateFileOrResource(String filename) {
+    if (filename.startsWith("classpath:")){
+      return new File(GeneralCAUtils.class.getResource("/" + filename.substring(10)).getFile());
+    }
+    return new File(filename);
+  }
+
 
 }

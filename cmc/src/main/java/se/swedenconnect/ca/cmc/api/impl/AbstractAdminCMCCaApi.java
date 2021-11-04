@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi{
+public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
   public AbstractAdminCMCCaApi(CAService caService,
     CMCRequestParser cmcRequestParser, CMCResponseFactory cmcResponseFactory) {
     super(caService, cmcRequestParser, cmcResponseFactory);
@@ -83,7 +83,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi{
     List<CertificateRecord> certificateRange = caRepository.getCertificateRange(
       listCertsReqeust.getPageIndex(),
       listCertsReqeust.getPageSize(),
-      listCertsReqeust.isValid(),
+      listCertsReqeust.isNotRevoked(),
       listCertsReqeust.getSortBy()
     );
 
@@ -91,7 +91,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi{
     for (CertificateRecord certificateRecord : certificateRange) {
       CertificateData.CertificateDataBuilder builder = CertificateData.builder()
         .certificate(certificateRecord.getCertificate())
-        .revoked(!certificateRecord.isRevoked());
+        .revoked(certificateRecord.isRevoked());
 
       if (certificateRecord.isRevoked()) {
         builder
@@ -109,8 +109,13 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi{
       .validCertificateCount(caRepository.getCertificateCount(true))
       .certificateCount(caRepository.getCertificateCount(false))
       .certificateChain(CMCUtils.getCerHolderByteList(caService.getCACertificateChain()))
-      .ocspCertificate(caService.getOCSPResponderCertificate().getEncoded())
+      .ocspCertificate(caService.getOCSPResponderCertificate() != null
+        ? caService.getOCSPResponderCertificate().getEncoded()
+        : null)
+      .caAlgorithm(caService.getCaAlgorithm())
+      .ocspResponserUrl(caService.getOCSPResponderURL())
+      .crlDpURLs(caService.getCrlDpURLs())
       .build();
-    return  CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
+    return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
   }
 }

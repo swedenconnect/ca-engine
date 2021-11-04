@@ -374,7 +374,7 @@ public class CMCTests {
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Certificate request with PKCS#10:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
     Assertions.assertEquals(cmcResponse.getResponseStatus().getStatus(), CMCStatusType.success);
@@ -388,7 +388,7 @@ public class CMCTests {
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Certificate request with CRMF:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Certificate request with CRMF:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
     Assertions.assertEquals(cmcResponse.getResponseStatus().getStatus(), CMCStatusType.success);
@@ -404,7 +404,7 @@ public class CMCTests {
     log.info("CMC API Certificate Revocation:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     checkCertStatus(certValidator, crmfCert, true);
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Certificate Revocation:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
     checkCertStatus(certValidator, crmfCert, false);
@@ -414,7 +414,7 @@ public class CMCTests {
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Certificate Revocation of unknown serial number:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, false));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Certificate Revocation of unknown serial number:\n{}",
       CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
@@ -428,7 +428,7 @@ public class CMCTests {
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API Get Certificate:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     X509Certificate getCertCertificate = cmcResponse.getReturnCertificates().get(0);
     Assertions.assertEquals(crmfCert, getCertCertificate);
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
@@ -445,7 +445,7 @@ public class CMCTests {
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API CA Info:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API Get Certificate:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
     CAInformation caInformation = CMCUtils.getCAInformation(cmcResponse);
@@ -460,7 +460,7 @@ public class CMCTests {
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API List cert serials:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List cert serials:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
     final List<BigInteger> allSerials = CMCUtils.getAllSerials(cmcResponse);
@@ -473,14 +473,14 @@ public class CMCTests {
 
     //Get all certs
     AdminCMCData adminData = (AdminCMCData) CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo,
-      CMCUtils.getResponseControlSequence(cmcResponse.getPkiResponse())).getValue();
+      cmcResponse.getPkiResponse()).getValue();
     List<String> serialHexStrList = CMCUtils.OBJECT_MAPPER.readValue(adminData.getData(), new TypeReference<>() {
     });
     log.info("Getting all certificates for all serial numbers {}", String.join(", ", serialHexStrList));
     for (BigInteger certSerial : allSerials) {
       requestModel = new CMCGetCertRequestModel(certSerial, ca.getCaCertificate().getSubject());
       cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
-      cmcResponse = cmcCaApi.processRequest(cmcRequest);
+      cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
       X509Certificate cert = cmcResponse.getReturnCertificates().get(0);
       log.info("Certificate issued to: {}", cert.getSubjectX500Principal());
       try {
@@ -499,40 +499,40 @@ public class CMCTests {
       .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
         .pageIndex(1)
         .pageSize(3)
-        .valid(true)
+        .notRevoked(true)
         .sortBy(SortBy.issueDate)
         .build()))
       .build());
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API List 2nd page valid certs:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List 2nd page valid certs:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
     List<CertificateData> certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(1, certList.size());
     Assertions.assertArrayEquals(p10Cert.getEncoded(), certList.get(0).getCertificate());
-    Assertions.assertTrue(certList.get(0).isRevoked());
+    Assertions.assertFalse(certList.get(0).isRevoked());
 
     // List certs
     requestModel = new CMCAdminRequestModel(AdminCMCData.builder().adminRequestType(AdminRequestType.listCerts)
       .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
         .pageIndex(1)
         .pageSize(3)
-        .valid(false)
+        .notRevoked(false)
         .sortBy(SortBy.issueDate)
         .build()))
       .build());
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
     log.info("CMC API List 2nd page all certs:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
     CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
-    cmcResponse = cmcCaApi.processRequest(cmcRequest);
+    cmcResponse = cmcCaApi.processRequest(cmcRequest.getCmcRequestBytes());
     parsedCMCResponse = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), requestModel.getCmcRequestType());
     log.info("CMC response from API List 2nd page valid certs:\n{}", CMCDataPrint.printCMCResponse(parsedCMCResponse, true));
     certList = CMCUtils.getCertList(cmcResponse);
     Assertions.assertEquals(2, certList.size());
     Assertions.assertArrayEquals(crmfCert.getEncoded(), certList.get(1).getCertificate());
-    Assertions.assertFalse(certList.get(1).isRevoked());
+    Assertions.assertTrue(certList.get(1).isRevoked());
 
   }
 

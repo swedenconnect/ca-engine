@@ -29,6 +29,7 @@ public enum AuditEventEnum {
     certificateRequested ("CERTIFICATE_REQUESTED"),
     revocationRequested ("REVOCATION_REQUESTED"),
     certificateIssued ("CERTIFICATE_ISSUED"),
+    expiredCertDeleted("EXPIRED_CERT_DELETED"),
     certificateRevoked("CERTIFICATE_REVOKED"),
     ocspCertificateIssued("OCSP_CERT_ISSUED"),
     selfSignedCACertIsssued("SELF_SIGNED_CA_CERT_ISSUED"),

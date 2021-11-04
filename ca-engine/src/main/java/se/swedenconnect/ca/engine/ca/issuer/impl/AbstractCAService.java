@@ -29,6 +29,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
+import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
@@ -119,6 +120,25 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
 
   /** {@inheritDoc} */
   @Override public void revokeCertificate(BigInteger serialNumber, int reason, Date revocationDate) throws CertificateRevocationException {
+    // Check that date is set and not a future date
+    if (revocationDate == null || revocationDate.after(new Date())){
+      revocationDate = new Date();
+    }
+
+    // Check for existence and previous revocation
+    final CertificateRecord certificateRecord = caRepository.getCertificate(serialNumber);
+    if (certificateRecord == null){
+      throw new CertificateRevocationException("Certificate serial number for revocation does not exist");
+    }
+    if (certificateRecord.isRevoked()) {
+      // Check is status is special status on-hold
+      if (certificateRecord.getReason() != CRLReason.certificateHold) {
+        throw new CertificateRevocationException("Certificate serial number for revocation has already been permanently revoked");
+      } else {
+        // This certificate was previously revoked with reason "on hold". Use original revocation time.
+        revocationDate = certificateRecord.getRevocationTime();
+      }
+    }
     caRepository.revokeCertificate(serialNumber, reason, revocationDate);
   }
 

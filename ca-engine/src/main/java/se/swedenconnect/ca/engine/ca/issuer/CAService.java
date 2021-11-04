@@ -74,7 +74,8 @@ public interface CAService {
   void revokeCertificate(BigInteger serialNumber, Date revocationDate) throws CertificateRevocationException;
 
   /**
-   * Revoke a certificate issued by the CA service
+   * Revoke a certificate issued by the CA service. The revocation request MUST be rejected if the specified serial number
+   * does not exist or if the certificate with this serial number has already been revoked with a reason other than certificate hold
    *
    * @param serialNumber   serial number of the issued certificate
    * @param reason         reason code
@@ -131,6 +132,24 @@ public interface CAService {
    * @return OCSP responder certificate or null of the CA has no OCSP responder
    */
   X509CertificateHolder getOCSPResponderCertificate();
+
+  /**
+   * Getter for the URI identifier of the algorithm used by the CA to sign certificates
+   * @return CA signing algorithm URI identifier
+   */
+  String getCaAlgorithm();
+
+  /**
+   * Getter for the CRL distribution point URLs of this CA
+   * @return List of CRL distribution point URL
+   */
+  List<String> getCrlDpURLs();
+
+  /**
+   * The OCSP responder URL for this CA, if present
+   * @return OCSP responder URL
+   */
+  String getOCSPResponderURL();
 
 
 }

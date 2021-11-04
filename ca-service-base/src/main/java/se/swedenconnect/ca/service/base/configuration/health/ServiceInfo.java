@@ -221,7 +221,7 @@ public class ServiceInfo {
       if (caService instanceof AbstractBasicCA) {
         AbstractBasicCA basicCAService = (AbstractBasicCA) caService;
         crlDistributionPoints = basicCAService.getCrlDistributionPoints();
-        ocspResponderUrl = basicCAService.getOcspResponderUrl();
+        ocspResponderUrl = basicCAService.getOCSPResponderURL();
       }
 
       // Store info

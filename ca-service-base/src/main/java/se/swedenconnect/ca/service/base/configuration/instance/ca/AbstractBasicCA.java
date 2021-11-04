@@ -48,13 +48,14 @@ public abstract class AbstractBasicCA extends AbstractCAService<DefaultCertifica
   @Getter protected CertificateIssuer certificateIssuer;
   protected CRLIssuer crlIssuer;
   @Setter protected OCSPResponder ocspResponder;
+  @Setter protected X509CertificateHolder ocspCertificate;
   @Getter protected final List<String> crlDistributionPoints;
   @Setter @Getter protected String ocspResponderUrl;
 
-  public AbstractBasicCA(PrivateKey privateKey, X509CertificateHolder caCertificate, CARepository caRepository,
+  public AbstractBasicCA(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain, CARepository caRepository,
     CertificateIssuerModel certIssuerModel, CRLIssuerModel crlIssuerModel, List<String> crlDistributionPoints)
     throws NoSuchAlgorithmException {
-    super(caCertificate, caRepository);
+    super(caCertificateChain, caRepository);
     this.certificateIssuer = new BasicCertificateIssuer(certIssuerModel, getCaCertificate().getSubject(), privateKey);
     if (crlIssuerModel != null) {
       this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, privateKey);
@@ -76,6 +77,22 @@ public abstract class AbstractBasicCA extends AbstractCAService<DefaultCertifica
 
   @Override public OCSPResponder getOCSPResponder() {
     return ocspResponder;
+  }
+
+  @Override public X509CertificateHolder getOCSPResponderCertificate() {
+    return ocspCertificate;
+  }
+
+  @Override public String getCaAlgorithm() {
+    return certificateIssuer.getCertificateIssuerModel().getAlgorithm();
+  }
+
+  @Override public List<String> getCrlDpURLs() {
+    return crlDistributionPoints;
+  }
+
+  @Override public String getOCSPResponderURL() {
+    return ocspResponderUrl;
   }
 
 }
