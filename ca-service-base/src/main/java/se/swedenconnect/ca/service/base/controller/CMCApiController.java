@@ -18,11 +18,7 @@ package se.swedenconnect.ca.service.base.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.asn1.x509.CRLNumber;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.cert.X509CRLHolder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.io.InputStreamResource;
@@ -32,15 +28,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
-import se.swedenconnect.ca.engine.ca.issuer.CAService;
-import se.swedenconnect.ca.service.base.configuration.audit.AuditEventEnum;
-import se.swedenconnect.ca.service.base.configuration.audit.AuditEventFactory;
-import se.swedenconnect.ca.service.base.configuration.audit.CAAuditEventData;
-import se.swedenconnect.ca.service.base.configuration.instance.CAServices;
+import se.swedenconnect.ca.service.base.configuration.cmc.CMCPortConstraints;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
-import java.util.Date;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -54,23 +46,24 @@ import java.util.Map;
 public class CMCApiController implements ApplicationEventPublisherAware {
 
   private static final String CMC_MIME_TYPE = "application/pkcs7-mime";
+  private static final MultiValueMap<String,String> HEADER_MAP;
 
   private ApplicationEventPublisher applicationEventPublisher;
   private final Map<String, CMCCaApi> cmcCaApiMap;
-
-  private static final MultiValueMap<String,String> headerMap;
+  private final CMCPortConstraints cmcPortConstraints;
 
   static {
-    headerMap = new LinkedMultiValueMap<>();
-    headerMap.add("Cache-Control", "no-cache, no-store, must-revalidate");
-    headerMap.add("Pragma", "no-cache");
-    headerMap.add("Expires", "0");
+    HEADER_MAP = new LinkedMultiValueMap<>();
+    HEADER_MAP.add("Cache-Control", "no-cache, no-store, must-revalidate");
+    HEADER_MAP.add("Pragma", "no-cache");
+    HEADER_MAP.add("Expires", "0");
   }
 
 
   @Autowired
-  public CMCApiController(Map<String, CMCCaApi> cmcCaApiMap) {
+  public CMCApiController(Map<String, CMCCaApi> cmcCaApiMap, CMCPortConstraints cmcPortConstraints) {
     this.cmcCaApiMap = cmcCaApiMap;
+    this.cmcPortConstraints = cmcPortConstraints;
   }
 
   /**
@@ -85,6 +78,15 @@ public class CMCApiController implements ApplicationEventPublisherAware {
     @PathVariable("instance") String instance, HttpEntity<byte[]> requestPayload,
     @RequestHeader("Content-Type") String contentType,
     HttpServletRequest request) {
+
+    try {
+      // Enforce port restrictions
+      cmcPortConstraints.validateRequestPort(request);
+    }
+    catch (IOException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
     if (!contentType.equalsIgnoreCase(CMC_MIME_TYPE)){
       log.debug("Received CMC post request for with illegal Content-Type {}", contentType);
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -100,7 +102,7 @@ public class CMCApiController implements ApplicationEventPublisherAware {
 
       return ResponseEntity
         .ok()
-        .headers(new HttpHeaders(headerMap))
+        .headers(new HttpHeaders(HEADER_MAP))
         .contentLength(cmcResponse.getCmcResponseBytes().length)
         .contentType(MediaType.parseMediaType(CMC_MIME_TYPE))
         .body(new InputStreamResource(new ByteArrayInputStream(cmcResponse.getCmcResponseBytes())));
