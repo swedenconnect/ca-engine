@@ -37,6 +37,7 @@ import java.util.Map;
 public class CMCConfigProperties {
 
   private boolean enabled;
+  private List<Integer> port;
   private Map<String, CMCConfigData> instance;
   private List<ClientAuthorization> client;
 
