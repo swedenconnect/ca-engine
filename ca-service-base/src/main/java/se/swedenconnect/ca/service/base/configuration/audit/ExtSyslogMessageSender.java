@@ -217,4 +217,8 @@ public class ExtSyslogMessageSender implements SyslogMessageSender {
   public void sendMessage(SyslogMessage syslogMessage) throws IOException {
     messageSender.sendMessage(syslogMessage);
   }
+
+  @Override public void close() throws IOException {
+    messageSender.close();
+  }
 }

@@ -45,9 +45,11 @@ import se.swedenconnect.ca.service.base.configuration.properties.CAConfigData;
 import javax.servlet.ServletContextListener;
 import java.io.File;
 import java.io.IOException;
+import java.security.Provider;
 import java.security.Security;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Configuration class to provide constructed beans
@@ -80,7 +82,13 @@ public class BeanConfig implements ApplicationEventPublisherAware {
     @Value("${ca-service.config.base-url}") String serviceBaseUrl,
     @Value("${server.servlet.context-path:#{null}}") String serviceContextPath
   ) {
-    Security.addProvider(new BouncyCastleProvider());
+    Security.insertProviderAt(new BouncyCastleProvider(),1);
+    log.info("Available crypto providers: {}", String.join(",", Arrays.stream(Security.getProviders())
+      .map(Provider::getName)
+      .collect(Collectors.toList())));
+    final Provider bcProvider = Security.getProvider("BC");
+    log.info("Bouncycastle version: {}", bcProvider.getVersionStr());
+    log.info("JRE Path: {}", System.getProperty("java.home"));
 
     BasicServiceConfig basicServiceConfig = new BasicServiceConfig();
     if (StringUtils.isNotBlank(configLocation)) {
