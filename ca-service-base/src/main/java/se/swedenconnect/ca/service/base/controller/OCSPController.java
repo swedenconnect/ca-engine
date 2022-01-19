@@ -88,27 +88,34 @@ public class OCSPController {
   }
 
   /**
+   * The GET support of OCSP is disabled as it turns out to be highly unreliable due to the OCSP specification syntax url/{base64(ocspreq)}
+   * It turns out that Spring Boot URL decodes the URL before doing path mapping. This means that the OCSP request sometimes introduces
+   * new "/" signs which is part of Base64 as well as a possible number 0-9 trailing the /. This ends up being an illegal URL
+   * To fix this issue we would have to alter Spring Boot Filter for URL processing and stop URL Decoding. Since HTTP GET with
+   * OCSP is practically unused, this is not worth it at this point. The code below could be fixed in some future release.
+   *
    * Processing a GET request for an OCSP response in accordance with RFC 6960
    *
    * <p>Request length of more than 255 bytes SHOULD be sent using POST request, but we allow longer requests as long as they
    * are successfully received as part of the encoded URL</p>
    *
    * @param instance the CA Service instance used to generate the OCSP response
-   * @param urlEncodedOCspReq URL encoded OCSP request
    * @return OCSP response bytes
    */
-  @GetMapping(value = "/ocsp/{instance}/{ocspreq}")
+/*  @GetMapping(value = "/ocsp/{instance}/**")
   public ResponseEntity<InputStreamResource> ocspGetResponse(
     @PathVariable("instance") String instance,
-    @PathVariable("ocspreq") String urlEncodedOCspReq,
     HttpServletRequest request
   ) {
     try {
+      final StringBuffer requestURL = request.getRequestURL();
+      String reqPrefix = "/ocsp/"+instance+"/";
+      String b64OcspReq = requestURL.substring(requestURL.indexOf(reqPrefix) + reqPrefix.length());
       // RFC 6960 recommends the GET is not used if request is larger than 255 bytes. We allow more, but set a maximum limit of 10K to defend against attacks.
-      if (urlEncodedOCspReq.length() > 10000){
+      if (b64OcspReq.length() > 10000){
         throw new RuntimeException("Too long OCSP GET request");
       }
-      String b64OcspReq = URLDecoder.decode(urlEncodedOCspReq, StandardCharsets.UTF_8);
+      // The base64 request was URL encoded, but this has already been decoded to Base64 by Spring
       byte[] ocspRequestBytes = Base64.decode(b64OcspReq);
       return getOCSPResponse(ocspRequestBytes, instance, request);
 
@@ -116,7 +123,7 @@ public class OCSPController {
       log.debug("Unable to parse OCSP GET request: {}", ex.getMessage());
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-  }
+  }*/
 
   private ResponseEntity<InputStreamResource> getOCSPResponse(byte[] ocspRequestBytes, String instance, HttpServletRequest request) throws IOException {
     CAService caService = caServices.getCAService(instance);
