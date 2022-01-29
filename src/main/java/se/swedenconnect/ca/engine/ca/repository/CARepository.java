@@ -88,7 +88,7 @@ public interface CARepository {
    * @param sortBy set to define sorting preferences or null if unsorted
    * @return list of certificates in the selected page
    */
-  List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean notRevoked, SortBy sortBy);
+  List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean notRevoked, SortBy sortBy, boolean descending);
 
   /**
    * Remove all expired certificates that has been expired for at least the specified grace period

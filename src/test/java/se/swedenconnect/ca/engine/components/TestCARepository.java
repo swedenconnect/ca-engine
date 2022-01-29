@@ -102,7 +102,7 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
       .count();
   }
 
-  @Override public List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean valid, SortBy sortBy) {
+  @Override public List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean valid, SortBy sortBy, boolean descending) {
 
     List<CertificateRecord> records = issuedCerts.stream()
       .filter(certificateRecord -> {
@@ -116,12 +116,16 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     if (sortBy != null) {
       switch (sortBy) {
       case serialNumber:
-        Collections.sort(records, Comparator.comparing(CertificateRecord::getSerialNumber));
+        records.sort(Comparator.comparing(CertificateRecord::getSerialNumber));
         break;
       case issueDate:
-        Collections.sort(records, Comparator.comparing(CertificateRecord::getIssueDate));
+        records.sort(Comparator.comparing(CertificateRecord::getIssueDate));
         break;
       }
+    }
+
+    if (descending) {
+      Collections.reverse(records);
     }
 
     int startIdx = page * pageSize;
