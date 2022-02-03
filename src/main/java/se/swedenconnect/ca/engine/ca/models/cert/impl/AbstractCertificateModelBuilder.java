@@ -35,9 +35,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.*;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Abstract implementation of the certificate model builder interface
@@ -50,9 +48,11 @@ import java.util.Map;
 public abstract class AbstractCertificateModelBuilder<T extends CertificateModelBuilder> implements CertificateModelBuilder {
 
   /** Certificate subject name */
-  protected CertNameModel subject;
+  protected CertNameModel<?> subject;
   /** Subject alternative name indexed by the subject alt name type identifier */
-  protected Map<Integer, String> subjectAltNames;
+  protected Map<Integer, List<String>> subjectAltNames;
+  /** Criticality of subjectAltName extension */
+  protected boolean subjectAltNameCritical = false;
   /** Basic constraints model */
   protected BasicConstraintsModel basicConstraints;
   /** true if an Authority key identifier is to be included */
@@ -84,13 +84,27 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
   /** subject attributes extension model */
   protected SubjDirectoryAttributesModel subjectDirectoryAttributes;
 
-  public T subject(CertNameModel subject) {
+  public T subject(CertNameModel<?> subject) {
     this.subject = subject;
     return (T) this;
   }
 
-  public T subjectAltNames(Map<Integer, String> subjectAltNames) {
+  public T subjectAltNames(Map<Integer, String> simpleSubjectAltNames) {
+    Map<Integer, List<String>> extendedSubjectAltNameMap = null;
+    if (simpleSubjectAltNames != null){
+      extendedSubjectAltNameMap = new HashMap<>();
+      for (Integer generalNameIndex : simpleSubjectAltNames.keySet()){
+        extendedSubjectAltNameMap.put(generalNameIndex, Collections.singletonList(simpleSubjectAltNames.get(generalNameIndex)));
+      }
+    }
+    this.subjectAltNameCritical = false;
+    this.subjectAltNames = extendedSubjectAltNameMap;
+    return (T) this;
+  }
+
+  public T subjectAltNames(boolean critical, Map<Integer, List<String>> subjectAltNames) {
     this.subjectAltNames = subjectAltNames;
+    this.subjectAltNameCritical = critical;
     return (T) this;
   }
 
@@ -219,7 +233,7 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
           .build());
       }
       extm.add(new InformationAccessModel(EntityType.issuer, accessDescParamList.toArray(
-        new InformationAccessModel.AccessDescriptionParams[accessDescParamList.size()])));
+        new InformationAccessModel.AccessDescriptionParams[0])));
     }
 
     //Subject info access
@@ -237,8 +251,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
           .accessLocationURI(timeStampAuthorityUrl)
           .build());
       }
-      extm.add(new InformationAccessModel(EntityType.subject, accessDescParamList.stream().toArray(
-        InformationAccessModel.AccessDescriptionParams[]::new)));
+      extm.add(new InformationAccessModel(EntityType.subject,
+        accessDescParamList.toArray(InformationAccessModel.AccessDescriptionParams[]::new)));
     }
 
     // Certificate policies
@@ -255,11 +269,17 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
 
     // Subject alternative names
     if (subjectAltNames != null && !subjectAltNames.isEmpty()) {
-      GeneralName[] generalNames = subjectAltNames.keySet().stream()
-        .map(integer -> new GeneralName(integer, subjectAltNames.get(integer)))
-        .toArray(GeneralName[]::new);
-      extm.add(new AlternativeNameModel(EntityType.subject, generalNames));
-
+      List<GeneralName> generalNameList = new ArrayList<>();
+      for (Integer generalNameIndex : subjectAltNames.keySet()){
+        final List<String> valueList = subjectAltNames.get(generalNameIndex);
+        for (String value: valueList){
+          generalNameList.add(new GeneralName(generalNameIndex, value));
+        }
+      }
+      final AlternativeNameModel alternativeNameModel = new AlternativeNameModel(EntityType.subject,
+        generalNameList.toArray(GeneralName[]::new));
+      alternativeNameModel.setCritical(subjectAltNameCritical);
+      extm.add(alternativeNameModel);
     }
 
     //Subject directory attributes
