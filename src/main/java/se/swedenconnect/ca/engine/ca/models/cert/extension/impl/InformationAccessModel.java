@@ -31,7 +31,7 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.EntityType;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModelUtils;
-import se.idsec.x509cert.extensions.SubjectInformationAccess;
+import se.swedenconnect.cert.extensions.SubjectInformationAccess;
 
 import java.util.ArrayList;
 import java.util.Arrays;

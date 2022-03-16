@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import org.bouncycastle.asn1.ASN1Object;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
-import se.idsec.x509cert.extensions.OCSPNoCheck;
+import se.swedenconnect.cert.extensions.OCSPNoCheck;
 
 /**
  * Extension data model

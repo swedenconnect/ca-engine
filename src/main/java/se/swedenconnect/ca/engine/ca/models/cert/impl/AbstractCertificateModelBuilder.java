@@ -30,7 +30,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolic
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.InformationAccessModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.*;
-import se.idsec.x509cert.extensions.QCStatements;
+import se.swedenconnect.cert.extensions.QCStatements;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.*;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
 
