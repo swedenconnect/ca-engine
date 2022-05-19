@@ -17,7 +17,7 @@
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
 import lombok.Getter;
-import se.idsec.x509cert.extensions.data.SemanticsInformation;
+import se.swedenconnect.cert.extensions.data.SemanticsInformation;
 
 /**
  * Class holding data about Qualified Certificate Statements syntax version and semantics information in accordance with

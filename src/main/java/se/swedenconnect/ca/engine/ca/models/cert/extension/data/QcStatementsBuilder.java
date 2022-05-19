@@ -17,9 +17,9 @@
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import se.idsec.x509cert.extensions.QCStatements;
-import se.idsec.x509cert.extensions.data.MonetaryValue;
-import se.idsec.x509cert.extensions.data.PDSLocation;
+import se.swedenconnect.cert.extensions.QCStatements;
+import se.swedenconnect.cert.extensions.data.MonetaryValue;
+import se.swedenconnect.cert.extensions.data.PDSLocation;
 
 import java.math.BigInteger;
 import java.util.List;

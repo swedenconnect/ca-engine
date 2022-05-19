@@ -49,9 +49,10 @@ import se.swedenconnect.sigval.cert.validity.ValidationStatus;
 import se.swedenconnect.sigval.cert.validity.crl.CRLCache;
 import se.swedenconnect.sigval.cert.validity.crl.impl.CRLValidityChecker;
 import se.swedenconnect.sigval.cert.validity.ocsp.OCSPCertificateVerifier;
-import se.idsec.x509cert.extensions.AuthnContext;
-import se.idsec.x509cert.extensions.OCSPNoCheck;
+import se.swedenconnect.cert.extensions.AuthnContext;
+import se.swedenconnect.cert.extensions.OCSPNoCheck;
 import se.swedenconnect.ca.engine.components.*;
+import se.idsec.utils.printcert.PrintCertificate;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -192,6 +193,11 @@ public class CertIssuingTests {
     CertRequestData.addUncommonExtensions(certificateModel);
 
     X509CertificateHolder certificate = ca.issueCertificate(certificateModel);
+    PrintCertificate printCertificate = new PrintCertificate(certificate);
+    final String pemCert = printCertificate.toPEM();
+    final String certPrint = printCertificate.toString(true, true, true);
+    log.info("Complex certificate issue test - PEM:\n{}", pemCert);
+    log.info("Complex certificate issue test - Content:\n{}", certPrint);
 
     //Test certificate content
     List<AttributeTypeAndValueModel> subjAttr = TestUtils.getAttributeValues(certificate.getSubject());

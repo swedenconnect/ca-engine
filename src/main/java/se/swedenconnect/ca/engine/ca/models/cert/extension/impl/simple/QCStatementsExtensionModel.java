@@ -20,7 +20,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.Extension;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
-import se.idsec.x509cert.extensions.QCStatements;
+import se.swedenconnect.cert.extensions.QCStatements;
 
 /**
  * Extension data model
