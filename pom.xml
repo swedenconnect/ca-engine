@@ -272,8 +272,8 @@
                                 <additionalJOption>-Xdoclint:-missing</additionalJOption>
                             </additionalJOptions>
                             <detectJavaApiLink>true</detectJavaApiLink>
-                            <doctitle>Certification Authority (CA) engine - ${project.version}</doctitle>
-                            <windowtitle>Certification Authority (CA) engine - ${project.version}</windowtitle>
+                            <doctitle>Certificate Authority (CA) engine - ${project.version}</doctitle>
+                            <windowtitle>Certificate Authority (CA) engine - ${project.version}</windowtitle>
                         </configuration>
                     </plugin>
 

@@ -1,10 +1,10 @@
 ![Logo](https://raw.githubusercontent.com/swedenconnect/technical-framework/master/img/sweden-connect.png)
 
-# Certification Authority (CA) Engine
+# Certificate Authority (CA) Engine
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.sigval/svt-base/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-engine)
 
-Core components for creating a Certification Authority (CA) service
+Core components for creating a Certificate Authority (CA) service
 
 ---
 
