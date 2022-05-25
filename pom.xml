@@ -123,7 +123,7 @@
                 <configuration>
                     <doctitle>CA engine - ${project.version}</doctitle>
                     <windowtitle>CA engine - ${project.version}</windowtitle>
-                    <source>8</source>
+                    <source>11</source>
                 </configuration>
             </plugin>
             <plugin>

@@ -7,5 +7,9 @@ package se.swedenconnect.ca.engine.ca.repository;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public enum SortBy {
-  serialNumber, issueDate;
+
+  /** Serial Number */
+  serialNumber,
+  /** Issuer date */
+  issueDate;
 }

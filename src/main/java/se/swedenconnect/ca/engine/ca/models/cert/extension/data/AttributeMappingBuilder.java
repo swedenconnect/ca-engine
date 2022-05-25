@@ -51,31 +51,66 @@ public class AttributeMappingBuilder {
     return new AttributeMappingBuilder();
   }
 
+  /**
+   * Set source attribute identifier
+   *
+   * @param name identifier of the source attribute
+   * @return this builder
+   */
   public AttributeMappingBuilder name(String name) {
     this.name = name;
     return this;
   }
 
+  /**
+   * Set attribute friendly name
+   *
+   * @param friendlyName attribute friendly name
+   * @return this builder
+   */
   public AttributeMappingBuilder friendlyName(String friendlyName) {
     this.friendlyName = friendlyName;
     return this;
   }
 
+  /**
+   * Set nameFormat
+   *
+   * @param nameFormat nameFormat of source attribute
+   * @return this builder
+   */
   public AttributeMappingBuilder nameFormat(String nameFormat) {
     this.nameFormat = nameFormat;
     return this;
   }
 
+  /**
+   * Set certificate attribute reference
+   *
+   * @param ref reference for the relevant type (rdn, san or sad)
+   * @return this builder
+   */
   public AttributeMappingBuilder ref(String ref) {
     this.ref = ref;
     return this;
   }
 
+  /**
+   * Set certificate reference type
+   *
+   * @param type rdn (Relative Distinguished Name), san (Subject Alt Name) or sda (Subject Directory Attributes)
+   * @return this builder
+   */
   public AttributeMappingBuilder type(AttributeRefType type) {
     this.type = type;
     return this;
   }
 
+  /**
+   * Create attribute mapping
+   *
+   * @return attribute mapping
+   */
   public AttributeMapping build() {
     AttributeMapping am = new AttributeMapping();
     Attribute attribute = new Attribute();

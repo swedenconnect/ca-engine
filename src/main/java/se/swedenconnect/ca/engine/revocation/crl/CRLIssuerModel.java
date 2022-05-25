@@ -59,6 +59,23 @@ public class CRLIssuerModel {
   /** true if this is an indirect CRL */
   @Setter boolean indirectCrl = false;
 
+  /**
+   * Constructs a CRL issuer model. The number of validity hours can be overwritten with a more suitable type and amount
+   * by setting expiryOffsetType and expiryOffsetAmount. E.g. if the "validHours" parameter here is set to 1 and
+   * expirtyOffsetType is changed to Calendar.YEAR, then the CRL will expire in 1 year.
+   *
+   * <p>
+   *   Note also that one CRLIssuerModel will issue just one CRL at one publication location. If other CRL:s are issued
+   *   to other locations, they need their own CRL issuer model. This is because the CRLDP location is written into each
+   *   CRL.
+   * </p>
+   *
+   * @param issuerCertificate issuer certificates of the CRL issuing CA
+   * @param algorithm CRL signing algorithm
+   * @param validHours the number of time units a CRL is valid (default hour)
+   * @param CRLRevocationDataProvider CRL revocation data provider handling revocation processing
+   * @param distributionPointUrl the URL where the URL will be published
+   */
   public CRLIssuerModel(X509CertificateHolder issuerCertificate, String algorithm, int validHours,
     CRLRevocationDataProvider CRLRevocationDataProvider, String distributionPointUrl) {
     this.issuerCertificate = issuerCertificate;

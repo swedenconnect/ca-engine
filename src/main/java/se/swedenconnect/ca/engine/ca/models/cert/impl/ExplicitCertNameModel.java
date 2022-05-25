@@ -16,7 +16,8 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
-import lombok.*;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 
@@ -43,8 +44,18 @@ import java.util.List;
 @NoArgsConstructor
 public class ExplicitCertNameModel implements CertNameModel<List<List<AttributeTypeAndValueModel>>> {
 
+  /**
+   * Relative distinguished name structure
+   *
+   * @param rdnSequence relative distinguished name structure
+   */
   @Setter private List<List<AttributeTypeAndValueModel>> rdnSequence;
 
+  /**
+   * Constructor for this certificate name model
+   *
+   * @param attributeList list of attribute type and values
+   */
   public ExplicitCertNameModel(List<AttributeTypeAndValueModel> attributeList) {
     this.rdnSequence = new ArrayList<>();
     for (AttributeTypeAndValueModel atavModel : attributeList) {
@@ -52,10 +63,12 @@ public class ExplicitCertNameModel implements CertNameModel<List<List<AttributeT
     }
   }
 
+  /** {@inheritDoc} */
   @Override public CertNameModelType getType() {
     return CertNameModelType.explicit;
   }
 
+  /** {@inheritDoc} */
   @Override public List<List<AttributeTypeAndValueModel>> getNameData() {
     return rdnSequence;
   }

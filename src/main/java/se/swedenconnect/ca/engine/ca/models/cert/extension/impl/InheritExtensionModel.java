@@ -29,20 +29,32 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * This certificate extension model copies extension data from an existing certificate
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
 public class InheritExtensionModel implements ExtensionModel {
 
+  /** certificate to inherit extensions from */
   private X509CertificateHolder certificateHolder;
+
+  /** List of extensions to copy from certficate */
   private List<ExtensionIdAndCrit> extensionIdList;
 
+  /**
+   * Constructor
+   *
+   * @param certificateHolder master certificate holding extensions to copy
+   * @param extensionId list of extensions to copy
+   */
   public InheritExtensionModel(X509CertificateHolder certificateHolder, ExtensionIdAndCrit... extensionId) {
     this.certificateHolder = certificateHolder;
     this.extensionIdList = Arrays.asList(extensionId);
   }
 
+  /** {@inheritDoc} */
   @Override public void addExtensions(JcaX509v3CertificateBuilder certificateBuilder) throws CertificateIssuanceException {
     try {
       for (ExtensionIdAndCrit extensionIdAndCrit : extensionIdList) {
@@ -55,6 +67,7 @@ public class InheritExtensionModel implements ExtensionModel {
     }
   }
 
+  /** {@inheritDoc} */
   @Override public List<Extension> getExtensions() throws CertificateIssuanceException {
     try {
       List<Extension> extensionList = new ArrayList<>();

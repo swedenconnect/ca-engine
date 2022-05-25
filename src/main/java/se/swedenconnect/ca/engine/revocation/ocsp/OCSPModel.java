@@ -47,8 +47,15 @@ public class OCSPModel {
   /** Time amount of specified type for the next update time where 0 indicates an absent next update time in the response */
   @Setter private int expiryOffsetAmount = 0;
 
-  public OCSPModel(List<X509CertificateHolder> responderCertificateCahin, X509CertificateHolder certificateIssuerCert, String algorithm) {
-    this.responderCertificateCahin = responderCertificateCahin;
+  /**
+   * Constructor for OCSP model
+   *
+   * @param responderCertificateChain certificate chain for the OCSP responder issuing key
+   * @param certificateIssuerCert the certificate of the CA that issues certificates that this service provides status for
+   * @param algorithm OCSP response signing algorithm
+   */
+  public OCSPModel(List<X509CertificateHolder> responderCertificateChain, X509CertificateHolder certificateIssuerCert, String algorithm) {
+    this.responderCertificateCahin = responderCertificateChain;
     this.algorithm = algorithm;
     this.certificateIssuerCert = certificateIssuerCert;
   }

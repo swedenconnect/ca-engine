@@ -23,21 +23,49 @@ package se.swedenconnect.ca.engine.ca.issuer;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CertificateIssuanceException extends RuntimeException {
+
+  /**
+   * Constructor
+   */
   public CertificateIssuanceException() {
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   */
   public CertificateIssuanceException(String message) {
     super(message);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   */
   public CertificateIssuanceException(String message, Throwable cause) {
     super(message, cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param cause cause
+   */
   public CertificateIssuanceException(Throwable cause) {
     super(cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   * @param enableSuppression enable suppression
+   * @param writableStackTrace writable stack trace
+   */
   public CertificateIssuanceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }

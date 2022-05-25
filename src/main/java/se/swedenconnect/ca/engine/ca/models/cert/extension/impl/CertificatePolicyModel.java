@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CertificatePolicyModel extends AbstractExtensionModel {
 
+  /** Any policy object identifier */
   public static final ASN1ObjectIdentifier ANY_POLICY = new ASN1ObjectIdentifier("2.5.29.32.0");
 
   /** indicates if this extension should be critical */
@@ -140,13 +141,37 @@ public class CertificatePolicyModel extends AbstractExtensionModel {
     return new DERSequence(policyQualifierInfoSequence);
   }
 
+  /**
+   * Certificate policy information
+   */
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
   @Builder
   public static class PolicyInfoParams {
+
+    /**
+     * Certificate policy object identifier
+     *
+     * @param policy certificate policy
+     * @return certificate policy
+     */
     ASN1ObjectIdentifier policy;
+
+    /**
+     * Certificate policy object identifier
+     *
+     * @param cpsUri CPS location URI
+     * @return CPS location URI
+     */
     String cpsUri;
+
+    /**
+     * Certificate policy object identifier
+     *
+     * @param displayText certificate policy display text
+     * @return certificate policy policy display text
+     */
     String displayText;
   }
 

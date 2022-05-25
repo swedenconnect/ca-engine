@@ -30,14 +30,14 @@ import se.swedenconnect.cert.extensions.data.SemanticsInformation;
  * --  defined in this Qualified Certificate profile
  * --  (Version 2). This statement may optionally contain
  * --  additional semantics information as specified below.
- * <p>
+ *
  * SemanticsInformation ::= SEQUENCE {
  * semanticsIdentifier        OBJECT IDENTIFIER   OPTIONAL,
  * nameRegistrationAuthorities NameRegistrationAuthorities
  * OPTIONAL }
  * (WITH COMPONENTS {..., semanticsIdentifier PRESENT}|
  * WITH COMPONENTS {..., nameRegistrationAuthorities PRESENT})
- * <p>
+ *
  * NameRegistrationAuthorities ::=  SEQUENCE SIZE (1..MAX) OF GeneralName
  * </code>
  *
@@ -79,8 +79,14 @@ public class QCPKIXSyntax {
     this.semanticsInformation = semanticsInformation;
   }
 
+  /**
+   * Enumeration of versions of QC extension syntax
+   */
   public enum Version {
-    V1, V2;
+    /** Version 1 */
+    V1,
+    /** Version 2 */
+    V2;
   }
 
 }

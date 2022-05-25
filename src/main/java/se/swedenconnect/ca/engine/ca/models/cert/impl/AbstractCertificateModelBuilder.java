@@ -84,11 +84,23 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
   /** subject attributes extension model */
   protected SubjDirectoryAttributesModel subjectDirectoryAttributes;
 
+  /**
+   * Set certificate subject name
+   *
+   * @param subject certificate subject name
+   * @return this builder
+   */
   public T subject(CertNameModel<?> subject) {
     this.subject = subject;
     return (T) this;
   }
 
+  /**
+   * Set subject alt names data
+   *
+   * @param simpleSubjectAltNames simple data input with single value per type
+   * @return this builder
+   */
   public T subjectAltNames(Map<Integer, String> simpleSubjectAltNames) {
     Map<Integer, List<String>> extendedSubjectAltNameMap = null;
     if (simpleSubjectAltNames != null){
@@ -102,89 +114,193 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
     return (T) this;
   }
 
+  /**
+   * Set subject alt names data
+   *
+   * @param critical criticality
+   * @param subjectAltNames subject alt name data
+   * @return this builder
+   */
   public T subjectAltNames(boolean critical, Map<Integer, List<String>> subjectAltNames) {
     this.subjectAltNames = subjectAltNames;
     this.subjectAltNameCritical = critical;
     return (T) this;
   }
 
+  /**
+   * Set basic constraints.
+   *
+   * @param basicConstraints basic constraints data
+   * @return this builder
+   */
   public T basicConstraints(BasicConstraintsModel basicConstraints) {
     this.basicConstraints = basicConstraints;
     return (T) this;
   }
 
+  /**
+   * Defines if this builder should include an AKI (Authority Key Identifier)
+   *
+   * @param includeAki true to include AKI
+   * @return this builder
+   */
   public T includeAki(boolean includeAki) {
     this.includeAki = includeAki;
     return (T) this;
   }
 
+  /**
+   * Defines if this builder should include an SKI (Subject Key Identifier)
+   *
+   * @param includeSki true to include SKI
+   * @return this builder
+   */
   public T includeSki(boolean includeSki) {
     this.includeSki = includeSki;
     return (T) this;
   }
 
+  /**
+   * Set key usage
+   *
+   * @param keyUsage key usage
+   * @return this builder
+   */
   public T keyUsage(KeyUsageModel keyUsage) {
     this.keyUsage = keyUsage;
     return (T) this;
   }
 
+  /**
+   * Set extended key usage
+   *
+   * @param extendedKeyUsage extended key usage
+   * @return this builder
+   */
   public T extendedKeyUsage(ExtendedKeyUsageModel extendedKeyUsage) {
     this.extendedKeyUsage = extendedKeyUsage;
     return (T) this;
   }
 
+  /**
+   * Set CRL distribution points
+   *
+   * @param crlDistributionPoints CRL distribution points
+   * @return this builder
+   */
   public T crlDistributionPoints(List<String> crlDistributionPoints) {
     this.crlDistributionPoints = crlDistributionPoints;
     return (T) this;
   }
 
+  /**
+   * Set OCSP service URL
+   *
+   * @param ocspServiceUrl OCSP service URL
+   * @return this builder
+   */
   public T ocspServiceUrl(String ocspServiceUrl) {
     this.ocspServiceUrl = ocspServiceUrl;
     return (T) this;
   }
 
+  /**
+   * Set issuer certificate URL for the AIA extension
+   *
+   * @param issuerCertUrl issuer certificate URL
+   * @return this builder
+   */
   public T issuerCertUrl(String issuerCertUrl) {
     this.issuerCertUrl = issuerCertUrl;
     return (T) this;
   }
 
+  /**
+   * Set CA Repository URL
+   *
+   * @param caRepositoryUrl CA repository URL
+   * @return this builder
+   */
   public T caRepositoryUrl(String caRepositoryUrl) {
     this.caRepositoryUrl = caRepositoryUrl;
     return (T) this;
   }
 
+  /**
+   * Set timestamp authority URL
+   *
+   * @param timeStampAuthorityUrl timestamp authority URL
+   * @return this builder
+   */
   public T timeStampAuthorityUrl(String timeStampAuthorityUrl) {
     this.timeStampAuthorityUrl = timeStampAuthorityUrl;
     return (T) this;
   }
 
+  /**
+   * Set certificate policy data
+   *
+   * @param certificatePolicy certificate policy data
+   * @return this builder
+   */
   public T certificatePolicy(CertificatePolicyModel certificatePolicy) {
     this.certificatePolicy = certificatePolicy;
     return (T) this;
   }
 
+  /**
+   * Set authentication context (RFC 7773)
+   *
+   * @param authenticationContext authentication context
+   * @return this builder
+   */
   public T authenticationContext(SAMLAuthContext authenticationContext) {
     this.authenticationContext = authenticationContext;
     return (T) this;
   }
 
+  /**
+   * Set QC statements
+   *
+   * @param qcStatements QC statements
+   * @return this builder
+   */
   public T qcStatements(QCStatements qcStatements) {
     this.qcStatements = qcStatements;
     return (T) this;
   }
 
+  /**
+   * Set OCSP no-check
+   *
+   * @param ocspNocheck true to include ocsp no-check extension
+   * @return this builder
+   */
   public T ocspNocheck(boolean ocspNocheck) {
     this.ocspNocheck = ocspNocheck;
     return (T) this;
   }
 
+  /**
+   * Set subject directory attributes
+   *
+   * @param subjectDirectoryAttributes subject directory attributes
+   * @return this builder
+   */
   public T subjectDirectoryAttributes(SubjDirectoryAttributesModel subjectDirectoryAttributes) {
     this.subjectDirectoryAttributes = subjectDirectoryAttributes;
     return (T) this;
   }
 
+  /** {@inheritDoc} */
   @Override public abstract CertificateModel build() throws CertificateIssuanceException;
 
+  /**
+   * Set authority and subject key identifiers
+   *
+   * @param extm the extension models for this certificate model builder
+   * @throws IOException error setting AKI and SKI data
+   */
   protected abstract void getKeyIdentifierExtensionsModels(List<ExtensionModel> extm) throws IOException;
 
   /**

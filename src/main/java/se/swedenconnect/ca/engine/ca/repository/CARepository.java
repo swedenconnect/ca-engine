@@ -86,6 +86,7 @@ public interface CARepository {
    * @param pageSize the size of each page of certificates
    * @param notRevoked true if the pages of certificates holds only not revoked certificates
    * @param sortBy set to define sorting preferences or null if unsorted
+   * @param descending true for descending order and false for ascending
    * @return list of certificates in the selected page
    */
   List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean notRevoked, SortBy sortBy, boolean descending);
@@ -94,6 +95,7 @@ public interface CARepository {
    * Remove all expired certificates that has been expired for at least the specified grace period
    * @param gracePeriodSeconds number of seconds a certificate can be expired without being removed
    * @return list of the serial numbers of the certificates that were removed from the repository
+   * @throws IOException error processing request
    */
   List<BigInteger> removeExpiredCerts(int gracePeriodSeconds) throws IOException;
 

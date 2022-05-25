@@ -16,6 +16,10 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert;
 
+/**
+ * Interface for name model for subject and issuer names
+ * @param <T> type of name data carried in this name model
+ */
 public interface CertNameModel<T extends Object> {
 
   /**
@@ -32,6 +36,9 @@ public interface CertNameModel<T extends Object> {
    */
   T getNameData();
 
+  /**
+   * Enumeration of certificate name model types
+   */
   enum CertNameModelType {
     /** Explicit information about every attribute and their encoding **/
     explicit,

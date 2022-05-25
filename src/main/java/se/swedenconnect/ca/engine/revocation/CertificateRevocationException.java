@@ -21,21 +21,49 @@ package se.swedenconnect.ca.engine.revocation;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CertificateRevocationException extends RuntimeException {
+
+  /**
+   * Constructor
+   */
   public CertificateRevocationException() {
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   */
   public CertificateRevocationException(String message) {
     super(message);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   */
   public CertificateRevocationException(String message, Throwable cause) {
     super(message, cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param cause cause
+   */
   public CertificateRevocationException(Throwable cause) {
     super(cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   * @param enableSuppression enable suppression
+   * @param writableStackTrace writable stack trace
+   */
   public CertificateRevocationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }

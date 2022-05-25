@@ -45,6 +45,9 @@ public class CertAttributes extends BCStyle {
    */
   public static final String PRINTABLE_STRING_REGEX = "^[a-zA-Z0-9'\\(\\)+\\,\\-\\.\\?:\\/=\\ ]{1,}$";
 
+  /**
+   * Constructor
+   */
   protected CertAttributes() {
     super();
     //defaultLookUp.put("personalIdentityNumber", PERSONAL_IDENTITY_NUMBER_SE);

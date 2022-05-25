@@ -34,17 +34,41 @@ import java.util.List;
 @NoArgsConstructor
 public class SelfIssuedCertificateModel extends CertificateModel {
 
+  /**
+   * Private key
+   *
+   * @param privateKey private key
+   * @return private key
+   */
   private PrivateKey privateKey;
 
+  /**
+   * Constructor
+   * @param privateKey private key
+   */
   public SelfIssuedCertificateModel(PrivateKey privateKey) {
     this.privateKey = privateKey;
   }
 
+  /**
+   * Create certificate model for self issued certificate
+   *
+   * @param model certificate model
+   * @param privateKey private key
+   */
   public SelfIssuedCertificateModel(CertificateModel model, PrivateKey privateKey) {
     super(model.getSubject(), model.getPublicKey(), model.getExtensionModels());
     this.privateKey = privateKey;
   }
 
+  /**
+   * Create certificate model for self issued certificate
+   *
+   * @param subject subject
+   * @param publicKey public key
+   * @param extensionModels extension models
+   * @param privateKey private key
+   */
   public SelfIssuedCertificateModel(CertNameModel subject, PublicKey publicKey,
     List<ExtensionModel> extensionModels, PrivateKey privateKey) {
     super(subject, publicKey, extensionModels);

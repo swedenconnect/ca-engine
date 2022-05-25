@@ -47,7 +47,10 @@ import java.util.List;
 @Slf4j
 public class InformationAccessModel extends AbstractExtensionModel {
 
+  /** CA Repository OID */
   public static final ASN1ObjectIdentifier CA_REPOSITORY = new ASN1ObjectIdentifier("1.3.6.1.5.5.7.48.5");
+
+  /** Timestamping OID */
   public static final ASN1ObjectIdentifier TIMESTAMPING = new ASN1ObjectIdentifier("1.3.6.1.5.5.7.48.3");
 
   /** Set to true if the extension is a SubjectInfoAccess Extension and false for an AuthorityInfoAccess Extension */
@@ -57,14 +60,21 @@ public class InformationAccessModel extends AbstractExtensionModel {
   @Setter
   private boolean critical = false;
 
-  /** List of */
+  /** List of access descriptions */
   private List<AccessDescriptionParams> accessDescriptionList;
 
+  /**
+   * Constructor
+   *
+   * @param entityType entity type (subject or issuer)
+   * @param accessDescriptionParams information access data
+   */
   public InformationAccessModel(EntityType entityType, AccessDescriptionParams... accessDescriptionParams) {
     this.entityType = entityType;
     this.accessDescriptionList = Arrays.asList(accessDescriptionParams);
   }
 
+  /** {@inheritDoc} */
   @Override protected ExtensionMetadata getExtensionMetadata() {
     return new ExtensionMetadata(
       entityType.equals(EntityType.subject) ? Extension.subjectInfoAccess : Extension.authorityInfoAccess,
@@ -73,6 +83,7 @@ public class InformationAccessModel extends AbstractExtensionModel {
     );
   }
 
+  /** {@inheritDoc} */
   @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
     if (accessDescriptionList == null || accessDescriptionList.isEmpty()) {
       throw new CertificateIssuanceException("The Access Info extension MUST contain at least one access description");
@@ -95,12 +106,18 @@ public class InformationAccessModel extends AbstractExtensionModel {
     return infoAccessExt;
   }
 
+  /**
+   * Access description parameters
+   */
   @Data
   @AllArgsConstructor
   @Builder
   public static class AccessDescriptionParams {
 
+    /** Access method OID */
     private ASN1ObjectIdentifier accessMethod;
+
+    /** Access location URI */
     private String accessLocationURI;
 
   }

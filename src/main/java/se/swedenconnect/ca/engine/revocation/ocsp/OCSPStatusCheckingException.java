@@ -31,25 +31,58 @@ public class OCSPStatusCheckingException extends CertificateRevocationException 
   /** The response status that should be returned in the OCSP response */
   @Getter final int responseStatus;
 
+  /**
+   * Constructor
+   *
+   * @param responseStatus response status
+   */
   public OCSPStatusCheckingException(int responseStatus) {
     this.responseStatus = responseStatus;
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param responseStatus response status
+   */
   public OCSPStatusCheckingException(String message, int responseStatus) {
     super(message);
     this.responseStatus = responseStatus;
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   * @param responseStatus response status
+   */
   public OCSPStatusCheckingException(String message, Throwable cause, int responseStatus) {
     super(message, cause);
     this.responseStatus = responseStatus;
   }
 
+  /**
+   * Constructor
+   *
+   * @param cause cause
+   * @param responseStatus response status
+   */
   public OCSPStatusCheckingException(Throwable cause, int responseStatus) {
     super(cause);
     this.responseStatus = responseStatus;
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   * @param enableSuppression enable suppression
+   * @param writableStackTrace writable stack trace
+   * @param responseStatus response status
+   */
   public OCSPStatusCheckingException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace,
     int responseStatus) {
     super(message, cause, enableSuppression, writableStackTrace);

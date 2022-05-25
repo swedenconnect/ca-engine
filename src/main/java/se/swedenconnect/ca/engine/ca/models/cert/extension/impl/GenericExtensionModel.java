@@ -24,26 +24,63 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 
 /**
+ * Generic certificate extension model that can be used to build any extension based on ASN.1 data structure
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-@AllArgsConstructor
 public class GenericExtensionModel extends AbstractExtensionModel {
 
+  /** Extension OID */
   private ASN1ObjectIdentifier oid;
+
+  /** Extension data */
   private ASN1Object extensionObject;
+
+  /** Extension criticality */
   private boolean critical;
 
+  /**
+   * Create extension model
+   *
+   * @param oid extension OID
+   * @param extensionObject extension data
+   */
   public GenericExtensionModel(ASN1ObjectIdentifier oid, ASN1Object extensionObject) {
     this.oid = oid;
     this.extensionObject = extensionObject;
+    this.critical = false;
   }
 
+  /**
+   * Create extension model
+   *
+   * @param oid extension OID
+   * @param extensionObject extension data
+   * @param critical extension criticality
+   */
+  public GenericExtensionModel(ASN1ObjectIdentifier oid, ASN1Object extensionObject, boolean critical) {
+    this.oid = oid;
+    this.extensionObject = extensionObject;
+    this.critical = critical;
+  }
+
+  /**
+   * Get extension metadata
+   *
+   * @return {@link ExtensionMetadata}
+   */
   @Override protected ExtensionMetadata getExtensionMetadata() {
     return new ExtensionMetadata(oid, "certificate", critical);
   }
 
+  /**
+   * Get extension data
+   *
+   * @return {@link ASN1Object} data
+   * @throws CertificateIssuanceException error parsing data
+   */
   @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
     return extensionObject;
   }

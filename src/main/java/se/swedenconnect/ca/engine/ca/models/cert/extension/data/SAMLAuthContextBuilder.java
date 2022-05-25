@@ -53,55 +53,109 @@ public class SAMLAuthContextBuilder {
     return new SAMLAuthContextBuilder();
   }
 
+  /** Assertion reference */
   private String assertionRef;
 
+  /** LoA identifier */
   private String authnContextClassRef;
 
+  /** Authentication time when user/subject was authenticated */
   private Date authenticationInstant;
 
+  /** Identity provider performing Authentication */
   private String identityProvider;
 
+  /** Service identifier */
   private String serviceID;
 
+  /** Extension data */
   private List<Element> extensions;
 
+  /** Attribute mappings */
   private List<AttributeMapping> attributeMappings;
 
+  /**
+   * Set assertion reference
+   *
+   * @param assertionRef assertion reference/identifier
+   * @return this builder
+   */
   public SAMLAuthContextBuilder assertionRef(String assertionRef) {
     this.assertionRef = assertionRef;
     return this;
   }
 
+  /**
+   * Set level of assurance
+   *
+   * @param authnContextClassRef level of assurance
+   * @return this builder
+   */
   public SAMLAuthContextBuilder authnContextClassRef(String authnContextClassRef) {
     this.authnContextClassRef = authnContextClassRef;
     return this;
   }
 
+  /**
+   * Set time of authentication
+   *
+   * @param authenticationInstant time of authentication
+   * @return this builder
+   */
   public SAMLAuthContextBuilder authenticationInstant(Date authenticationInstant) {
     this.authenticationInstant = authenticationInstant;
     return this;
   }
 
+  /**
+   * Set identity provider
+   *
+   * @param identityProvider identity provider
+   * @return this builder
+   */
   public SAMLAuthContextBuilder identityProvider(String identityProvider) {
     this.identityProvider = identityProvider;
     return this;
   }
 
+  /**
+   * Set service identifier
+   *
+   * @param serviceID service identifier
+   * @return this builder
+   */
   public SAMLAuthContextBuilder serviceID(String serviceID) {
     this.serviceID = serviceID;
     return this;
   }
 
+  /**
+   * Set extension
+   *
+   * @param extensions extensions
+   * @return this builder
+   */
   public SAMLAuthContextBuilder extensions(List<Element> extensions) {
     this.extensions = extensions;
     return this;
   }
 
+  /**
+   * Set attribute mappings
+   *
+   * @param attributeMappings attribute mappings
+   * @return this builder
+   */
   public SAMLAuthContextBuilder attributeMappings(List<AttributeMapping> attributeMappings) {
     this.attributeMappings = attributeMappings;
     return this;
   }
 
+  /**
+   * Build SAML Authentication context
+   *
+   * @return {@link SAMLAuthContext}
+   */
   public SAMLAuthContext build() {
 
     SAMLAuthContext samlAuthContext = new SAMLAuthContext();
@@ -127,6 +181,12 @@ public class SAMLAuthContextBuilder {
     return samlAuthContext;
   }
 
+  /**
+   * Convert {@link Date} to {@link XMLGregorianCalendar}
+   * @param date date to convert
+   * @return {@link XMLGregorianCalendar}
+   * @throws CertificateIssuanceException error parsing date
+   */
   public static XMLGregorianCalendar getXmlDate(Date date) throws CertificateIssuanceException {
     GregorianCalendar gcal = new GregorianCalendar();
     gcal.setTime(date);

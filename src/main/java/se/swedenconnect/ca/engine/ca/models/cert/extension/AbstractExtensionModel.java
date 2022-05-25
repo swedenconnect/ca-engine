@@ -77,11 +77,32 @@ public abstract class AbstractExtensionModel implements ExtensionModel {
     }
   }
 
+  /**
+   * Metadata for a certificate extension
+   */
   @Getter
   @AllArgsConstructor
   protected class ExtensionMetadata {
+
+    /**
+     * Extension object identifier
+     *
+     * @return extension object identifier
+     */
     private ASN1ObjectIdentifier oid;
+
+    /**
+     * Extension name
+     *
+     * @return extension name
+     */
     private String name;
+
+    /**
+     * Extension criticality
+     *
+     * @return extension criticality
+     */
     private boolean critical;
   }
 

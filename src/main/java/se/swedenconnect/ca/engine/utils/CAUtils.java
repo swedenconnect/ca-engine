@@ -64,6 +64,14 @@ public class CAUtils {
     }
   }
 
+  /**
+   * Get list of certificates
+   *
+   * @param certificateHolderList list of certificate holder objects
+   * @return list of {@link X509Certificate}
+   * @throws CertificateException error processing certificate data
+   * @throws IOException error processing certificate data
+   */
   public static List<X509Certificate> getCertList(List<X509CertificateHolder> certificateHolderList)
     throws CertificateException, IOException {
     List<X509Certificate> certificateList = new ArrayList<>();
@@ -77,6 +85,7 @@ public class CAUtils {
    * Utility function creating a X500Name object based on a certificate name model
    *
    * @param nameModel certificate name model holding information about a certificate name
+   * @param attributeValueEncoder attribute value encoder
    * @return X500Name object
    * @throws IOException errors creating the X500Name object
    */

@@ -56,41 +56,89 @@ public class QcStatementsBuilder {
   private QcStatementsBuilder() {
   }
 
+  /**
+   * Set version and semantics
+   *
+   * @param versionAndSemantics version and semantics
+   * @return this builder
+   */
   public QcStatementsBuilder versionAndSemantics(QCPKIXSyntax versionAndSemantics) {
     this.versionAndSemantics = versionAndSemantics;
     return this;
   }
 
+  /**
+   * Set qualified certificate status
+   *
+   * @param qualifiedCertificate qualified certificate status
+   * @return this builder
+   */
   public QcStatementsBuilder qualifiedCertificate(boolean qualifiedCertificate) {
     this.qualifiedCertificate = qualifiedCertificate;
     return this;
   }
 
+  /**
+   * Set qualified signature creation device status
+   *
+   * @param qscd qualified signature creation device status
+   * @return this builder
+   */
   public QcStatementsBuilder qscd(boolean qscd) {
     this.qscd = qscd;
     return this;
   }
 
+  /**
+   * Set qualified certificate certificate types
+   *
+   * @param qcTypes qualified certificate certificate types
+   * @return this builder
+   */
   public QcStatementsBuilder qcTypes(List<ASN1ObjectIdentifier> qcTypes) {
     this.qcTypes = qcTypes;
     return this;
   }
 
+  /**
+   * Set legislation countries
+   *
+   * @param legislationCountries legislation countries
+   * @return this builder
+   */
   public QcStatementsBuilder legislationCountries(List<String> legislationCountries) {
     this.legislationCountries = legislationCountries;
     return this;
   }
 
+  /**
+   * Set reliance limit
+   *
+   * @param relianceLimit reliance limit
+   * @return this builder
+   */
   public QcStatementsBuilder relianceLimit(MonetaryValue relianceLimit) {
     this.relianceLimit = relianceLimit;
     return this;
   }
 
+  /**
+   * Set retention period
+   *
+   * @param retentionPeriod retention period
+   * @return this builder
+   */
   public QcStatementsBuilder retentionPeriod(Integer retentionPeriod) {
     this.retentionPeriod = retentionPeriod;
     return this;
   }
 
+  /**
+   * Set PDS locations
+   *
+   * @param pdsLocations PDS locations
+   * @return this builder
+   */
   public QcStatementsBuilder pdsLocations(List<PDSLocation> pdsLocations) {
     this.pdsLocations = pdsLocations;
     return this;

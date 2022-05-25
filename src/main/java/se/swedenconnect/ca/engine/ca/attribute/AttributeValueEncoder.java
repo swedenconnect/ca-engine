@@ -44,8 +44,13 @@ public class AttributeValueEncoder {
   /** The attribute value encoder used by this class */
   public X500NameStyle encoder = new CertAttributes();
 
+  /** Date with hyphen regex */
   public static final String DATE_SIMPLE_FOMRAT_REGEX_HYPHEN = "^(19|20)[0-9]{2}-[0-9]{2}-[0-9]{2}$";
+
+  /** Simple Date regex */
   public static final String DATE_SIMPLE_FOMRAT_REGEX = "^(19|20)[0-9]{6}$";
+
+  /** Simple date format */
   public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 
   /**
