@@ -2,7 +2,7 @@
 
 # Certificate Authority (CA) Engine
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.sigval/svt-base/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-engine)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-engine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-engine)
 
 Core components for creating a Certificate Authority (CA) service
 
@@ -155,6 +155,10 @@ This library does not implement a CA repository but provides an interface for su
 
 This interface is designed to match the JPA API for database storage, but could as easily be implemented by a file-based repository.
 
+
+-----
+
+Copyright &copy; 2022, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
 
 
 
