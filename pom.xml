@@ -10,6 +10,7 @@
 
   <name>CA engine</name>
   <description>CA engine providing core functions of a X.509 certificate issuing service</description>
+  <url>https://github.com/swedenconnect/ca-engine</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
