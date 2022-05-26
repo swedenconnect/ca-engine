@@ -16,18 +16,6 @@
 
 package se.swedenconnect.ca.engine.utils;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
-import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
-import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.EncodedCertNameModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,10 +25,21 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
+import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
+import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.EncodedCertNameModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
+
 /**
  * Utility functions in support of the CA library
  */
-@Slf4j
 public class CAUtils {
 
   /**
@@ -54,7 +53,7 @@ public class CAUtils {
    *
    * @param cert certificate to convert
    * @return {@link X509Certificate}
-   * @throws IOException          input data error
+   * @throws IOException input data error
    * @throws CertificateException certificate encoding errors
    */
   public static X509Certificate getCert(X509CertificateHolder cert) throws IOException, CertificateException {
@@ -73,7 +72,7 @@ public class CAUtils {
    * @throws IOException error processing certificate data
    */
   public static List<X509Certificate> getCertList(List<X509CertificateHolder> certificateHolderList)
-    throws CertificateException, IOException {
+      throws CertificateException, IOException {
     List<X509Certificate> certificateList = new ArrayList<>();
     for (X509CertificateHolder certificateHolder : certificateHolderList) {
       certificateList.add(getCert(certificateHolder));
@@ -89,7 +88,8 @@ public class CAUtils {
    * @return X500Name object
    * @throws IOException errors creating the X500Name object
    */
-  public static X500Name getX500Name(CertNameModel nameModel, AttributeValueEncoder attributeValueEncoder) throws IOException {
+  public static X500Name getX500Name(CertNameModel<?> nameModel, AttributeValueEncoder attributeValueEncoder)
+      throws IOException {
     if (nameModel instanceof EncodedCertNameModel) {
       return ((EncodedCertNameModel) nameModel).getNameData();
     }
@@ -102,7 +102,8 @@ public class CAUtils {
         for (AttributeTypeAndValueModel attrTypeAndValData : rdnData) {
           final ASN1EncodableVector attrTypeAndVal = new ASN1EncodableVector();
           attrTypeAndVal.add(attrTypeAndValData.getAttributeType());
-          attrTypeAndVal.add(attributeValueEncoder.encode(attrTypeAndValData.getAttributeType(), attrTypeAndValData.getValue()));
+          attrTypeAndVal
+              .add(attributeValueEncoder.encode(attrTypeAndValData.getAttributeType(), attrTypeAndValData.getValue()));
           rdnSet.add(new DERSequence(attrTypeAndVal));
         }
         rdnSequence.add(new DERSet(rdnSet));

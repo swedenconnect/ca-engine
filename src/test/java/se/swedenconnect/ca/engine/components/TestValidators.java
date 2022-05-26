@@ -16,15 +16,27 @@
 
 package se.swedenconnect.ca.engine.components;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertStore;
+import java.security.cert.CertificateException;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.util.encoders.Base64;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import se.swedenconnect.ca.engine.data.TestCa;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.sigval.cert.chain.AbstractPathValidator;
@@ -40,21 +52,9 @@ import se.swedenconnect.sigval.cert.validity.impl.BasicCertificateValidityChecke
 import se.swedenconnect.sigval.cert.validity.ocsp.OCSPCertificateVerifier;
 import se.swedenconnect.sigval.cert.validity.ocsp.OCSPDataLoader;
 
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertStore;
-import java.security.cert.CertificateException;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509Certificate;
-import java.util.List;
-
 /**
  * Providing certificate validator for certificates issued by a CA provider
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class TestValidators {
@@ -131,6 +131,7 @@ public class TestValidators {
     @Override public OCSPResp requestOCSPResponse(String url, OCSPReq ocspReq, int connectTimeout, int readTimeout) throws IOException {
       OCSPResponder ocspResponder = ca01.getOCSPResponder();
       if (ca01.getOCSPResponderURL().equals(url) || !enforceUrlMatch) {
+        @SuppressWarnings("resource")
         OCSPResp ocspResp = ocspResponder.handleRequest(
           OCSPRequest.getInstance(new ASN1InputStream(ocspReq.getEncoded()).readObject()));
         lastResponseB64 = Base64.toBase64String(ocspResp.getEncoded());

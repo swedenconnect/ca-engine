@@ -16,25 +16,19 @@
 
 package se.swedenconnect.ca.engine.ca.issuer;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
-import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
-import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
-import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.EncodedCertNameModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
-import se.swedenconnect.ca.engine.utils.CAUtils;
-
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import lombok.Getter;
+import lombok.Setter;
+import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
+import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
+import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
+import se.swedenconnect.ca.engine.utils.CAUtils;
 
 /**
  * Abstract class for a certificate issuer component.
@@ -47,9 +41,12 @@ import java.util.List;
 public abstract class CertificateIssuer {
 
   /** Configuration data for a certificate issuer component */
-  @Getter protected final CertificateIssuerModel certificateIssuerModel;
+  @Getter
+  protected final CertificateIssuerModel certificateIssuerModel;
+
   /** Encoder for encoding attribute values */
-  @Setter protected final AttributeValueEncoder attributeValueEncoder = new AttributeValueEncoder();
+  @Setter
+  protected AttributeValueEncoder attributeValueEncoder = new AttributeValueEncoder();
 
   /**
    * Constructor for the certificate issuer
@@ -76,7 +73,7 @@ public abstract class CertificateIssuer {
    * @return X500Name object
    * @throws IOException errors creating the X500Name object
    */
-  protected X500Name getX500Name(CertNameModel nameModel) throws IOException {
+  protected X500Name getX500Name(CertNameModel<?> nameModel) throws IOException {
     return CAUtils.getX500Name(nameModel, attributeValueEncoder);
   }
 

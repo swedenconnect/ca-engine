@@ -17,10 +17,13 @@
 package se.swedenconnect.ca.engine.revocation;
 
 /**
- * @author Martin Lindström (martin@idsec.se)
+ * Exception class for certificate revocation.
+ *
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CertificateRevocationException extends RuntimeException {
+
+  private static final long serialVersionUID = -2229186707266267663L;
 
   /**
    * Constructor
@@ -33,7 +36,7 @@ public class CertificateRevocationException extends RuntimeException {
    *
    * @param message message
    */
-  public CertificateRevocationException(String message) {
+  public CertificateRevocationException(final String message) {
     super(message);
   }
 
@@ -43,7 +46,7 @@ public class CertificateRevocationException extends RuntimeException {
    * @param message message
    * @param cause cause
    */
-  public CertificateRevocationException(String message, Throwable cause) {
+  public CertificateRevocationException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
@@ -52,7 +55,7 @@ public class CertificateRevocationException extends RuntimeException {
    *
    * @param cause cause
    */
-  public CertificateRevocationException(Throwable cause) {
+  public CertificateRevocationException(final Throwable cause) {
     super(cause);
   }
 
@@ -64,7 +67,8 @@ public class CertificateRevocationException extends RuntimeException {
    * @param enableSuppression enable suppression
    * @param writableStackTrace writable stack trace
    */
-  public CertificateRevocationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+  public CertificateRevocationException(final String message, final Throwable cause, final boolean enableSuppression,
+      final boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }
 }

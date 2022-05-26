@@ -19,10 +19,12 @@ package se.swedenconnect.ca.engine.ca.issuer;
 /**
  * Exception thrown as a result of failure to issue a certificate
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CertificateIssuanceException extends RuntimeException {
+
+  /** For serializing. */
+  private static final long serialVersionUID = 8463084075292154476L;
 
   /**
    * Constructor
@@ -33,7 +35,8 @@ public class CertificateIssuanceException extends RuntimeException {
   /**
    * Constructor
    *
-   * @param message message
+   * @param message
+   *          message
    */
   public CertificateIssuanceException(String message) {
     super(message);
@@ -42,8 +45,10 @@ public class CertificateIssuanceException extends RuntimeException {
   /**
    * Constructor
    *
-   * @param message message
-   * @param cause cause
+   * @param message
+   *          message
+   * @param cause
+   *          cause
    */
   public CertificateIssuanceException(String message, Throwable cause) {
     super(message, cause);
@@ -52,7 +57,8 @@ public class CertificateIssuanceException extends RuntimeException {
   /**
    * Constructor
    *
-   * @param cause cause
+   * @param cause
+   *          cause
    */
   public CertificateIssuanceException(Throwable cause) {
     super(cause);
@@ -61,10 +67,14 @@ public class CertificateIssuanceException extends RuntimeException {
   /**
    * Constructor
    *
-   * @param message message
-   * @param cause cause
-   * @param enableSuppression enable suppression
-   * @param writableStackTrace writable stack trace
+   * @param message
+   *          message
+   * @param cause
+   *          cause
+   * @param enableSuppression
+   *          enable suppression
+   * @param writableStackTrace
+   *          writable stack trace
    */
   public CertificateIssuanceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);

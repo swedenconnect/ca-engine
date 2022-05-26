@@ -16,11 +16,19 @@
 
 package se.swedenconnect.ca.engine.components;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -40,17 +48,9 @@ import se.swedenconnect.ca.engine.revocation.ocsp.OCSPModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.ca.engine.revocation.ocsp.impl.RepositoryBasedOCSPResponder;
 
-import java.io.File;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * This class when instantiated creates 2 CA services and related revocation services for CRL adn OCSP revocation checking.
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
@@ -84,7 +84,7 @@ public class TestCAProvider {
   private BasicIssuerCAService createIssuerCA() throws Exception {
     log.info("Generating ca key for {}", caConfig.getId());
     KeyPair kp = caConfig.getCaKeyPair();
-    CertNameModel name = getCAName(caConfig.getCaName());
+    CertNameModel<?> name = getCAName(caConfig.getCaName());
     DefaultCertificateModelBuilder builder = rootCA.getCertificateModelBuilder(name, kp.getPublic());
 
     // Add OCSP capability if there is not OSCP key
@@ -112,7 +112,7 @@ public class TestCAProvider {
 
     log.info("Generating root ca key for {}", caConfig.getId());
     KeyPair kp = caConfig.getRootKeyPair();
-    CertNameModel name = getCAName(caConfig.getRootName());
+    CertNameModel<?> name = getCAName(caConfig.getRootName());
 
     CertificateModelBuilder builder = SelfIssuedCertificateModelBuilder.getInstance(kp, certificateIssuer.getCertificateIssuerModel())
       .subject(name)
@@ -126,7 +126,7 @@ public class TestCAProvider {
     return new BasicRootCAService(kp.getPrivate(), rootCA01Cert, new TestCARepository(crlFile), crlFile, caConfig.getRootAlgo());
   }
 
-  private CertNameModel getCAName(String commonName) {
+  private CertNameModel<?> getCAName(String commonName) {
     return new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder()
         .attributeType(CertAttributes.C)

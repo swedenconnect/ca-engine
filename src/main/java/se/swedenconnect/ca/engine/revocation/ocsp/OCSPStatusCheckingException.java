@@ -20,23 +20,25 @@ import lombok.Getter;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 
 /**
- * Exception thrown when determining the status of a requested certificate in a OCSP request.
- * The response status passed in the request is stored in the exception.
+ * Exception thrown when determining the status of a requested certificate in a OCSP request. The response status passed
+ * in the request is stored in the exception.
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class OCSPStatusCheckingException extends CertificateRevocationException {
 
+  private static final long serialVersionUID = 3569421905622192155L;
+
   /** The response status that should be returned in the OCSP response */
-  @Getter final int responseStatus;
+  @Getter
+  final int responseStatus;
 
   /**
    * Constructor
    *
    * @param responseStatus response status
    */
-  public OCSPStatusCheckingException(int responseStatus) {
+  public OCSPStatusCheckingException(final int responseStatus) {
     this.responseStatus = responseStatus;
   }
 
@@ -46,7 +48,7 @@ public class OCSPStatusCheckingException extends CertificateRevocationException 
    * @param message message
    * @param responseStatus response status
    */
-  public OCSPStatusCheckingException(String message, int responseStatus) {
+  public OCSPStatusCheckingException(final String message, final int responseStatus) {
     super(message);
     this.responseStatus = responseStatus;
   }
@@ -58,7 +60,7 @@ public class OCSPStatusCheckingException extends CertificateRevocationException 
    * @param cause cause
    * @param responseStatus response status
    */
-  public OCSPStatusCheckingException(String message, Throwable cause, int responseStatus) {
+  public OCSPStatusCheckingException(final String message, final Throwable cause, final int responseStatus) {
     super(message, cause);
     this.responseStatus = responseStatus;
   }
@@ -69,7 +71,7 @@ public class OCSPStatusCheckingException extends CertificateRevocationException 
    * @param cause cause
    * @param responseStatus response status
    */
-  public OCSPStatusCheckingException(Throwable cause, int responseStatus) {
+  public OCSPStatusCheckingException(final Throwable cause, final int responseStatus) {
     super(cause);
     this.responseStatus = responseStatus;
   }
@@ -83,8 +85,9 @@ public class OCSPStatusCheckingException extends CertificateRevocationException 
    * @param writableStackTrace writable stack trace
    * @param responseStatus response status
    */
-  public OCSPStatusCheckingException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace,
-    int responseStatus) {
+  public OCSPStatusCheckingException(final String message, final Throwable cause, final boolean enableSuppression,
+      final boolean writableStackTrace,
+      final int responseStatus) {
     super(message, cause, enableSuppression, writableStackTrace);
     this.responseStatus = responseStatus;
   }

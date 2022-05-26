@@ -16,20 +16,6 @@
 
 package se.swedenconnect.ca.engine.components;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
-import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
-import org.bouncycastle.asn1.x500.RDN;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
-import se.swedenconnect.ca.engine.data.TestCa;
-import se.swedenconnect.ca.engine.data.TestData;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,10 +30,29 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
+import se.swedenconnect.ca.engine.data.TestCa;
+import se.swedenconnect.ca.engine.data.TestData;
+
 /**
  * Utility function for test
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class TestUtils {
@@ -78,7 +83,6 @@ public class TestUtils {
 
   public static KeyPair generateKeyPair(KeyType algorithm, Object spec) throws NoSuchAlgorithmException,
     InvalidAlgorithmParameterException {
-    KeyPair kp;
     KeyPairGenerator generator;
     generator = KeyPairGenerator.getInstance(algorithm.name(), new BouncyCastleProvider());
     if (spec instanceof AlgorithmParameterSpec) {

@@ -16,35 +16,33 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Setter;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.EntityType;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModelUtils;
 import se.swedenconnect.cert.extensions.SubjectInformationAccess;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Model for subject and authority information access extensions.
- * The subject boolean flag determines the type of extension created.
+ * Model for subject and authority information access extensions. The subject boolean flag determines the type of
+ * extension created.
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class InformationAccessModel extends AbstractExtensionModel {
 
   /** CA Repository OID */
@@ -61,7 +59,7 @@ public class InformationAccessModel extends AbstractExtensionModel {
   private boolean critical = false;
 
   /** List of access descriptions */
-  private List<AccessDescriptionParams> accessDescriptionList;
+  private final List<AccessDescriptionParams> accessDescriptionList;
 
   /**
    * Constructor
@@ -69,40 +67,42 @@ public class InformationAccessModel extends AbstractExtensionModel {
    * @param entityType entity type (subject or issuer)
    * @param accessDescriptionParams information access data
    */
-  public InformationAccessModel(EntityType entityType, AccessDescriptionParams... accessDescriptionParams) {
+  public InformationAccessModel(final EntityType entityType, final AccessDescriptionParams... accessDescriptionParams) {
     this.entityType = entityType;
     this.accessDescriptionList = Arrays.asList(accessDescriptionParams);
   }
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
     return new ExtensionMetadata(
-      entityType.equals(EntityType.subject) ? Extension.subjectInfoAccess : Extension.authorityInfoAccess,
-      entityType.equals(EntityType.subject) ? "SubjectInfoAccess" : "AuthorityInfoAccess",
-      critical
-    );
+        this.entityType.equals(EntityType.subject) ? Extension.subjectInfoAccess : Extension.authorityInfoAccess,
+        this.entityType.equals(EntityType.subject) ? "SubjectInfoAccess" : "AuthorityInfoAccess",
+        this.critical);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    if (accessDescriptionList == null || accessDescriptionList.isEmpty()) {
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    if (this.accessDescriptionList == null || this.accessDescriptionList.isEmpty()) {
       throw new CertificateIssuanceException("The Access Info extension MUST contain at least one access description");
     }
-    List<AccessDescription> distributionPointList = new ArrayList<>();
+    final List<AccessDescription> distributionPointList = new ArrayList<>();
 
-    for (AccessDescriptionParams adp : accessDescriptionList) {
+    for (final AccessDescriptionParams adp : this.accessDescriptionList) {
 
-      String accessPointURI = adp.accessLocationURI;
-      ASN1ObjectIdentifier accessMethod = adp.getAccessMethod();
+      final String accessPointURI = adp.accessLocationURI;
+      final ASN1ObjectIdentifier accessMethod = adp.getAccessMethod();
       ExtensionModelUtils.testUriString(accessPointURI);
       distributionPointList.add(new AccessDescription(accessMethod, new GeneralName(6, accessPointURI)));
     }
 
-    AccessDescription[] accessDescriptions = distributionPointList.toArray(new AccessDescription[distributionPointList.size()]);
+    final AccessDescription[] accessDescriptions =
+        distributionPointList.toArray(new AccessDescription[distributionPointList.size()]);
 
-    ASN1Object infoAccessExt = entityType.equals(EntityType.subject)
-      ? new SubjectInformationAccess(accessDescriptions)
-      : new AuthorityInformationAccess(accessDescriptions);
+    final ASN1Object infoAccessExt = this.entityType.equals(EntityType.subject)
+        ? new SubjectInformationAccess(accessDescriptions)
+        : new AuthorityInformationAccess(accessDescriptions);
     return infoAccessExt;
   }
 

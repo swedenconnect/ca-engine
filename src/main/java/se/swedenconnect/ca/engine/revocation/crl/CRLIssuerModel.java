@@ -16,48 +16,65 @@
 
 package se.swedenconnect.ca.engine.revocation.crl;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Calendar;
+
 import org.bouncycastle.asn1.x509.ReasonFlags;
 import org.bouncycastle.cert.X509CertificateHolder;
 
-import java.util.Calendar;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Model holding configuration data for a CRL issuer
+ * Model holding configuration data for a CRL issuer.
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Getter
-@Slf4j
 public class CRLIssuerModel {
 
   /** Issuer certificate of the CRL issuer */
   private final X509CertificateHolder issuerCertificate;
+
   /** Algorithm used to sign CRLs */
   private final String algorithm;
+
   /** Provider of revocation data */
   private final CRLRevocationDataProvider CRLRevocationDataProvider;
+
   /** The distribution point URL for this CRL (null if the CRL is published on multiple locations) */
   private final String distributionPointUrl;
+
   /** Offset type for altering revocation time from current time */
-  @Setter private int startOffsetType = Calendar.MINUTE;
+  @Setter
+  private int startOffsetType = Calendar.MINUTE;
+
   /** Offset amount for altering revocation time from current time */
-  @Setter private int startOffsetAmount = -15;
+  @Setter
+  private int startOffsetAmount = -15;
+
   /** Time type for defining CRL next update time */
-  @Setter private int expiryOffsetType = Calendar.HOUR;
+  @Setter
+  private int expiryOffsetType = Calendar.HOUR;
+
   /** Time amount for defining CRL next update time */
-  @Setter private int expiryOffsetAmount = 2;
+  @Setter
+  private int expiryOffsetAmount = 2;
+
   /** true to mark that the CRL only contains EE certificates */
-  @Setter boolean onlyEECerts = false;
+  @Setter
+  boolean onlyEECerts = false;
+
   /** true ot mark that the CRL only contains CA certificates */
-  @Setter boolean onlyCACerts = false;
+  @Setter
+  boolean onlyCACerts = false;
+
   /** Specifies that the CRL only supports the specified reasons */
-  @Setter ReasonFlags onlySomeReasons = null;
+  @Setter
+  ReasonFlags onlySomeReasons = null;
+
   /** true if this is an indirect CRL */
-  @Setter boolean indirectCrl = false;
+  @Setter
+  boolean indirectCrl = false;
 
   /**
    * Constructs a CRL issuer model. The number of validity hours can be overwritten with a more suitable type and amount
@@ -65,9 +82,8 @@ public class CRLIssuerModel {
    * expirtyOffsetType is changed to Calendar.YEAR, then the CRL will expire in 1 year.
    *
    * <p>
-   *   Note also that one CRLIssuerModel will issue just one CRL at one publication location. If other CRL:s are issued
-   *   to other locations, they need their own CRL issuer model. This is because the CRLDP location is written into each
-   *   CRL.
+   * Note also that one CRLIssuerModel will issue just one CRL at one publication location. If other CRL:s are issued to
+   * other locations, they need their own CRL issuer model. This is because the CRLDP location is written into each CRL.
    * </p>
    *
    * @param issuerCertificate issuer certificates of the CRL issuing CA
@@ -76,8 +92,8 @@ public class CRLIssuerModel {
    * @param CRLRevocationDataProvider CRL revocation data provider handling revocation processing
    * @param distributionPointUrl the URL where the URL will be published
    */
-  public CRLIssuerModel(X509CertificateHolder issuerCertificate, String algorithm, int validHours,
-    CRLRevocationDataProvider CRLRevocationDataProvider, String distributionPointUrl) {
+  public CRLIssuerModel(final X509CertificateHolder issuerCertificate, final String algorithm, final int validHours,
+      final CRLRevocationDataProvider CRLRevocationDataProvider, final String distributionPointUrl) {
     this.issuerCertificate = issuerCertificate;
     this.expiryOffsetAmount = validHours;
     this.algorithm = algorithm;

@@ -24,7 +24,6 @@ import se.swedenconnect.sigval.cert.validity.crl.CRLCache;
 /**
  * Components of a certificate validator used for test
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Data

@@ -16,114 +16,128 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
 
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.x509.*;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModelUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x509.CertificatePolicies;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.PolicyInformation;
+import org.bouncycastle.asn1.x509.PolicyQualifierId;
+import org.bouncycastle.asn1.x509.PolicyQualifierInfo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModelUtils;
+
 /**
- * Provides data for creating a certificate policies extension
- * This model does only support explicit text option of qualifiers and CPS URI
- * in accordance with RFC 5280 recommendations
+ * Provides data for creating a certificate policies extension. This model does only support explicit text option of
+ * qualifiers and CPS URI in accordance with RFC 5280 recommendations.
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class CertificatePolicyModel extends AbstractExtensionModel {
 
   /** Any policy object identifier */
   public static final ASN1ObjectIdentifier ANY_POLICY = new ASN1ObjectIdentifier("2.5.29.32.0");
 
   /** indicates if this extension should be critical */
-  @Setter private boolean critical = false;
+  @Setter
+  private boolean critical = false;
 
   /** indicates if the 200 character limit of explicit text is enforced */
-  @Setter private boolean enforce200CharLimit = true;
+  @Setter
+  private boolean enforce200CharLimit = true;
 
   /** Policy oid and qualifier parameters */
-  private List<PolicyInfoParams> policyInfoParamsList;
+  private final List<PolicyInfoParams> policyInfoParamsList;
 
   /**
    * Constuctor
    *
    * @param anyPolicy set to true to include an any policy identifier (OID 2.5.29.32.0)
    */
-  public CertificatePolicyModel(boolean anyPolicy) {
-    policyInfoParamsList = anyPolicy
-      ? Arrays.asList(PolicyInfoParams.builder().policy(ANY_POLICY).build())
-      : new ArrayList<>();
+  public CertificatePolicyModel(final boolean anyPolicy) {
+    this.policyInfoParamsList = anyPolicy
+        ? Arrays.asList(PolicyInfoParams.builder().policy(ANY_POLICY).build())
+        : new ArrayList<>();
   }
 
   /**
    * Constructor
    *
-   * @param critical          criticality of the extension
+   * @param critical criticality of the extension
    * @param certificatePolicy one or more certificate policy object identifiers
    */
-  public CertificatePolicyModel(boolean critical, ASN1ObjectIdentifier... certificatePolicy) {
+  public CertificatePolicyModel(final boolean critical, final ASN1ObjectIdentifier... certificatePolicy) {
     this.critical = critical;
-    policyInfoParamsList = Arrays.asList(certificatePolicy).stream()
-      .map(asn1ObjectIdentifier -> PolicyInfoParams.builder().policy(asn1ObjectIdentifier).build())
-      .collect(Collectors.toList());
+    this.policyInfoParamsList = Arrays.asList(certificatePolicy).stream()
+        .map(asn1ObjectIdentifier -> PolicyInfoParams.builder().policy(asn1ObjectIdentifier).build())
+        .collect(Collectors.toList());
   }
 
   /**
    * Constructor
    *
-   * @param critical             criticality of the extension
-   * @param policyInfoParamsList list of policy information model objects holding information about a policy and its qualifiers
+   * @param critical criticality of the extension
+   * @param policyInfoParamsList list of policy information model objects holding information about a policy and its
+   *          qualifiers
    */
   public CertificatePolicyModel(
-    boolean critical, List<PolicyInfoParams> policyInfoParamsList) {
+      final boolean critical, final List<PolicyInfoParams> policyInfoParamsList) {
     this.critical = critical;
     this.policyInfoParamsList = policyInfoParamsList;
   }
 
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    if (policyInfoParamsList == null || policyInfoParamsList.isEmpty()) {
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    if (this.policyInfoParamsList == null || this.policyInfoParamsList.isEmpty()) {
       throw new CertificateIssuanceException("The Certificate Policies extension MUST contain at least one policy");
     }
-    List<PolicyInformation> policyInformationList = new ArrayList<>();
+    final List<PolicyInformation> policyInformationList = new ArrayList<>();
 
-    for (PolicyInfoParams pip : policyInfoParamsList) {
+    for (final PolicyInfoParams pip : this.policyInfoParamsList) {
 
       if (pip.getPolicy() == null) {
         throw new CertificateIssuanceException("Policy information contains a null policy");
       }
-      ASN1Sequence qualifiers = getPolicyQualifiers(pip);
+      final ASN1Sequence qualifiers = this.getPolicyQualifiers(pip);
       policyInformationList.add(new PolicyInformation(pip.getPolicy(), qualifiers));
     }
 
-    CertificatePolicies certificatePolicies = new CertificatePolicies(
-      policyInformationList.toArray(new PolicyInformation[policyInformationList.size()])
-    );
+    final CertificatePolicies certificatePolicies = new CertificatePolicies(
+        policyInformationList.toArray(new PolicyInformation[policyInformationList.size()]));
 
     return certificatePolicies;
   }
 
-  @Override protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(Extension.certificatePolicies, "Certificate policies", critical);
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
+    return new ExtensionMetadata(Extension.certificatePolicies, "Certificate policies", this.critical);
   }
 
-  private ASN1Sequence getPolicyQualifiers(PolicyInfoParams pip) throws CertificateIssuanceException {
-    String cpsUri = pip.getCpsUri();
+  private ASN1Sequence getPolicyQualifiers(final PolicyInfoParams pip) throws CertificateIssuanceException {
+    final String cpsUri = pip.getCpsUri();
     String displayText = pip.getDisplayText();
     if (StringUtils.isBlank(cpsUri) && StringUtils.isBlank(displayText)) {
       // No qualifiers. Return null qualifiers
       return null;
     }
     // Set the present qualifiers
-    ASN1EncodableVector policyQualifierInfoSequence = new ASN1EncodableVector();
+    final ASN1EncodableVector policyQualifierInfoSequence = new ASN1EncodableVector();
 
     if (StringUtils.isNotBlank(cpsUri)) {
       ExtensionModelUtils.testUriString(cpsUri);
@@ -131,12 +145,13 @@ public class CertificatePolicyModel extends AbstractExtensionModel {
     }
     displayText = displayText.trim();
     if (StringUtils.isNotBlank(displayText)) {
-      if (enforce200CharLimit && displayText.length() > 200) {
+      if (this.enforce200CharLimit && displayText.length() > 200) {
         throw new CertificateIssuanceException("Qualifier display text exceeds maximum length of 200 characters");
       }
-      ASN1EncodableVector userNoticeSequence = new ASN1EncodableVector();
+      final ASN1EncodableVector userNoticeSequence = new ASN1EncodableVector();
       userNoticeSequence.add(new DERUTF8String(displayText));
-      policyQualifierInfoSequence.add(new PolicyQualifierInfo(PolicyQualifierId.id_qt_unotice, new DERSequence(userNoticeSequence)));
+      policyQualifierInfoSequence
+          .add(new PolicyQualifierInfo(PolicyQualifierId.id_qt_unotice, new DERSequence(userNoticeSequence)));
     }
     return new DERSequence(policyQualifierInfoSequence);
   }

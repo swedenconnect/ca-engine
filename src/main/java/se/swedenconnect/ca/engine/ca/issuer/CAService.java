@@ -16,8 +16,14 @@
 
 package se.swedenconnect.ca.engine.ca.issuer;
 
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.util.Date;
+import java.util.List;
+
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelBuilder;
@@ -25,62 +31,68 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 
-import java.math.BigInteger;
-import java.security.PublicKey;
-import java.util.Date;
-import java.util.List;
-
 /**
- * Interface for a CA service
+ * Interface for a CA service.
  * <p>
  * The CA service provides the collective core services of a CA including certificate issuance and revocation.
  * <p>
- * This interface is not necessary to provide a CA service, but it can be a convenient collection point that consolidates
- * all the parts of the CA service and its core functions.
+ * This interface is not necessary to provide a CA service, but it can be a convenient collection point that
+ * consolidates all the parts of the CA service and its core functions.
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public interface CAService {
 
   /**
-   * Get a base model builder for a certificate to be issued. This model builder is populated with default properties for certificates
-   * issued by this CA.
+   * Get a base model builder for a certificate to be issued. This model builder is populated with default properties
+   * for certificates issued by this CA.
    *
-   * @param subject   subject name
-   * @param publicKey public key to be certified in the certificate
+   * @param subject
+   *          subject name
+   * @param publicKey
+   *          public key to be certified in the certificate
    * @return {@link CertificateModel}
-   * @throws CertificateIssuanceException errors creating certificate model
-   *                                      Get the CRL issuer instance for this CA service
+   * @throws CertificateIssuanceException
+   *           errors creating certificate model Get the CRL issuer instance for this CA service
    */
-  CertificateModelBuilder getCertificateModelBuilder(CertNameModel subject, PublicKey publicKey) throws CertificateIssuanceException;
+  CertificateModelBuilder getCertificateModelBuilder(CertNameModel<?> subject, PublicKey publicKey) throws CertificateIssuanceException;
 
   /**
    * Issue and register a new certificate based on a certificate model
    *
-   * @param certificateModel certificate model
+   * @param certificateModel
+   *          certificate model
    * @return issued certificate
-   * @throws CertificateIssuanceException errors issuing the certificate
+   * @throws CertificateIssuanceException
+   *           errors issuing the certificate
    */
   X509CertificateHolder issueCertificate(CertificateModel certificateModel) throws CertificateIssuanceException;
 
   /**
    * Revoke a certificate issued by the CA service with unspecified reason
    *
-   * @param serialNumber   serial number of the issued certificate
-   * @param revocationDate revocation time
-   * @throws CertificateRevocationException errors revoking the certificate
+   * @param serialNumber
+   *          serial number of the issued certificate
+   * @param revocationDate
+   *          revocation time
+   * @throws CertificateRevocationException
+   *           errors revoking the certificate
    */
   void revokeCertificate(BigInteger serialNumber, Date revocationDate) throws CertificateRevocationException;
 
   /**
-   * Revoke a certificate issued by the CA service. The revocation request MUST be rejected if the specified serial number
-   * does not exist or if the certificate with this serial number has already been revoked with a reason other than certificate hold
+   * Revoke a certificate issued by the CA service. The revocation request MUST be rejected if the specified serial
+   * number does not exist or if the certificate with this serial number has already been revoked with a reason other
+   * than certificate hold
    *
-   * @param serialNumber   serial number of the issued certificate
-   * @param reason         reason code
-   * @param revocationDate revocation time
-   * @throws CertificateRevocationException errors revoking the certificate
+   * @param serialNumber
+   *          serial number of the issued certificate
+   * @param reason
+   *          reason code
+   * @param revocationDate
+   *          revocation time
+   * @throws CertificateRevocationException
+   *           errors revoking the certificate
    */
   void revokeCertificate(BigInteger serialNumber, int reason, Date revocationDate) throws CertificateRevocationException;
 
@@ -88,7 +100,8 @@ public interface CAService {
    * Publish a new CRL from the CA service
    *
    * @return the newly published CRL or null if no CRL was issued.
-   * @throws CertificateRevocationException errors revoking the certificate
+   * @throws CertificateRevocationException
+   *           errors revoking the certificate
    */
   X509CRLHolder publishNewCrl() throws CertificateRevocationException;
 
@@ -99,7 +112,6 @@ public interface CAService {
    */
   X509CRLHolder getCurrentCrl();
 
-
   /**
    * Getter for the CA certificate of this service
    *
@@ -109,6 +121,7 @@ public interface CAService {
 
   /**
    * Returns the current configured certificate chain to a trusted root
+   *
    * @return CA certificate chain with the CA certificate first and the trust anchor last in the list
    */
   List<X509CertificateHolder> getCACertificateChain();
@@ -129,27 +142,30 @@ public interface CAService {
 
   /**
    * Getter for the OCSP responder certificate
+   *
    * @return OCSP responder certificate or null of the CA has no OCSP responder
    */
   X509CertificateHolder getOCSPResponderCertificate();
 
   /**
    * Getter for the URI identifier of the algorithm used by the CA to sign certificates
+   *
    * @return CA signing algorithm URI identifier
    */
   String getCaAlgorithm();
 
   /**
    * Getter for the CRL distribution point URLs of this CA
+   *
    * @return List of CRL distribution point URL
    */
   List<String> getCrlDpURLs();
 
   /**
    * The OCSP responder URL for this CA, if present
+   *
    * @return OCSP responder URL
    */
   String getOCSPResponderURL();
-
 
 }
