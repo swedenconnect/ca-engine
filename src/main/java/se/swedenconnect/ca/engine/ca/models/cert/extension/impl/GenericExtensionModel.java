@@ -16,30 +16,27 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 
 /**
- * Generic certificate extension model that can be used to build any extension based on ASN.1 data structure
+ * Generic certificate extension model that can be used to build any extension based on ASN.1 data structure.
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class GenericExtensionModel extends AbstractExtensionModel {
 
   /** Extension OID */
-  private ASN1ObjectIdentifier oid;
+  private final ASN1ObjectIdentifier oid;
 
   /** Extension data */
-  private ASN1Object extensionObject;
+  private final ASN1Object extensionObject;
 
   /** Extension criticality */
-  private boolean critical;
+  private final boolean critical;
 
   /**
    * Create extension model
@@ -47,7 +44,7 @@ public class GenericExtensionModel extends AbstractExtensionModel {
    * @param oid extension OID
    * @param extensionObject extension data
    */
-  public GenericExtensionModel(ASN1ObjectIdentifier oid, ASN1Object extensionObject) {
+  public GenericExtensionModel(final ASN1ObjectIdentifier oid, final ASN1Object extensionObject) {
     this.oid = oid;
     this.extensionObject = extensionObject;
     this.critical = false;
@@ -60,7 +57,8 @@ public class GenericExtensionModel extends AbstractExtensionModel {
    * @param extensionObject extension data
    * @param critical extension criticality
    */
-  public GenericExtensionModel(ASN1ObjectIdentifier oid, ASN1Object extensionObject, boolean critical) {
+  public GenericExtensionModel(final ASN1ObjectIdentifier oid, final ASN1Object extensionObject,
+      final boolean critical) {
     this.oid = oid;
     this.extensionObject = extensionObject;
     this.critical = critical;
@@ -71,8 +69,9 @@ public class GenericExtensionModel extends AbstractExtensionModel {
    *
    * @return {@link ExtensionMetadata}
    */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(oid, "certificate", critical);
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
+    return new ExtensionMetadata(this.oid, "certificate", this.critical);
   }
 
   /**
@@ -81,7 +80,8 @@ public class GenericExtensionModel extends AbstractExtensionModel {
    * @return {@link ASN1Object} data
    * @throws CertificateIssuanceException error parsing data
    */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return extensionObject;
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    return this.extensionObject;
   }
 }

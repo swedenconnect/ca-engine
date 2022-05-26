@@ -16,9 +16,19 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
-import lombok.Getter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.AccessDescription;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.KeyUsage;
+
+import lombok.Getter;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
@@ -29,58 +39,78 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CRLDistPointsMod
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.InformationAccessModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.*;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AlternativeNameModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AuthnContextModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.OCSPNoCheckModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.QCStatementsExtensionModel;
 import se.swedenconnect.cert.extensions.QCStatements;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.*;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Abstract implementation of the certificate model builder interface
  *
  * @param <T> The class of the implementation of this abstract class
- * @author Martin Lindström (martin@idsec.se)
+ *
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Getter
-public abstract class AbstractCertificateModelBuilder<T extends CertificateModelBuilder> implements CertificateModelBuilder {
+public abstract class AbstractCertificateModelBuilder<T extends CertificateModelBuilder>
+    implements CertificateModelBuilder {
 
   /** Certificate subject name */
   protected CertNameModel<?> subject;
+
   /** Subject alternative name indexed by the subject alt name type identifier */
   protected Map<Integer, List<String>> subjectAltNames;
+
   /** Criticality of subjectAltName extension */
   protected boolean subjectAltNameCritical = false;
+
   /** Basic constraints model */
   protected BasicConstraintsModel basicConstraints;
+
   /** true if an Authority key identifier is to be included */
   protected boolean includeAki;
+
   /** true if an Subject key identifier is to be included */
   protected boolean includeSki;
+
   /** key usage settings according to X.509 see {@link KeyUsage} */
   protected KeyUsageModel keyUsage;
+
   /** Extended key usage model */
   protected ExtendedKeyUsageModel extendedKeyUsage;
+
   /** List of CRL distribution point URL:s */
   protected List<String> crlDistributionPoints;
+
   /** URL for an OCSP service authorized for the issued certificate */
   protected String ocspServiceUrl;
+
   /** URL where the issuer certificate is published */
   protected String issuerCertUrl;
+
   /** URL where certificates issued by the CA of this certificate are located */
   protected String caRepositoryUrl;
+
   /** URL where the timestamp service represented by this certificate is located */
   protected String timeStampAuthorityUrl;
+
   /** Certificate policy model */
   protected CertificatePolicyModel certificatePolicy;
+
   /** SAML authentication context model */
   protected SAMLAuthContext authenticationContext;
+
   /** QC statements */
   protected QCStatements qcStatements;
+
   /** true to include an OCSP no check extension */
   protected boolean ocspNocheck;
+
   /** subject attributes extension model */
   protected SubjDirectoryAttributesModel subjectDirectoryAttributes;
 
@@ -90,7 +120,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param subject certificate subject name
    * @return this builder
    */
-  public T subject(CertNameModel<?> subject) {
+  @SuppressWarnings("unchecked")
+  public T subject(final CertNameModel<?> subject) {
     this.subject = subject;
     return (T) this;
   }
@@ -101,12 +132,14 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param simpleSubjectAltNames simple data input with single value per type
    * @return this builder
    */
-  public T subjectAltNames(Map<Integer, String> simpleSubjectAltNames) {
+  @SuppressWarnings("unchecked")
+  public T subjectAltNames(final Map<Integer, String> simpleSubjectAltNames) {
     Map<Integer, List<String>> extendedSubjectAltNameMap = null;
-    if (simpleSubjectAltNames != null){
+    if (simpleSubjectAltNames != null) {
       extendedSubjectAltNameMap = new HashMap<>();
-      for (Integer generalNameIndex : simpleSubjectAltNames.keySet()){
-        extendedSubjectAltNameMap.put(generalNameIndex, Collections.singletonList(simpleSubjectAltNames.get(generalNameIndex)));
+      for (final Integer generalNameIndex : simpleSubjectAltNames.keySet()) {
+        extendedSubjectAltNameMap.put(generalNameIndex,
+            Collections.singletonList(simpleSubjectAltNames.get(generalNameIndex)));
       }
     }
     this.subjectAltNameCritical = false;
@@ -121,7 +154,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param subjectAltNames subject alt name data
    * @return this builder
    */
-  public T subjectAltNames(boolean critical, Map<Integer, List<String>> subjectAltNames) {
+  @SuppressWarnings("unchecked")
+  public T subjectAltNames(final boolean critical, final Map<Integer, List<String>> subjectAltNames) {
     this.subjectAltNames = subjectAltNames;
     this.subjectAltNameCritical = critical;
     return (T) this;
@@ -133,7 +167,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param basicConstraints basic constraints data
    * @return this builder
    */
-  public T basicConstraints(BasicConstraintsModel basicConstraints) {
+  @SuppressWarnings("unchecked")
+  public T basicConstraints(final BasicConstraintsModel basicConstraints) {
     this.basicConstraints = basicConstraints;
     return (T) this;
   }
@@ -144,7 +179,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param includeAki true to include AKI
    * @return this builder
    */
-  public T includeAki(boolean includeAki) {
+  @SuppressWarnings("unchecked")
+  public T includeAki(final boolean includeAki) {
     this.includeAki = includeAki;
     return (T) this;
   }
@@ -155,7 +191,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param includeSki true to include SKI
    * @return this builder
    */
-  public T includeSki(boolean includeSki) {
+  @SuppressWarnings("unchecked")
+  public T includeSki(final boolean includeSki) {
     this.includeSki = includeSki;
     return (T) this;
   }
@@ -166,7 +203,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param keyUsage key usage
    * @return this builder
    */
-  public T keyUsage(KeyUsageModel keyUsage) {
+  @SuppressWarnings("unchecked")
+  public T keyUsage(final KeyUsageModel keyUsage) {
     this.keyUsage = keyUsage;
     return (T) this;
   }
@@ -177,7 +215,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param extendedKeyUsage extended key usage
    * @return this builder
    */
-  public T extendedKeyUsage(ExtendedKeyUsageModel extendedKeyUsage) {
+  @SuppressWarnings("unchecked")
+  public T extendedKeyUsage(final ExtendedKeyUsageModel extendedKeyUsage) {
     this.extendedKeyUsage = extendedKeyUsage;
     return (T) this;
   }
@@ -188,7 +227,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param crlDistributionPoints CRL distribution points
    * @return this builder
    */
-  public T crlDistributionPoints(List<String> crlDistributionPoints) {
+  @SuppressWarnings("unchecked")
+  public T crlDistributionPoints(final List<String> crlDistributionPoints) {
     this.crlDistributionPoints = crlDistributionPoints;
     return (T) this;
   }
@@ -199,7 +239,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param ocspServiceUrl OCSP service URL
    * @return this builder
    */
-  public T ocspServiceUrl(String ocspServiceUrl) {
+  @SuppressWarnings("unchecked")
+  public T ocspServiceUrl(final String ocspServiceUrl) {
     this.ocspServiceUrl = ocspServiceUrl;
     return (T) this;
   }
@@ -210,7 +251,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param issuerCertUrl issuer certificate URL
    * @return this builder
    */
-  public T issuerCertUrl(String issuerCertUrl) {
+  @SuppressWarnings("unchecked")
+  public T issuerCertUrl(final String issuerCertUrl) {
     this.issuerCertUrl = issuerCertUrl;
     return (T) this;
   }
@@ -221,7 +263,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param caRepositoryUrl CA repository URL
    * @return this builder
    */
-  public T caRepositoryUrl(String caRepositoryUrl) {
+  @SuppressWarnings("unchecked")
+  public T caRepositoryUrl(final String caRepositoryUrl) {
     this.caRepositoryUrl = caRepositoryUrl;
     return (T) this;
   }
@@ -232,7 +275,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param timeStampAuthorityUrl timestamp authority URL
    * @return this builder
    */
-  public T timeStampAuthorityUrl(String timeStampAuthorityUrl) {
+  @SuppressWarnings("unchecked")
+  public T timeStampAuthorityUrl(final String timeStampAuthorityUrl) {
     this.timeStampAuthorityUrl = timeStampAuthorityUrl;
     return (T) this;
   }
@@ -243,7 +287,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param certificatePolicy certificate policy data
    * @return this builder
    */
-  public T certificatePolicy(CertificatePolicyModel certificatePolicy) {
+  @SuppressWarnings("unchecked")
+  public T certificatePolicy(final CertificatePolicyModel certificatePolicy) {
     this.certificatePolicy = certificatePolicy;
     return (T) this;
   }
@@ -254,7 +299,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param authenticationContext authentication context
    * @return this builder
    */
-  public T authenticationContext(SAMLAuthContext authenticationContext) {
+  @SuppressWarnings("unchecked")
+  public T authenticationContext(final SAMLAuthContext authenticationContext) {
     this.authenticationContext = authenticationContext;
     return (T) this;
   }
@@ -265,7 +311,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param qcStatements QC statements
    * @return this builder
    */
-  public T qcStatements(QCStatements qcStatements) {
+  @SuppressWarnings("unchecked")
+  public T qcStatements(final QCStatements qcStatements) {
     this.qcStatements = qcStatements;
     return (T) this;
   }
@@ -276,7 +323,8 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param ocspNocheck true to include ocsp no-check extension
    * @return this builder
    */
-  public T ocspNocheck(boolean ocspNocheck) {
+  @SuppressWarnings("unchecked")
+  public T ocspNocheck(final boolean ocspNocheck) {
     this.ocspNocheck = ocspNocheck;
     return (T) this;
   }
@@ -287,13 +335,15 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @param subjectDirectoryAttributes subject directory attributes
    * @return this builder
    */
-  public T subjectDirectoryAttributes(SubjDirectoryAttributesModel subjectDirectoryAttributes) {
+  @SuppressWarnings("unchecked")
+  public T subjectDirectoryAttributes(final SubjDirectoryAttributesModel subjectDirectoryAttributes) {
     this.subjectDirectoryAttributes = subjectDirectoryAttributes;
     return (T) this;
   }
 
   /** {@inheritDoc} */
-  @Override public abstract CertificateModel build() throws CertificateIssuanceException;
+  @Override
+  public abstract CertificateModel build() throws CertificateIssuanceException;
 
   /**
    * Set authority and subject key identifiers
@@ -310,100 +360,106 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
    * @throws IOException errors creating extension model list
    */
   protected List<ExtensionModel> getExtensionModels() throws IOException {
-    List<ExtensionModel> extm = new ArrayList<>();
+    final List<ExtensionModel> extm = new ArrayList<>();
 
     // Basic constraints
-    if (basicConstraints != null) {
-      extm.add(basicConstraints);
+    if (this.basicConstraints != null) {
+      extm.add(this.basicConstraints);
     }
 
     // Get custom implemented key identifier extensioins
-    getKeyIdentifierExtensionsModels(extm);
+    this.getKeyIdentifierExtensionsModels(extm);
 
     // Key usage
-    if (keyUsage != null)
-      extm.add(keyUsage);
+    if (this.keyUsage != null) {
+      extm.add(this.keyUsage);
+    }
 
     // Extended key usage
-    if (extendedKeyUsage != null)
-      extm.add(extendedKeyUsage);
+    if (this.extendedKeyUsage != null) {
+      extm.add(this.extendedKeyUsage);
+    }
 
     // CRL Distribution points
-    if (crlDistributionPoints != null && !crlDistributionPoints.isEmpty()) {
-      extm.add(new CRLDistPointsModel(crlDistributionPoints));
+    if (this.crlDistributionPoints != null && !this.crlDistributionPoints.isEmpty()) {
+      extm.add(new CRLDistPointsModel(this.crlDistributionPoints));
     }
 
-    //Authority info access
-    if (StringUtils.isNotBlank(issuerCertUrl) || StringUtils.isNotBlank(ocspServiceUrl)) {
-      List<InformationAccessModel.AccessDescriptionParams> accessDescParamList = new ArrayList<>();
-      if (StringUtils.isNotBlank(issuerCertUrl)) {
+    // Authority info access
+    if (StringUtils.isNotBlank(this.issuerCertUrl) || StringUtils.isNotBlank(this.ocspServiceUrl)) {
+      final List<InformationAccessModel.AccessDescriptionParams> accessDescParamList = new ArrayList<>();
+      if (StringUtils.isNotBlank(this.issuerCertUrl)) {
         accessDescParamList.add(InformationAccessModel.AccessDescriptionParams.builder()
-          .accessMethod(AccessDescription.id_ad_caIssuers)
-          .accessLocationURI(issuerCertUrl)
-          .build());
+            .accessMethod(AccessDescription.id_ad_caIssuers)
+            .accessLocationURI(this.issuerCertUrl)
+            .build());
       }
-      if (StringUtils.isNotBlank(ocspServiceUrl)) {
+      if (StringUtils.isNotBlank(this.ocspServiceUrl)) {
         accessDescParamList.add(InformationAccessModel.AccessDescriptionParams.builder()
-          .accessMethod(AccessDescription.id_ad_ocsp)
-          .accessLocationURI(ocspServiceUrl)
-          .build());
+            .accessMethod(AccessDescription.id_ad_ocsp)
+            .accessLocationURI(this.ocspServiceUrl)
+            .build());
       }
       extm.add(new InformationAccessModel(EntityType.issuer, accessDescParamList.toArray(
-        new InformationAccessModel.AccessDescriptionParams[0])));
+          new InformationAccessModel.AccessDescriptionParams[0])));
     }
 
-    //Subject info access
-    if (StringUtils.isNotBlank(caRepositoryUrl) || StringUtils.isNotBlank(timeStampAuthorityUrl)) {
-      List<InformationAccessModel.AccessDescriptionParams> accessDescParamList = new ArrayList<>();
-      if (StringUtils.isNotBlank(caRepositoryUrl)) {
+    // Subject info access
+    if (StringUtils.isNotBlank(this.caRepositoryUrl) || StringUtils.isNotBlank(this.timeStampAuthorityUrl)) {
+      final List<InformationAccessModel.AccessDescriptionParams> accessDescParamList = new ArrayList<>();
+      if (StringUtils.isNotBlank(this.caRepositoryUrl)) {
         accessDescParamList.add(InformationAccessModel.AccessDescriptionParams.builder()
-          .accessMethod(InformationAccessModel.CA_REPOSITORY)
-          .accessLocationURI(caRepositoryUrl)
-          .build());
+            .accessMethod(InformationAccessModel.CA_REPOSITORY)
+            .accessLocationURI(this.caRepositoryUrl)
+            .build());
       }
-      if (StringUtils.isNotBlank(timeStampAuthorityUrl)) {
+      if (StringUtils.isNotBlank(this.timeStampAuthorityUrl)) {
         accessDescParamList.add(InformationAccessModel.AccessDescriptionParams.builder()
-          .accessMethod(InformationAccessModel.TIMESTAMPING)
-          .accessLocationURI(timeStampAuthorityUrl)
-          .build());
+            .accessMethod(InformationAccessModel.TIMESTAMPING)
+            .accessLocationURI(this.timeStampAuthorityUrl)
+            .build());
       }
       extm.add(new InformationAccessModel(EntityType.subject,
-        accessDescParamList.toArray(InformationAccessModel.AccessDescriptionParams[]::new)));
+          accessDescParamList.toArray(InformationAccessModel.AccessDescriptionParams[]::new)));
     }
 
     // Certificate policies
-    if (certificatePolicy != null)
-      extm.add(certificatePolicy);
+    if (this.certificatePolicy != null) {
+      extm.add(this.certificatePolicy);
+    }
 
     // Authn context
-    if (authenticationContext != null)
-      extm.add(new AuthnContextModel(authenticationContext));
+    if (this.authenticationContext != null) {
+      extm.add(new AuthnContextModel(this.authenticationContext));
+    }
 
-    //QC Statements
-    if (qcStatements != null)
-      extm.add(new QCStatementsExtensionModel(qcStatements));
+    // QC Statements
+    if (this.qcStatements != null) {
+      extm.add(new QCStatementsExtensionModel(this.qcStatements));
+    }
 
     // Subject alternative names
-    if (subjectAltNames != null && !subjectAltNames.isEmpty()) {
-      List<GeneralName> generalNameList = new ArrayList<>();
-      for (Integer generalNameIndex : subjectAltNames.keySet()){
-        final List<String> valueList = subjectAltNames.get(generalNameIndex);
-        for (String value: valueList){
+    if (this.subjectAltNames != null && !this.subjectAltNames.isEmpty()) {
+      final List<GeneralName> generalNameList = new ArrayList<>();
+      for (final Integer generalNameIndex : this.subjectAltNames.keySet()) {
+        final List<String> valueList = this.subjectAltNames.get(generalNameIndex);
+        for (final String value : valueList) {
           generalNameList.add(new GeneralName(generalNameIndex, value));
         }
       }
       final AlternativeNameModel alternativeNameModel = new AlternativeNameModel(EntityType.subject,
-        generalNameList.toArray(GeneralName[]::new));
-      alternativeNameModel.setCritical(subjectAltNameCritical);
+          generalNameList.toArray(GeneralName[]::new));
+      alternativeNameModel.setCritical(this.subjectAltNameCritical);
       extm.add(alternativeNameModel);
     }
 
-    //Subject directory attributes
-    if (subjectDirectoryAttributes != null)
-      extm.add(subjectDirectoryAttributes);
+    // Subject directory attributes
+    if (this.subjectDirectoryAttributes != null) {
+      extm.add(this.subjectDirectoryAttributes);
+    }
 
     // OCSP Nocheck
-    if (ocspNocheck) {
+    if (this.ocspNocheck) {
       extm.add(new OCSPNoCheckModel());
     }
     return extm;

@@ -16,21 +16,24 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.List;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.List;
-
 /**
- * @author Martin Lindström (martin@idsec.se)
+ * Model class for a self-issued certificate.
+ *
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class SelfIssuedCertificateModel extends CertificateModel {
 
@@ -44,9 +47,10 @@ public class SelfIssuedCertificateModel extends CertificateModel {
 
   /**
    * Constructor
+   *
    * @param privateKey private key
    */
-  public SelfIssuedCertificateModel(PrivateKey privateKey) {
+  public SelfIssuedCertificateModel(final PrivateKey privateKey) {
     this.privateKey = privateKey;
   }
 
@@ -56,7 +60,7 @@ public class SelfIssuedCertificateModel extends CertificateModel {
    * @param model certificate model
    * @param privateKey private key
    */
-  public SelfIssuedCertificateModel(CertificateModel model, PrivateKey privateKey) {
+  public SelfIssuedCertificateModel(final CertificateModel model, final PrivateKey privateKey) {
     super(model.getSubject(), model.getPublicKey(), model.getExtensionModels());
     this.privateKey = privateKey;
   }
@@ -69,8 +73,8 @@ public class SelfIssuedCertificateModel extends CertificateModel {
    * @param extensionModels extension models
    * @param privateKey private key
    */
-  public SelfIssuedCertificateModel(CertNameModel subject, PublicKey publicKey,
-    List<ExtensionModel> extensionModels, PrivateKey privateKey) {
+  public SelfIssuedCertificateModel(final CertNameModel<?> subject, final PublicKey publicKey,
+      final List<ExtensionModel> extensionModels, final PrivateKey privateKey) {
     super(subject, publicKey, extensionModels);
     this.privateKey = privateKey;
   }

@@ -16,24 +16,45 @@
 
 package se.swedenconnect.ca.engine.components;
 
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.CertPolicyId;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralSubtree;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.NameConstraints;
+import org.bouncycastle.asn1.x509.PolicyConstraints;
+import org.bouncycastle.asn1.x509.PolicyMappings;
 import org.bouncycastle.cert.X509CertificateHolder;
+
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.models.cert.*;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
+import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.EntityType;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.data.*;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.*;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.*;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.data.*;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeMappingBuilder;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeRefType;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.QCPKIXSyntax;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.QcStatementsBuilder;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.GenericExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.SubjDirectoryAttributesModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AlternativeNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.cert.extensions.InhibitAnyPolicy;
@@ -42,15 +63,6 @@ import se.swedenconnect.cert.extensions.QCStatements;
 import se.swedenconnect.cert.extensions.data.MonetaryValue;
 import se.swedenconnect.cert.extensions.data.PDSLocation;
 import se.swedenconnect.cert.extensions.data.SemanticsInformation;
-import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AlternativeNameModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
-
-import java.math.BigInteger;
-import java.security.PublicKey;
-import java.util.*;
 
 /**
  * Generating basic certificate request data for test
@@ -60,8 +72,8 @@ import java.util.*;
  */
 public class CertRequestData {
 
-  public static CertNameModel getCompleteSubjectName() {
-    CertNameModel subjectName = new ExplicitCertNameModel(Arrays.asList(
+  public static CertNameModel<?> getCompleteSubjectName() {
+    CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder()
         .attributeType(CertAttributes.C)
         .value("SE").build(),
@@ -102,8 +114,8 @@ public class CertRequestData {
     return subjectName;
   }
 
-  public static CertNameModel getTypicalSubejctName(String givenName, String surname, String id) {
-    CertNameModel subjectName = new ExplicitCertNameModel(Arrays.asList(
+  public static CertNameModel<?> getTypicalSubejctName(String givenName, String surname, String id) {
+    CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder()
         .attributeType(CertAttributes.C)
         .value("SE").build(),
@@ -123,8 +135,8 @@ public class CertRequestData {
     return subjectName;
   }
 
-  public static CertNameModel getTypicalServiceName(String commonName) {
-    CertNameModel subjectName = new ExplicitCertNameModel(Arrays.asList(
+  public static CertNameModel<?> getTypicalServiceName(String commonName) {
+    CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder()
         .attributeType(CertAttributes.C)
         .value("SE").build(),

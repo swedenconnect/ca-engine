@@ -16,10 +16,20 @@
 
 package se.swedenconnect.ca.engine;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -33,40 +43,39 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import se.idsec.signservice.security.certificate.CertificateValidator;
+import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
-import se.swedenconnect.ca.engine.components.*;
+import se.swedenconnect.ca.engine.components.BasicIssuerCAService;
+import se.swedenconnect.ca.engine.components.CertRequestData;
+import se.swedenconnect.ca.engine.components.CertValidatorComponents;
+import se.swedenconnect.ca.engine.components.TestCAProvider;
+import se.swedenconnect.ca.engine.components.TestUtils;
+import se.swedenconnect.ca.engine.components.TestValidators;
 import se.swedenconnect.ca.engine.data.TestCa;
 import se.swedenconnect.ca.engine.data.TestData;
-import se.idsec.signservice.security.certificate.CertificateValidator;
+import se.swedenconnect.cert.extensions.AuthnContext;
+import se.swedenconnect.cert.extensions.OCSPNoCheck;
 import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
 import se.swedenconnect.sigval.cert.chain.PathValidationResult;
 import se.swedenconnect.sigval.cert.validity.ValidationStatus;
 import se.swedenconnect.sigval.cert.validity.crl.CRLCache;
 import se.swedenconnect.sigval.cert.validity.crl.impl.CRLValidityChecker;
 import se.swedenconnect.sigval.cert.validity.ocsp.OCSPCertificateVerifier;
-import se.swedenconnect.cert.extensions.AuthnContext;
-import se.swedenconnect.cert.extensions.OCSPNoCheck;
-import se.swedenconnect.ca.engine.components.*;
-import se.idsec.utils.printcert.PrintCertificate;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the CA components lib
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
@@ -309,8 +318,9 @@ public class CertIssuingTests {
     case malformedReq:
     case good_noNonce:
       throw new IllegalArgumentException("Illegal expected result");
+    default:
+      throw new IllegalArgumentException("Illegal expected result");
     }
-    int sdf = 0;
   }
 
   private CRLValidityChecker getCRLVerifier(X509CertificateHolder cert01, TestCa caConf) throws IOException, CertificateException {

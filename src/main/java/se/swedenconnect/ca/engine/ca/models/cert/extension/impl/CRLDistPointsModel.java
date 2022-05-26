@@ -16,35 +16,41 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.DistributionPoint;
+import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+
+import lombok.Setter;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModelUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Model for CRLDistribution point extensions
- * <p>
+ *
+ * <pre>
  * DistributionPoint ::= SEQUENCE {
  * distributionPoint       [0]     DistributionPointName OPTIONAL,
  * reasons                 [1]     ReasonFlags OPTIONAL,
  * cRLIssuer               [2]     GeneralNames OPTIONAL }
+ * </pre>
  * <p>
- * cRLIssuer MUST NOT be present if the CA is the CRLIssuer
- * reasons are only applicable if the CRL only covers some reasons. This is
- * discouraged in RFC 5280. This model only allows inclusion of distribution points.
+ * cRLIssuer MUST NOT be present if the CA is the CRLIssuer reasons are only applicable if the CRL only covers some
+ * reasons. This is discouraged in RFC 5280. This model only allows inclusion of distribution points.
+ * </p>
  * <p>
  * All listed URL:s must be either ldap or http(s) URL:s.
+ * </p>
  *
- * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class CRLDistPointsModel extends AbstractExtensionModel {
 
   /** Set to true to force this extension to be critical. RFC 5280 recommends that this extension is not critical */
@@ -59,34 +65,37 @@ public class CRLDistPointsModel extends AbstractExtensionModel {
    *
    * @param distributionPointUrlList list of distribution point URLs
    */
-  public CRLDistPointsModel(List<String> distributionPointUrlList) {
+  public CRLDistPointsModel(final List<String> distributionPointUrlList) {
     this.distributionPointUrlList = distributionPointUrlList;
   }
 
-  @Override protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(Extension.cRLDistributionPoints, "CRL distribution points", critical);
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
+    return new ExtensionMetadata(Extension.cRLDistributionPoints, "CRL distribution points", this.critical);
   }
 
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    if (distributionPointUrlList == null || distributionPointUrlList.isEmpty()) {
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    if (this.distributionPointUrlList == null || this.distributionPointUrlList.isEmpty()) {
       throw new CertificateIssuanceException("The CRL Distribution point extension MUST contain at least one URL");
     }
-    List<DistributionPoint> distributionPointList = new ArrayList<>();
+    final List<DistributionPoint> distributionPointList = new ArrayList<>();
 
-    for (String dpUrl : distributionPointUrlList) {
+    for (final String dpUrl : this.distributionPointUrlList) {
 
       // Check URI
       ExtensionModelUtils.testUriString(dpUrl);
       // Store CRL DP
       distributionPointList.add(
-        new DistributionPoint(
-          new DistributionPointName(
-            new GeneralNames(
-              new GeneralName(6, dpUrl)))
-          , null, null));
+          new DistributionPoint(
+              new DistributionPointName(
+                  new GeneralNames(
+                      new GeneralName(6, dpUrl))),
+              null, null));
     }
 
-    CRLDistPoint crlDp = new CRLDistPoint(distributionPointList.toArray(new DistributionPoint[distributionPointList.size()]));
+    final CRLDistPoint crlDp =
+        new CRLDistPoint(distributionPointList.toArray(new DistributionPoint[distributionPointList.size()]));
     return crlDp;
   }
 
