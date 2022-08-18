@@ -51,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 import se.idsec.signservice.security.certificate.CertificateValidator;
 import se.idsec.utils.printcert.PrintCertificate;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
@@ -64,6 +65,7 @@ import se.swedenconnect.ca.engine.components.TestUtils;
 import se.swedenconnect.ca.engine.components.TestValidators;
 import se.swedenconnect.ca.engine.data.TestCa;
 import se.swedenconnect.ca.engine.data.TestData;
+import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.cert.extensions.AuthnContext;
 import se.swedenconnect.cert.extensions.OCSPNoCheck;
 import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
@@ -333,7 +335,7 @@ public class CertIssuingTests {
     return crlValidityChecker;
   }
 
-  private void revokeCert(X509CertificateHolder cert, int reason, TestCa caConf) {
+  private void revokeCert(X509CertificateHolder cert, int reason, TestCa caConf) throws CertificateRevocationException {
     CertValidatorComponents validatorComponents = TestData.getCertValidators().get(caConf);
     BasicIssuerCAService ca = TestData.getTestCAs().get(caConf).getCa();
     ca.revokeCertificate(cert.getSerialNumber(), reason, new Date());
@@ -391,7 +393,7 @@ public class CertIssuingTests {
     checkOCSPValidation(ocspVerifierBundle, expected, new Date());
   }
 
-  private X509CertificateHolder issueCert(BasicIssuerCAService ca) {
+  private X509CertificateHolder issueCert(BasicIssuerCAService ca) throws CertificateIssuanceException {
     DefaultCertificateModelBuilder certificateModelBuilder = ca.getCertificateModelBuilder(
       CertRequestData.getTypicalSubejctName("John", "Doe", "1234567890"),
       TestData.rsa2048kp01.getPublic());

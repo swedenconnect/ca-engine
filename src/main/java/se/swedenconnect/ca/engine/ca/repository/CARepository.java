@@ -60,7 +60,7 @@ public interface CARepository {
    * Revoke a certificate at a particular date at a particular time
    *
    * @param serialNumber   certificate serial number
-   * @param reason         revocation reason
+   * @param reason         revocation reason or -1 to unrevoke a certificate with current reason certificateHold
    * @param revocationTime revocation time
    * @throws CertificateRevocationException error revoking the certificate with the specified serial number
    */

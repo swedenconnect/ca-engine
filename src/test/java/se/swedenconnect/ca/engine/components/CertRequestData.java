@@ -36,6 +36,7 @@ import org.bouncycastle.asn1.x509.PolicyMappings;
 import org.bouncycastle.cert.X509CertificateHolder;
 
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeModel;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
@@ -157,7 +158,7 @@ public class CertRequestData {
   }
 
   public static DefaultCertificateModelBuilder getCompleteCertModelBuilder(PublicKey publicKey, X509CertificateHolder issuerCert,
-    CertificateIssuerModel issuerModel) {
+    CertificateIssuerModel issuerModel) throws CertificateIssuanceException {
     DefaultCertificateModelBuilder builder = DefaultCertificateModelBuilder.getInstance(publicKey, issuerCert, issuerModel);
     builder
       .subject(getCompleteSubjectName())

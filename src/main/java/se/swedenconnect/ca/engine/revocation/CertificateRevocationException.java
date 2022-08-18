@@ -16,12 +16,14 @@
 
 package se.swedenconnect.ca.engine.revocation;
 
+import java.io.IOException;
+
 /**
  * Exception class for certificate revocation.
  *
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CertificateRevocationException extends RuntimeException {
+public class CertificateRevocationException extends IOException {
 
   private static final long serialVersionUID = -2229186707266267663L;
 
@@ -59,16 +61,4 @@ public class CertificateRevocationException extends RuntimeException {
     super(cause);
   }
 
-  /**
-   * Constructor
-   *
-   * @param message message
-   * @param cause cause
-   * @param enableSuppression enable suppression
-   * @param writableStackTrace writable stack trace
-   */
-  public CertificateRevocationException(final String message, final Throwable cause, final boolean enableSuppression,
-      final boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
 }

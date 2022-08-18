@@ -16,12 +16,14 @@
 
 package se.swedenconnect.ca.engine.ca.issuer;
 
+import java.io.IOException;
+
 /**
  * Exception thrown as a result of failure to issue a certificate
  *
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CertificateIssuanceException extends RuntimeException {
+public class CertificateIssuanceException extends IOException {
 
   /** For serializing. */
   private static final long serialVersionUID = 8463084075292154476L;
@@ -64,19 +66,4 @@ public class CertificateIssuanceException extends RuntimeException {
     super(cause);
   }
 
-  /**
-   * Constructor
-   *
-   * @param message
-   *          message
-   * @param cause
-   *          cause
-   * @param enableSuppression
-   *          enable suppression
-   * @param writableStackTrace
-   *          writable stack trace
-   */
-  public CertificateIssuanceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
 }
