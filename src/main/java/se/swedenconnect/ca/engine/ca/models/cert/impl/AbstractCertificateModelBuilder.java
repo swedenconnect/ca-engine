@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,14 +51,15 @@ import se.swedenconnect.cert.extensions.QCStatements;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
 
 /**
- * Abstract implementation of the certificate model builder interface
+ * Abstract implementation of the certificate model builder interface.
  *
- * @param <T> The class of the implementation of this abstract class
+ * @param <T> the class of the implementation of this abstract class.
  *
  * @author Stefan Santesson (stefan@idsec.se)
+ * @author Martin Lindström (martin@idsec.se)
  */
 @Getter
-public abstract class AbstractCertificateModelBuilder<T extends CertificateModelBuilder>
+public abstract class AbstractCertificateModelBuilder<T extends AbstractCertificateModelBuilder<?>>
     implements CertificateModelBuilder {
 
   /** Certificate subject name */
@@ -113,6 +115,28 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
 
   /** subject attributes extension model */
   protected SubjDirectoryAttributesModel subjectDirectoryAttributes;
+
+  /** {@inheritDoc} */
+  @Override
+  public CertificateModel build() throws CertificateIssuanceException {
+    try {
+      return CertificateModel.builder()
+          .publicKey(this.getPublicKey())
+          .subject(this.getSubject())
+          .extensionModels(this.getExtensionModels())
+          .build();
+    }
+    catch (final Exception e) {
+      throw new CertificateIssuanceException("Failed to prepare certificate data", e);
+    }
+  }
+
+  /**
+   * Gets the public key for the certificate model being built.
+   *
+   * @return the public key
+   */
+  protected abstract PublicKey getPublicKey();
 
   /**
    * Set certificate subject name
@@ -340,10 +364,6 @@ public abstract class AbstractCertificateModelBuilder<T extends CertificateModel
     this.subjectDirectoryAttributes = subjectDirectoryAttributes;
     return (T) this;
   }
-
-  /** {@inheritDoc} */
-  @Override
-  public abstract CertificateModel build() throws CertificateIssuanceException;
 
   /**
    * Set authority and subject key identifiers

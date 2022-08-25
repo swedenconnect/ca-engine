@@ -16,7 +16,14 @@
 
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.List;
+
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
@@ -24,30 +31,28 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AuthorityKeyIdentifierModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.SubjectKeyIdentifierModel;
 
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.List;
-
 /**
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class SelfIssuedCertificateModelBuilder extends AbstractCertificateModelBuilder<SelfIssuedCertificateModelBuilder> {
+public class SelfIssuedCertificateModelBuilder
+    extends AbstractCertificateModelBuilder<SelfIssuedCertificateModelBuilder> {
 
   private final PrivateKey privateKey;
+
   private final PublicKey publicKey;
+
   private final CertificateIssuerModel certificateIssuerModel;
 
   /**
    * Private constructor
    *
-   * @param privateKey             private issuing key
-   * @param publicKey              public key of the certificate subject
+   * @param privateKey private issuing key
+   * @param publicKey public key of the certificate subject
    * @param certificateIssuerModel certificate issuer configuration data
    */
-  private SelfIssuedCertificateModelBuilder(PrivateKey privateKey, PublicKey publicKey, CertificateIssuerModel certificateIssuerModel) {
+  private SelfIssuedCertificateModelBuilder(final PrivateKey privateKey, final PublicKey publicKey,
+      final CertificateIssuerModel certificateIssuerModel) {
     this.privateKey = privateKey;
     this.publicKey = publicKey;
     this.certificateIssuerModel = certificateIssuerModel;
@@ -56,57 +61,54 @@ public class SelfIssuedCertificateModelBuilder extends AbstractCertificateModelB
   /**
    * Creates an instance of this certificate model builder
    *
-   * @param privateKey             private issuing key
-   * @param publicKey              public key of the certificate subject
+   * @param privateKey private issuing key
+   * @param publicKey public key of the certificate subject
    * @param certificateIssuerModel certificate issuer configuration data
    * @return certificate model builder
    */
   public static SelfIssuedCertificateModelBuilder getInstance(PrivateKey privateKey, PublicKey publicKey,
-    CertificateIssuerModel certificateIssuerModel) {
+      CertificateIssuerModel certificateIssuerModel) {
     return new SelfIssuedCertificateModelBuilder(privateKey, publicKey, certificateIssuerModel);
   }
 
   /**
    * Creates an instance of this certificate model builder
    *
-   * @param keyPair                key pair of the certificate issuer and subject
+   * @param keyPair key pair of the certificate issuer and subject
    * @param certificateIssuerModel certificate issuer configuration data
    * @return certificate model builder
    */
-  public static SelfIssuedCertificateModelBuilder getInstance(KeyPair keyPair, CertificateIssuerModel certificateIssuerModel) {
+  public static SelfIssuedCertificateModelBuilder getInstance(KeyPair keyPair,
+      CertificateIssuerModel certificateIssuerModel) {
     return new SelfIssuedCertificateModelBuilder(keyPair.getPrivate(), keyPair.getPublic(), certificateIssuerModel);
   }
 
   /** {@inheritDoc} */
-  @Override public CertificateModel build() throws CertificateIssuanceException {
-    try {
-      CertificateModel certificateModel = CertificateModel.builder()
-        .publicKey(publicKey)
-        .subject(getSubject())
-        .extensionModels(getExtensionModels())
-        .build();
-      return new SelfIssuedCertificateModel(certificateModel, privateKey);
-    }
-    catch (Exception ex) {
-      throw new CertificateIssuanceException("Failed to prepare certificate data", ex);
-    }
+  @Override
+  public CertificateModel build() throws CertificateIssuanceException {
+    return new SelfIssuedCertificateModel(super.build(), this.privateKey);
   }
 
   /** {@inheritDoc} */
-  @Override protected void getKeyIdentifierExtensionsModels(List<ExtensionModel> extm) throws IOException {
+  @Override
+  protected PublicKey getPublicKey() {
+    return this.publicKey;
+  }
 
-    //Authority key identifier
+  /** {@inheritDoc} */
+  @Override
+  protected void getKeyIdentifierExtensionsModels(List<ExtensionModel> extm) throws IOException {
+
+    // Authority key identifier
     if (includeAki) {
       extm.add(new AuthorityKeyIdentifierModel(new AuthorityKeyIdentifier(
-        certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded())
-      )));
+          certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded()))));
     }
 
     // Subject key identifier
     if (includeSki) {
       extm.add(new SubjectKeyIdentifierModel(
-        certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded())
-      ));
+          certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded())));
     }
 
   }
