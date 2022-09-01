@@ -17,6 +17,8 @@
 package se.swedenconnect.ca.engine.ca.issuer;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -78,17 +80,15 @@ public abstract class CertificateIssuer {
   }
 
   /**
-   * Utility function calculating the offset time based on offset type and amount
+   * Utility function calculating the offset time based on duration
    *
-   * @param offsetType   offset type
-   * @param offsetAmount offset amount of the specified type
+   * @param offsetDuration   offset duration
    * @return new time with specified offset from current time
    */
-  public static Date getOffsetTime(int offsetType, int offsetAmount) {
-    Calendar offsetTime = Calendar.getInstance();
-    offsetTime.setTime(new Date());
-    offsetTime.add(offsetType, offsetAmount);
-    return offsetTime.getTime();
+  public static Date getOffsetTime(Duration offsetDuration) {
+    Instant now = Instant.now();
+    Instant offsetInstant = now.plusMillis(offsetDuration.toMillis());
+    return Date.from(offsetInstant);
   }
 
 }

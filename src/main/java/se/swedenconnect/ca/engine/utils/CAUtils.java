@@ -19,6 +19,7 @@ package se.swedenconnect.ca.engine.utils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -31,6 +32,7 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
@@ -79,6 +81,16 @@ public class CAUtils {
     }
     return certificateList;
   }
+
+  public static List<X509CertificateHolder> getCertificateHolderList(List<X509Certificate> certificateList)
+    throws CertificateEncodingException {
+    List<X509CertificateHolder> certificateHolderList = new ArrayList<>();
+    for (X509Certificate certificate: certificateList) {
+      certificateHolderList.add(new JcaX509CertificateHolder(certificate));
+    }
+    return certificateHolderList;
+  }
+
 
   /**
    * Utility function creating a X500Name object based on a certificate name model

@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -47,6 +49,9 @@ import se.swedenconnect.ca.engine.data.TestCa;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.ca.engine.revocation.ocsp.impl.RepositoryBasedOCSPResponder;
+import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.BasicCredential;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * This class when instantiated creates 2 CA services and related revocation services for CRL adn OCSP revocation checking.
@@ -100,14 +105,16 @@ public class TestCAProvider {
     X509CertificateHolder caCert = rootCA.issueCertificate(builder.build());
     List<X509CertificateHolder> caCertChain = Arrays.asList(caCert, rootCA.getCaCertificate());
     File crlFile = new File(dataDir, caConfig.getId() + "/ca.crl");
-    return new BasicIssuerCAService(kp.getPrivate(), caCertChain, new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
+    PkiCredential issuerCredential = new BasicCredential(CAUtils.getCertList(caCertChain), kp.getPrivate());
+
+    return new BasicIssuerCAService(issuerCredential, new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
   }
 
   private BasicRootCAService createRootCA() throws Exception {
     // generate key and root CA cert
     CertificateIssuer certificateIssuer = new SelfIssuedCertificateIssuer(new CertificateIssuerModel(
       caConfig.getRootAlgo(),
-      20
+      Duration.ofDays(2 * 3650 + 5)
     ));
 
     log.info("Generating root ca key for {}", caConfig.getId());
@@ -123,7 +130,9 @@ public class TestCAProvider {
     X509CertificateHolder rootCA01Cert = certificateIssuer.issueCertificate(builder.build());
     File crlFile = new File(dataDir, caConfig.getId() + "/root-ca.crl");
 
-    return new BasicRootCAService(kp.getPrivate(), rootCA01Cert, new TestCARepository(crlFile), crlFile, caConfig.getRootAlgo());
+    PkiCredential issuerCredential = new BasicCredential(List.of(CAUtils.getCert(rootCA01Cert)), kp.getPrivate());
+
+    return new BasicRootCAService(issuerCredential, new TestCARepository(crlFile), crlFile, caConfig.getRootAlgo());
   }
 
   private CertNameModel<?> getCAName(String commonName) {
@@ -179,8 +188,9 @@ public class TestCAProvider {
           rootCA.getCaCertificate());
       }
 
-      OCSPModel ocspModel = new OCSPModel(ocspServiceChain, ca.getCaCertificate(), algorithm);
-      OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(kp.getPrivate(), ocspModel, ca.getCaRepository());
+      OCSPModel ocspModel = new OCSPModel(ca.getCaCertificate(), algorithm);
+      PkiCredential ocspSigningCredential = new BasicCredential(CAUtils.getCertList(ocspServiceChain), kp.getPrivate());
+      OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(ocspSigningCredential, ocspModel, ca.getCaRepository());
       ca.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp", ocspServiceChain.get(0));
     }
     catch (Exception ex) {

@@ -27,6 +27,7 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.PkiCredential;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -49,8 +50,8 @@ public class DefaultCRLIssuer extends AbstractCRLIssuer {
   protected final CRLIssuerModel crlIssuerModel;
 
   /** {@inheritDoc} */
-  public DefaultCRLIssuer(CRLIssuerModel crlIssuerModel, PrivateKey issuerPrivateKey) throws NoSuchAlgorithmException {
-    super(issuerPrivateKey, crlIssuerModel.getIssuerCertificate(), crlIssuerModel.getAlgorithm());
+  public DefaultCRLIssuer(CRLIssuerModel crlIssuerModel, PkiCredential issuerCredential) throws NoSuchAlgorithmException {
+    super(issuerCredential, crlIssuerModel.getAlgorithm());
     this.crlIssuerModel = crlIssuerModel;
   }
 
@@ -59,8 +60,8 @@ public class DefaultCRLIssuer extends AbstractCRLIssuer {
 
     try {
       X509Certificate issuerCert = CAUtils.getCert(crlIssuerModel.getIssuerCertificate());
-      Date issuedAt = CertificateIssuer.getOffsetTime(crlIssuerModel.getStartOffsetType(), crlIssuerModel.getStartOffsetAmount());
-      Date nextUpdate = CertificateIssuer.getOffsetTime(crlIssuerModel.getExpiryOffsetType(), crlIssuerModel.getExpiryOffsetAmount());
+      Date issuedAt = CertificateIssuer.getOffsetTime(crlIssuerModel.getStartOffset());
+      Date nextUpdate = CertificateIssuer.getOffsetTime(crlIssuerModel.getExpiryOffset());
 
       JcaX509v2CRLBuilder builder = new JcaX509v2CRLBuilder(issuerCert, issuedAt);
       CRLRevocationDataProvider CRLRevocationDataProvider = crlIssuerModel.getCRLRevocationDataProvider();

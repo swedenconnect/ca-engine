@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bouncycastle.cert.X509CertificateHolder;
 
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.List;
 
@@ -32,30 +33,22 @@ import java.util.List;
 @Getter
 public class OCSPModel {
 
-  /** OCSP responder certificate chain */
-  private final List<X509CertificateHolder> responderCertificateCahin;
   /** Certificate of the issuer of certificates being checked by this OCSP responder */
   private final X509CertificateHolder certificateIssuerCert;
   /** Signature algorithm for signing OCSP responses */
   private final String algorithm;
-  /** Offset type for altering response this update time relative to current time */
-  @Setter private int startOffsetType = Calendar.SECOND;
-  /** Offset amount for altering response this update time relative to current time */
-  @Setter private int startOffsetAmount = -30;
-  /** Time type for specifying the next update time in OCSP responses */
-  @Setter private int expiryOffsetType = Calendar.HOUR;
-  /** Time amount of specified type for the next update time where 0 indicates an absent next update time in the response */
-  @Setter private int expiryOffsetAmount = 0;
+  /** Offset duration for altering response this update time relative to current time */
+  @Setter private Duration startOffset = Duration.ofSeconds(-30);
+  /** Time duration for specifying the next update time in OCSP responses. a null value  indicates an absent next update time in the response */
+  @Setter private Duration expiryOffset = null;
 
   /**
    * Constructor for OCSP model
    *
-   * @param responderCertificateChain certificate chain for the OCSP responder issuing key
    * @param certificateIssuerCert the certificate of the CA that issues certificates that this service provides status for
    * @param algorithm OCSP response signing algorithm
    */
-  public OCSPModel(List<X509CertificateHolder> responderCertificateChain, X509CertificateHolder certificateIssuerCert, String algorithm) {
-    this.responderCertificateCahin = responderCertificateChain;
+  public OCSPModel(X509CertificateHolder certificateIssuerCert, String algorithm) {
     this.algorithm = algorithm;
     this.certificateIssuerCert = certificateIssuerCert;
   }

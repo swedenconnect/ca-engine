@@ -19,9 +19,13 @@ package se.swedenconnect.ca.engine.revocation.ocsp.impl;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
+import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ocsp.TBSRequest;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.UnknownStatus;
@@ -30,26 +34,29 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPStatusCheckingException;
+import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * OCSP responder issuing responses based on data from the CA repository.
  *
  * @author Stefan Santesson (stefan@idsec.se)
  */
+@Slf4j
 public class RepositoryBasedOCSPResponder extends AbstractOCSPResponder {
 
   /** The repository holding information about all issued certificates */
   private final CARepository caRepository;
 
   /**
-   * @param privateKey the private key object used to sign OCSP responses
+   * @param ocspIssuerCredential the private key object used to sign OCSP responses
    * @param ocspModel OCSP responder configuration data
    * @param caRepository CA repository
    * @throws NoSuchAlgorithmException if the selected algorithm is not supported
    */
-  public RepositoryBasedOCSPResponder(final PrivateKey privateKey, final OCSPModel ocspModel,
+  public RepositoryBasedOCSPResponder(final PkiCredential ocspIssuerCredential, final OCSPModel ocspModel,
       final CARepository caRepository) throws NoSuchAlgorithmException {
-    super(privateKey, ocspModel);
+    super(ocspIssuerCredential, ocspModel);
     this.caRepository = caRepository;
   }
 

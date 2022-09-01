@@ -85,8 +85,8 @@ public class SelfIssuedCertificateIssuer extends CertificateIssuer {
     JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
       getX500Name(model.getSubject()),
       certificateIssuerModel.getSerialNumberProvider().getSerialNumber(),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffsetType(), certificateIssuerModel.getStartOffsetAmount()),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffsetType(), certificateIssuerModel.getExpiryOffsetAmount()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffset()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffset()),
       getX500Name(model.getSubject()),
       model.getPublicKey()
     );
@@ -110,8 +110,8 @@ public class SelfIssuedCertificateIssuer extends CertificateIssuer {
     JcaX509v1CertificateBuilder certificateBuilder = new JcaX509v1CertificateBuilder(
       getX500Name(model.getSubject()),
       certificateIssuerModel.getSerialNumberProvider().getSerialNumber(),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffsetType(), certificateIssuerModel.getStartOffsetAmount()),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffsetType(), certificateIssuerModel.getExpiryOffsetAmount()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffset()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffset()),
       getX500Name(model.getSubject()),
       model.getPublicKey()
     );

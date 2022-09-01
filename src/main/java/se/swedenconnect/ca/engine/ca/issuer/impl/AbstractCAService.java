@@ -19,6 +19,7 @@ package se.swedenconnect.ca.engine.ca.issuer.impl;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +40,8 @@ import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * This class provides an abstract skeleton for a typical CA service by combining the functions of a CertificateIssuer,
@@ -57,12 +60,13 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
   /**
    * Constructor for the CA service
    *
-   * @param caCertificateChain the certificate chain for the public key of this CA service with the CA certificate first
+   * @param issuerCredential ths issuing credentials of this CA service with the CA certificate first
    *          and the trust anchor la
    * @param caRepository repository for certificate and revocation data
    */
-  public AbstractCAService(final List<X509CertificateHolder> caCertificateChain, final CARepository caRepository) {
-    this.caCertificateChain = caCertificateChain;
+  public AbstractCAService(PkiCredential issuerCredential, final CARepository caRepository)
+    throws CertificateEncodingException {
+    this.caCertificateChain = CAUtils.getCertificateHolderList(issuerCredential.getCertificateChain());
     this.caRepository = caRepository;
   }
 

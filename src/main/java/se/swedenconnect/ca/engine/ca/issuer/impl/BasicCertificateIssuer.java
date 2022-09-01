@@ -19,6 +19,7 @@ package se.swedenconnect.ca.engine.ca.issuer.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -28,9 +29,11 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
+import se.swedenconnect.security.credential.PkiCredential;
 
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
 import java.util.List;
 
 /**
@@ -45,19 +48,26 @@ public class BasicCertificateIssuer extends CertificateIssuer {
   /** name of the certificate issuer */
   private final X500Name issuerName;
   /** private key of the certificate issuer */
-  private final PrivateKey issuerPrivateKey;
+  private final PkiCredential issuerCredential;
 
   /**
    * Constructor for this certificate issuer implementation
    *
    * @param certificateIssuerModel certificate issuer configuration data
-   * @param issuerName             issuer name
-   * @param issuerPrivateKey       private issuing key
+   * @param issuerCredential       private key and issuing certificates of the certificate issuer
    */
-  public BasicCertificateIssuer(final CertificateIssuerModel certificateIssuerModel, X500Name issuerName, PrivateKey issuerPrivateKey) {
+  public BasicCertificateIssuer(final CertificateIssuerModel certificateIssuerModel, final PkiCredential issuerCredential){
     super(certificateIssuerModel);
-    this.issuerPrivateKey = issuerPrivateKey;
-    this.issuerName = issuerName;
+    this.issuerCredential = issuerCredential;
+    try {
+      this.issuerName = new JcaX509CertificateHolder(issuerCredential.getCertificate()).getSubject();
+    }
+    catch (CertificateEncodingException e) {
+      // Throwing an unchecked runtime exception. There is no legal way that a valid PkiCredential will not contain a valid
+      // certificate with a valid issuer name. Any such situation is non-recoverable
+      log.error("PkiCredential does not contain a valid issuer certificate");
+      throw new RuntimeException(e);
+    }
   }
 
   /** {@inheritDoc} */
@@ -90,8 +100,8 @@ public class BasicCertificateIssuer extends CertificateIssuer {
     JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
       issuerName,
       certificateIssuerModel.getSerialNumberProvider().getSerialNumber(),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffsetType(), certificateIssuerModel.getStartOffsetAmount()),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffsetType(), certificateIssuerModel.getExpiryOffsetAmount()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffset()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffset()),
       getX500Name(model.getSubject()),
       model.getPublicKey()
     );
@@ -100,7 +110,7 @@ public class BasicCertificateIssuer extends CertificateIssuer {
     for (ExtensionModel extensionModel : extensionModels) {
       extensionModel.addExtensions(certificateBuilder);
     }
-    return certificateBuilder.build((new JcaContentSignerBuilder(certificateIssuerModel.getAlgorithmName())).build(issuerPrivateKey));
+    return certificateBuilder.build((new JcaContentSignerBuilder(certificateIssuerModel.getAlgorithmName())).build(issuerCredential.getPrivateKey()));
   }
 
   /**
@@ -115,12 +125,12 @@ public class BasicCertificateIssuer extends CertificateIssuer {
     JcaX509v1CertificateBuilder certificateBuilder = new JcaX509v1CertificateBuilder(
       issuerName,
       certificateIssuerModel.getSerialNumberProvider().getSerialNumber(),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffsetType(), certificateIssuerModel.getStartOffsetAmount()),
-      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffsetType(), certificateIssuerModel.getExpiryOffsetAmount()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getStartOffset()),
+      CertificateIssuer.getOffsetTime(certificateIssuerModel.getExpiryOffset()),
       getX500Name(model.getSubject()),
       model.getPublicKey()
     );
-    return certificateBuilder.build((new JcaContentSignerBuilder(certificateIssuerModel.getAlgorithmName())).build(issuerPrivateKey));
+    return certificateBuilder.build((new JcaContentSignerBuilder(certificateIssuerModel.getAlgorithmName())).build(issuerCredential.getPrivateKey()));
   }
 
 }

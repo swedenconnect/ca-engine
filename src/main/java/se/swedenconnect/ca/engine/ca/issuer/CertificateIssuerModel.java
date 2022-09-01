@@ -25,6 +25,7 @@ import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Calendar;
 
 /**
@@ -40,14 +41,10 @@ public class CertificateIssuerModel {
 
   /** Engine for generating certificate serial numbers */
   @Setter private SerialNumberProvider serialNumberProvider = new BasicSerialNumberProvider();
-  /** Offset type for altering the not valid before time of certificates relative to current time */
-  @Setter private int startOffsetType = Calendar.MINUTE;
-  /** Offset amount for altering the not valid before time of certificates where a negative value indicated before current time */
-  @Setter private int startOffsetAmount = -15;
-  /** Offset type for setting the not valid after time relative to current time */
-  @Setter private int expiryOffsetType = Calendar.YEAR;
-  /** Offset amount defining the validity time of issued certificates */
-  private int expiryOffsetAmount = 1;
+  /** Offset duration for altering the not valid before time of certificates relative to current time */
+  @Setter private Duration startOffset = Duration.ofSeconds(-15);
+  /** Offset duration for setting the not valid after time relative to current time */
+  @Setter private Duration expiryOffset = Duration.ofDays(365);
   /** The name of the algorithm used by the crypto provider to sign ASN.1 objects */
   private String algorithmName;
   /** The signing algorithm used to sign certificates */
@@ -59,28 +56,13 @@ public class CertificateIssuerModel {
    * Constructor for the certificate issuer model
    *
    * @param algorithm  the XML identifier of the certificate signing algorithm
-   * @param validYears the number of years the issued certificates should be valid
+   * @param validity the validity duration of issued certificates
    * @throws NoSuchAlgorithmException thrown if the provided algorithm is not recognized
    */
-  public CertificateIssuerModel(String algorithm, int validYears) throws NoSuchAlgorithmException {
+  public CertificateIssuerModel(String algorithm, Duration validity) throws NoSuchAlgorithmException {
     this.algorithm = algorithm;
     this.algorithmName = CAAlgorithmRegistry.getSigAlgoName(algorithm);
-    this.expiryOffsetAmount = validYears;
-  }
-
-  /**
-   * Constructor for the certificate builder model
-   *
-   * @param algorithm          the XML identifier of the certificate signing algorithm
-   * @param expiryOffsetAmount the amount of time units issued certificates should be valid
-   * @param expiryOffsetType   the type of time unit for certificate validity time defined as the {@link Calendar} integer constant of time
-   *                           unit type (e.g. Calendar.YEAR)
-   * @throws NoSuchAlgorithmException unsupported algorithm
-   */
-  public CertificateIssuerModel(String algorithm, int expiryOffsetAmount, int expiryOffsetType)
-    throws NoSuchAlgorithmException {
-    this(algorithm, expiryOffsetAmount);
-    this.expiryOffsetType = expiryOffsetType;
+    this.expiryOffset = validity;
   }
 
   /**

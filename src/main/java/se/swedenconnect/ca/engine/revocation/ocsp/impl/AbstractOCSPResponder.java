@@ -36,10 +36,13 @@ import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPStatusCheckingException;
+import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.PkiCredential;
 
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -58,23 +61,31 @@ public abstract class AbstractOCSPResponder implements OCSPResponder {
   /** Algorithm properties of the OCSP signing algorithm */
   @Getter private final CAAlgorithmRegistry.SignatureAlgorithmProperties algorithmProperties;
   /** private signing key */
-  private final PrivateKey privateKey;
+  private final PkiCredential ocspIssuerCredential;
+  /** OCSP responder certificate chain */
+  @Getter private final List<X509CertificateHolder> responderCertificateCahin;
 
   /**
    * Constructor for the abstract OCSP responder
    *
    * @param ocspModel  configuration data for the OCSP responder
-   * @param privateKey the private key object used to sign OCSP responses
+   * @param ocspIssuerCredential the private key object used to sign OCSP responses
    * @throws NoSuchAlgorithmException unsupported algorithm
    */
-  public AbstractOCSPResponder(PrivateKey privateKey, OCSPModel ocspModel)
+  public AbstractOCSPResponder(PkiCredential ocspIssuerCredential, OCSPModel ocspModel)
     throws NoSuchAlgorithmException {
-    this.privateKey = privateKey;
+    this.ocspIssuerCredential = ocspIssuerCredential;
     this.algorithmProperties = CAAlgorithmRegistry.getAlgorithmProperties(ocspModel.getAlgorithm());
     this.ocspModel = ocspModel;
-    List<X509CertificateHolder> responderCertChain = ocspModel.getResponderCertificateCahin();
-    if (responderCertChain == null || responderCertChain.isEmpty()) {
-      throw new IllegalArgumentException("OCSP certificate chain must not be null");
+    try {
+      this.responderCertificateCahin = CAUtils.getCertificateHolderList(ocspIssuerCredential.getCertificateChain());
+    }
+    catch (CertificateEncodingException e) {
+      log.error("The OCSP responder credentials do not contain a valid OCSP signing certificate");
+      throw new RuntimeException(e);
+    }
+    if (responderCertificateCahin.isEmpty()) {
+      throw new IllegalArgumentException("OCSP certificate chain must not be empty");
     }
   }
 
@@ -82,16 +93,17 @@ public abstract class AbstractOCSPResponder implements OCSPResponder {
   @Override public OCSPResp handleRequest(final OCSPRequest ocspRequest) throws CertificateRevocationException {
 
     // Get this update based on offset settings in the OCSP model
-    Date thisUpdate = CertificateIssuer.getOffsetTime(ocspModel.getStartOffsetType(), ocspModel.getStartOffsetAmount());
+    Date thisUpdate = CertificateIssuer.getOffsetTime(ocspModel.getStartOffset());
     // Get next update based on offset settings in the OCSP model, or null if no offset is set
-    Date nextUpdate = ocspModel.getExpiryOffsetAmount() == 0
+    Date nextUpdate = ocspModel.getExpiryOffset() == null
       ? null
-      : CertificateIssuer.getOffsetTime(ocspModel.getExpiryOffsetType(), ocspModel.getExpiryOffsetAmount());
+      : CertificateIssuer.getOffsetTime(ocspModel.getExpiryOffset());
 
     // Get the content signer and digest calculator
     final ContentSigner contentSigner;
     try {
-      contentSigner = new JcaContentSignerBuilder(algorithmProperties.getSigAlgoName()).build(privateKey);
+      contentSigner = new JcaContentSignerBuilder(algorithmProperties.getSigAlgoName()).build(
+        ocspIssuerCredential.getPrivateKey());
     }
     catch (OperatorCreationException ex) {
       log.error("Error creating the OCSP response content signer", ex);
@@ -170,13 +182,13 @@ public abstract class AbstractOCSPResponder implements OCSPResponder {
   }
 
   private X509CertificateHolder[] getResponderCertChain() {
-    return ocspModel.getResponderCertificateCahin().toArray(new X509CertificateHolder[ocspModel.getResponderCertificateCahin().size()]);
+    return getResponderCertificateCahin().toArray(new X509CertificateHolder[0]);
   }
 
   private BasicOCSPRespBuilder getResponseBuilder(Extension nonce) throws OCSPException, OperatorCreationException {
 
     final BasicOCSPRespBuilder responseBuilder = new BasicOCSPRespBuilder(
-      ocspModel.getResponderCertificateCahin().get(0).getSubjectPublicKeyInfo(),
+      getResponderCertificateCahin().get(0).getSubjectPublicKeyInfo(),
       new JcaDigestCalculatorProviderBuilder().build().get(CertificateID.HASH_SHA1));
     if (nonce != null) {
       log.debug("Found nonce in the request. Adding the nonce to the response.");

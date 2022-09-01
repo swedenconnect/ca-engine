@@ -17,8 +17,11 @@
 package se.swedenconnect.ca.engine.components;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.List;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
 
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -43,6 +47,7 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Basic Root CA service for test
@@ -56,16 +61,17 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
   private CRLIssuer crlIssuer;
   private List<String> crlDistributionPoints;
 
-  public BasicRootCAService(PrivateKey privateKey, X509CertificateHolder caCertificate, CARepository caRepository,
-    File crlFile, String algorithm) throws Exception {
-    super(Arrays.asList(caCertificate), caRepository);
+  public BasicRootCAService(PkiCredential issuerCredential, CARepository caRepository,
+    File crlFile, String algorithm)
+    throws CertificateEncodingException, NoSuchAlgorithmException, CertificateRevocationException {
+    super(issuerCredential, caRepository);
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(
-      new CertificateIssuerModel(algorithm, 10), getCaCertificate().getSubject(), privateKey);
+      new CertificateIssuerModel(algorithm, Duration.ofDays(3652)), issuerCredential);
     CRLIssuerModel crlIssuerModel = getCrlIssuerModel(getCaRepository().getCRLRevocationDataProvider(), algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, privateKey);
+      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, issuerCredential);
       this.crlDistributionPoints = Arrays.asList(crlIssuerModel.getDistributionPointUrl());
       publishNewCrl();
     }
@@ -75,7 +81,7 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
     throws CertificateRevocationException {
     try {
       return new CRLIssuerModel(getCaCertificate(), algorithm,
-        2, crlRevocationDataProvider, TestCAProvider.getFileUrl(crlFile));
+        Duration.ofHours(2), crlRevocationDataProvider, TestCAProvider.getFileUrl(crlFile));
     }
     catch (Exception e) {
       throw new CertificateRevocationException(e);
