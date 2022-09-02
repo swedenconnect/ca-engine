@@ -16,6 +16,7 @@
 
 package se.swedenconnect.ca.engine.ca.issuer;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.Date;
@@ -103,7 +104,7 @@ public interface CAService {
    * @throws CertificateRevocationException
    *           errors revoking the certificate
    */
-  X509CRLHolder publishNewCrl() throws CertificateRevocationException;
+  X509CRLHolder publishNewCrl() throws IOException;
 
   /**
    * Getter for the latest published CRL

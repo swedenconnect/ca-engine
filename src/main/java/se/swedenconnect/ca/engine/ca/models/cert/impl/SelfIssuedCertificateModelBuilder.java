@@ -97,17 +97,17 @@ public class SelfIssuedCertificateModelBuilder
 
   /** {@inheritDoc} */
   @Override
-  protected void getKeyIdentifierExtensionsModels(List<ExtensionModel> extm) throws IOException {
+  protected void addKeyIdentifierExtensionsModels(List<ExtensionModel> extensionModelList) throws IOException {
 
     // Authority key identifier
     if (includeAki) {
-      extm.add(new AuthorityKeyIdentifierModel(new AuthorityKeyIdentifier(
+      extensionModelList.add(new AuthorityKeyIdentifierModel(new AuthorityKeyIdentifier(
           certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded()))));
     }
 
     // Subject key identifier
     if (includeSki) {
-      extm.add(new SubjectKeyIdentifierModel(
+      extensionModelList.add(new SubjectKeyIdentifierModel(
           certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded())));
     }
 

@@ -81,8 +81,9 @@ public class DefaultCertificateModelBuilder extends AbstractCertificateModelBuil
     return this.publicKey;
   }
 
+  /** {@inheritDoc} */
   @Override
-  protected void getKeyIdentifierExtensionsModels(final List<ExtensionModel> extm) throws IOException {
+  protected void addKeyIdentifierExtensionsModels(final List<ExtensionModel> extensionModelList) throws IOException {
 
     // Authority key identifier
     if (this.includeAki) {
@@ -103,12 +104,12 @@ public class DefaultCertificateModelBuilder extends AbstractCertificateModelBuil
             this.certificateIssuerModel.getSigAlgoMessageDigest()
                 .digest(this.issuer.getSubjectPublicKeyInfo().getEncoded())));
       }
-      extm.add(akiModel);
+      extensionModelList.add(akiModel);
     }
 
     // Subject key identifier
     if (this.includeSki) {
-      extm.add(new SubjectKeyIdentifierModel(
+      extensionModelList.add(new SubjectKeyIdentifierModel(
           this.certificateIssuerModel.getSigAlgoMessageDigest().digest(this.publicKey.getEncoded())));
     }
 

@@ -182,7 +182,7 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     return crlNumber;
   }
 
-  @SneakyThrows @Override public void publishNewCrl(X509CRLHolder crl) {
+  @Override public void publishNewCrl(X509CRLHolder crl) throws IOException {
     FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
   }
 

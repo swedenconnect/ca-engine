@@ -17,6 +17,7 @@
 package se.swedenconnect.ca.engine.components;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -63,7 +64,7 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
 
   public BasicRootCAService(PkiCredential issuerCredential, CARepository caRepository,
     File crlFile, String algorithm)
-    throws CertificateEncodingException, NoSuchAlgorithmException, CertificateRevocationException {
+    throws CertificateEncodingException, NoSuchAlgorithmException, IOException {
     super(issuerCredential, caRepository);
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(

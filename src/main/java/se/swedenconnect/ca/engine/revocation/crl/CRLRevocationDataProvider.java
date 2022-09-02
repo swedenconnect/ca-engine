@@ -18,6 +18,7 @@ package se.swedenconnect.ca.engine.revocation.crl;
 
 import org.bouncycastle.cert.X509CRLHolder;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public interface CRLRevocationDataProvider {
    *
    * @param crl CRL to publish
    */
-  void publishNewCrl(X509CRLHolder crl);
+  void publishNewCrl(X509CRLHolder crl) throws IOException;
 
   /**
    * Getter for the latest published CRL

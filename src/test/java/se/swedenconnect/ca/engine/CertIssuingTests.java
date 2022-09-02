@@ -335,7 +335,7 @@ public class CertIssuingTests {
     return crlValidityChecker;
   }
 
-  private void revokeCert(X509CertificateHolder cert, int reason, TestCa caConf) throws CertificateRevocationException {
+  private void revokeCert(X509CertificateHolder cert, int reason, TestCa caConf) throws IOException {
     CertValidatorComponents validatorComponents = TestData.getCertValidators().get(caConf);
     BasicIssuerCAService ca = TestData.getTestCAs().get(caConf).getCa();
     ca.revokeCertificate(cert.getSerialNumber(), reason, new Date());

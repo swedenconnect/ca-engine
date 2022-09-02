@@ -163,7 +163,7 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
 
   /** {@inheritDoc} */
   @Override
-  public X509CRLHolder publishNewCrl() throws CertificateRevocationException {
+  public X509CRLHolder publishNewCrl() throws IOException {
     final CRLIssuer crlIssuer = this.getCrlIssuer();
     if (crlIssuer != null) {
       final X509CRLHolder newCrl = crlIssuer.issueCRL();
