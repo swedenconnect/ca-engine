@@ -32,8 +32,13 @@ public class ExternalChainCredential implements PkiCredential {
 
   public ExternalChainCredential(List<X509Certificate> certificateChain,
     PkiCredential baseCredential) throws Exception {
+    // As prio 1 we set any externally specified chain
     this.certificateChain = certificateChain == null ? new ArrayList<>() : certificateChain;
     this.baseCredential = baseCredential;
+    if (this.certificateChain.isEmpty()){
+      // If not certificate chain was set. Attempt to import any chain from the base credential
+      this.certificateChain = baseCredential.getCertificateChain();
+    }
     init();
   }
 
@@ -80,9 +85,9 @@ public class ExternalChainCredential implements PkiCredential {
   }
 
   @Override public void afterPropertiesSet() throws Exception {
-    // It is essential for the usage of this credential implementation that the chain can be set at any point
-    // Therefore only the private key existence is checked here
-    if (getPrivateKey() == null) {
+    if (this.getPublicKey() == null) {
+      throw new IllegalArgumentException("Either 'certificate'/'certificates' or 'publicKey' must be assigned");
+    } else if (getPrivateKey() == null) {
       throw new IllegalArgumentException("Property 'privateKey' must be assigned");
     }
   }
