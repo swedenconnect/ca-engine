@@ -82,6 +82,12 @@ public class CAUtils {
     return certificateList;
   }
 
+  /**
+   * Get a list of {@link X509CertificateHolder} certificates from a list of {@link X509Certificate} objects
+   * @param certificateList a list of {@link X509Certificate} objects
+   * @return a list of {@link X509CertificateHolder} certificates
+   * @throws CertificateEncodingException error parsing certificates
+   */
   public static List<X509CertificateHolder> getCertificateHolderList(List<X509Certificate> certificateList)
     throws CertificateEncodingException {
     List<X509CertificateHolder> certificateHolderList = new ArrayList<>();

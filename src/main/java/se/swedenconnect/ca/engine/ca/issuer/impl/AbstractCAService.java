@@ -63,6 +63,7 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
    * @param issuerCredential ths issuing credentials of this CA service with the CA certificate first
    *          and the trust anchor la
    * @param caRepository repository for certificate and revocation data
+   * @throws CertificateEncodingException error parsing certificate data
    */
   public AbstractCAService(PkiCredential issuerCredential, final CARepository caRepository)
     throws CertificateEncodingException {

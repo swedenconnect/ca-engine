@@ -48,6 +48,7 @@ public interface CRLRevocationDataProvider {
    * Publish a new CRL
    *
    * @param crl CRL to publish
+   * @throws IOException error publishing the new CLR
    */
   void publishNewCrl(X509CRLHolder crl) throws IOException;
 

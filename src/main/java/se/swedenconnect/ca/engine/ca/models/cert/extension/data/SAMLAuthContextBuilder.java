@@ -155,6 +155,7 @@ public class SAMLAuthContextBuilder {
    * Build SAML Authentication context
    *
    * @return {@link SAMLAuthContext}
+   * @throws CertificateIssuanceException error building the SAMLAuthContext object
    */
   public SAMLAuthContext build() throws CertificateIssuanceException {
 
