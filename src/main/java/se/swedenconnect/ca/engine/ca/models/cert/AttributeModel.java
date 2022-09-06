@@ -32,13 +32,10 @@ import lombok.NoArgsConstructor;
  *     values    SET OF AttributeValue }
  *   -- at least one value is required
  * </pre>
- * <p>
- *
  * <pre>
  * AttributeType  ::= OBJECT IDENTIFIER
  * AttributeValue ::= ANY -- DEFINED BY AttributeType
  * </pre>
- * </p>
  * <p>
  * X.509 certificates include use of both the type "Attribute" and the type "AttributeTypeAndValue" The difference being
  * that the former may have any number of values, while the latter can have only one value.

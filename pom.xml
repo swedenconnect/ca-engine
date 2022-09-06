@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.ca</groupId>
   <artifactId>ca-engine</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>1.2.2</version>
   <packaging>jar</packaging>
 
   <name>CA engine</name>
@@ -324,8 +324,9 @@
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>false</autoReleaseAfterClose>
-              <!-- Allows manual inspection of the staging repo before deploying it to the central repo. Use 'mvn nexus-staging:release 
-                -Prelease' to release and 'mvn nexus-staging:drop' to abort. -->
+              <!-- Allows manual inspection of the staging repo before deploying it to the central repo. 
+                   Use 'mvn nexus-staging:release -Prelease' to release and 'mvn nexus-staging:drop' to abort. 
+               -->
             </configuration>
           </plugin>
 
