@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
- * Data class holding certificate extensions metadata
+ * Data class holding certificate extensions metadata.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -34,9 +34,10 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 @Builder
 public class ExtensionIdAndCrit {
 
-  /** OID of the extension */
+  /** OID of the extension. */
   private ASN1ObjectIdentifier oid;
-  /** extension criticality */
+
+  /** Extension criticality. */
   private boolean critical;
 
 }

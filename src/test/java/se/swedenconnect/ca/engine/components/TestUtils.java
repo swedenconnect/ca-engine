@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.components;
 
 import java.io.ByteArrayInputStream;
@@ -64,7 +63,8 @@ public class TestUtils {
     }
   }
 
-  public static List<X509Certificate> getChain(byte[] certificate, TestCa testCa) throws CertificateException, IOException {
+  public static List<X509Certificate> getChain(byte[] certificate, TestCa testCa)
+      throws CertificateException, IOException {
     TestCAProvider caProvider = TestData.getTestCAs().get(testCa);
     List<X509Certificate> chain = new ArrayList<>();
     chain.add(getCertificate(certificate));
@@ -73,16 +73,18 @@ public class TestUtils {
     return chain;
   }
 
-  public static KeyPair generateRSAKeyPair(int bits) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+  public static KeyPair generateRSAKeyPair(int bits)
+      throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
     return generateKeyPair(KeyType.RSA, bits);
   }
 
-  public static KeyPair generateECKeyPair(NistCurve curve) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+  public static KeyPair generateECKeyPair(NistCurve curve)
+      throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
     return generateKeyPair(KeyType.EC, curve);
   }
 
   public static KeyPair generateKeyPair(KeyType algorithm, Object spec) throws NoSuchAlgorithmException,
-    InvalidAlgorithmParameterException {
+      InvalidAlgorithmParameterException {
     KeyPairGenerator generator;
     generator = KeyPairGenerator.getInstance(algorithm.name(), new BouncyCastleProvider());
     if (spec instanceof AlgorithmParameterSpec) {
@@ -139,11 +141,9 @@ public class TestUtils {
   @Getter
   @AllArgsConstructor
   public enum NistCurve {
-    P521("P-521", SECObjectIdentifiers.secp521r1),
-    P384("P-384", SECObjectIdentifiers.secp384r1),
-    P256("P-256", SECObjectIdentifiers.secp256r1),
-    P224("P-224", SECObjectIdentifiers.secp224r1),
-    P192("P-192", SECObjectIdentifiers.secp192r1);
+    P521("P-521", SECObjectIdentifiers.secp521r1), P384("P-384", SECObjectIdentifiers.secp384r1), P256("P-256",
+        SECObjectIdentifiers.secp256r1), P224("P-224",
+            SECObjectIdentifiers.secp224r1), P192("P-192", SECObjectIdentifiers.secp192r1);
 
     String curveName;
     ASN1ObjectIdentifier curveOid;

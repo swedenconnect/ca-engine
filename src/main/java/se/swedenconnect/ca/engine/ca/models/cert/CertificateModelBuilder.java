@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert;
 
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 
 /**
- * Interface for Certificate model builders
+ * Interface for certificate model builders.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -27,7 +26,7 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 public interface CertificateModelBuilder {
 
   /**
-   * Build the certificate model
+   * Builds the certificate model.
    *
    * @return certificate model
    * @throws CertificateIssuanceException on errors creating the certificate model

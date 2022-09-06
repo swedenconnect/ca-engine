@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
 import java.io.IOException;
@@ -32,6 +31,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.Authority
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.SubjectKeyIdentifierModel;
 
 /**
+ * Model builder for self issued certificates.
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -66,8 +67,8 @@ public class SelfIssuedCertificateModelBuilder
    * @param certificateIssuerModel certificate issuer configuration data
    * @return certificate model builder
    */
-  public static SelfIssuedCertificateModelBuilder getInstance(PrivateKey privateKey, PublicKey publicKey,
-      CertificateIssuerModel certificateIssuerModel) {
+  public static SelfIssuedCertificateModelBuilder getInstance(final PrivateKey privateKey, final PublicKey publicKey,
+      final CertificateIssuerModel certificateIssuerModel) {
     return new SelfIssuedCertificateModelBuilder(privateKey, publicKey, certificateIssuerModel);
   }
 
@@ -78,8 +79,8 @@ public class SelfIssuedCertificateModelBuilder
    * @param certificateIssuerModel certificate issuer configuration data
    * @return certificate model builder
    */
-  public static SelfIssuedCertificateModelBuilder getInstance(KeyPair keyPair,
-      CertificateIssuerModel certificateIssuerModel) {
+  public static SelfIssuedCertificateModelBuilder getInstance(final KeyPair keyPair,
+      final CertificateIssuerModel certificateIssuerModel) {
     return new SelfIssuedCertificateModelBuilder(keyPair.getPrivate(), keyPair.getPublic(), certificateIssuerModel);
   }
 
@@ -97,18 +98,18 @@ public class SelfIssuedCertificateModelBuilder
 
   /** {@inheritDoc} */
   @Override
-  protected void addKeyIdentifierExtensionsModels(List<ExtensionModel> extensionModelList) throws IOException {
+  protected void addKeyIdentifierExtensionsModels(final List<ExtensionModel> extensionModelList) throws IOException {
 
     // Authority key identifier
-    if (includeAki) {
+    if (this.includeAki) {
       extensionModelList.add(new AuthorityKeyIdentifierModel(new AuthorityKeyIdentifier(
-          certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded()))));
+          this.certificateIssuerModel.getSigAlgoMessageDigest().digest(this.publicKey.getEncoded()))));
     }
 
     // Subject key identifier
-    if (includeSki) {
+    if (this.includeSki) {
       extensionModelList.add(new SubjectKeyIdentifierModel(
-          certificateIssuerModel.getSigAlgoMessageDigest().digest(publicKey.getEncoded())));
+          this.certificateIssuerModel.getSigAlgoMessageDigest().digest(this.publicKey.getEncoded())));
     }
 
   }

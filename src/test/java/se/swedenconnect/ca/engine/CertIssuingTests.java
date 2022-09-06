@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,7 +64,6 @@ import se.swedenconnect.ca.engine.components.TestUtils;
 import se.swedenconnect.ca.engine.components.TestValidators;
 import se.swedenconnect.ca.engine.data.TestCa;
 import se.swedenconnect.ca.engine.data.TestData;
-import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.cert.extensions.AuthnContext;
 import se.swedenconnect.cert.extensions.OCSPNoCheck;
 import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;

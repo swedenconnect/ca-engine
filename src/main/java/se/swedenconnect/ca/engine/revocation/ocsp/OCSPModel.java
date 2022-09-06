@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.ocsp;
+
+import java.time.Duration;
+
+import org.bouncycastle.cert.X509CertificateHolder;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.bouncycastle.cert.X509CertificateHolder;
-
-import java.time.Duration;
-import java.util.Calendar;
-import java.util.List;
 
 /**
- * OCSP model holding OCSP service configuration data
+ * OCSP model holding OCSP service configuration data.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -35,21 +33,31 @@ public class OCSPModel {
 
   /** Certificate of the issuer of certificates being checked by this OCSP responder */
   private final X509CertificateHolder certificateIssuerCert;
+
   /** Signature algorithm for signing OCSP responses */
   private final String algorithm;
+
   /** Offset duration for altering response this update time relative to current time */
-  @Setter private Duration startOffset = Duration.ofSeconds(-30);
-  /** Time duration for specifying the next update time in OCSP responses. a null value  indicates an absent next update time in the response */
-  @Setter private Duration expiryOffset = null;
+  @Setter
+  private Duration startOffset = Duration.ofSeconds(-30);
 
   /**
-   * Constructor for OCSP model
+   * Time duration for specifying the next update time in OCSP responses. a null value indicates an absent next update
+   * time in the response.
+   */
+  @Setter
+  private Duration expiryOffset = null;
+
+  /**
+   * Constructor for OCSP model.
    *
-   * @param certificateIssuerCert the certificate of the CA that issues certificates that this service provides status for
+   * @param certificateIssuerCert the certificate of the CA that issues certificates that this service provides status
+   *          for
    * @param algorithm OCSP response signing algorithm
    */
-  public OCSPModel(X509CertificateHolder certificateIssuerCert, String algorithm) {
+  public OCSPModel(final X509CertificateHolder certificateIssuerCert, final String algorithm) {
     this.algorithm = algorithm;
     this.certificateIssuerCert = certificateIssuerCert;
   }
+
 }

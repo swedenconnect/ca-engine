@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension;
 
 /**
  * Enumeration for entity types in extensions that are syntactically identical but targeted
- * for a particular entity such as SubjectAltName and IssuerAltName
+ * for a particular entity such as SubjectAltName and IssuerAltName.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public enum EntityType {
-  /** Identifies the certificate subject entity */
+
+  /**
+   * Identifies the certificate subject entity.
+   */
   subject,
-  /** Identifies the certificate issuer entity */
+
+  /**
+   * Identifies the certificate issuer entity.
+   */
   issuer;
 }

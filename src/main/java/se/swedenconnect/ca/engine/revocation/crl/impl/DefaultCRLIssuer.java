@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.crl.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.x509.*;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.List;
+
+import org.bouncycastle.asn1.x509.CRLNumber;
+import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509v2CRLBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
@@ -29,16 +41,8 @@ import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.security.credential.PkiCredential;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.List;
-
 /**
- * Default implementation of a CRL issuer
+ * Default implementation of a CRL issuer.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -49,51 +53,58 @@ public class DefaultCRLIssuer extends AbstractCRLIssuer {
   /** Configuration data for this CRL issuer */
   protected final CRLIssuerModel crlIssuerModel;
 
-  /** {@inheritDoc} */
-  public DefaultCRLIssuer(CRLIssuerModel crlIssuerModel, PkiCredential issuerCredential) throws NoSuchAlgorithmException {
+  /**
+   * Constructor.
+   *
+   * @param crlIssuerModel the CRL issuer model
+   * @param issuerCredential the credential used to sign CRLs
+   * @throws NoSuchAlgorithmException if the issuer model algorithm is not supported
+   */
+  public DefaultCRLIssuer(final CRLIssuerModel crlIssuerModel, final PkiCredential issuerCredential)
+      throws NoSuchAlgorithmException {
     super(issuerCredential, crlIssuerModel.getAlgorithm());
     this.crlIssuerModel = crlIssuerModel;
   }
 
   /** {@inheritDoc} */
-  @Override public X509CRLHolder issueCRL() throws CertificateRevocationException {
+  @Override
+  public X509CRLHolder issueCRL() throws CertificateRevocationException {
 
     try {
-      X509Certificate issuerCert = CAUtils.getCert(crlIssuerModel.getIssuerCertificate());
-      Date issuedAt = CertificateIssuer.getOffsetTime(crlIssuerModel.getStartOffset());
-      Date nextUpdate = CertificateIssuer.getOffsetTime(crlIssuerModel.getExpiryOffset());
+      final X509Certificate issuerCert = CAUtils.getCert(this.crlIssuerModel.getIssuerCertificate());
+      final Date issuedAt = CertificateIssuer.getOffsetTime(this.crlIssuerModel.getStartOffset());
+      final Date nextUpdate = CertificateIssuer.getOffsetTime(this.crlIssuerModel.getExpiryOffset());
 
-      JcaX509v2CRLBuilder builder = new JcaX509v2CRLBuilder(issuerCert, issuedAt);
-      CRLRevocationDataProvider CRLRevocationDataProvider = crlIssuerModel.getCRLRevocationDataProvider();
-      List<RevokedCertificate> revokedCertificates = CRLRevocationDataProvider.getRevokedCertificates();
+      final JcaX509v2CRLBuilder builder = new JcaX509v2CRLBuilder(issuerCert, issuedAt);
+      final CRLRevocationDataProvider CRLRevocationDataProvider = this.crlIssuerModel.getCRLRevocationDataProvider();
+      final List<RevokedCertificate> revokedCertificates = CRLRevocationDataProvider.getRevokedCertificates();
       builder.addExtension(Extension.cRLNumber, false, new CRLNumber(CRLRevocationDataProvider.getNextCrlNumber()));
-      builder.addExtension(Extension.authorityKeyIdentifier, false, getAki());
+      builder.addExtension(Extension.authorityKeyIdentifier, false, this.getAki());
       builder.addExtension(Extension.issuingDistributionPoint, true, new IssuingDistributionPoint(
-        new DistributionPointName(
-          new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier, crlIssuerModel.getDistributionPointUrl()))),
-        crlIssuerModel.isOnlyEECerts(),
-        crlIssuerModel.isOnlyCACerts(),
-        crlIssuerModel.getOnlySomeReasons(),
-        crlIssuerModel.isIndirectCrl(), false
-      ));
+          new DistributionPointName(
+              new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier,
+                  this.crlIssuerModel.getDistributionPointUrl()))),
+          this.crlIssuerModel.isOnlyEECerts(),
+          this.crlIssuerModel.isOnlyCACerts(),
+          this.crlIssuerModel.getOnlySomeReasons(),
+          this.crlIssuerModel.isIndirectCrl(), false));
 
       // set issuing data and next update
       builder.setNextUpdate(nextUpdate);
 
-      for (RevokedCertificate revokedCertificate : revokedCertificates) {
+      for (final RevokedCertificate revokedCertificate : revokedCertificates) {
         builder.addCRLEntry(
-          revokedCertificate.getCertificateSerialNumber(),
-          revokedCertificate.getRevocationTime(),
-          revokedCertificate.getReason());
+            revokedCertificate.getCertificateSerialNumber(),
+            revokedCertificate.getRevocationTime(),
+            revokedCertificate.getReason());
       }
-
-      return builder.build(getContentSigner());
+      return builder.build(this.getContentSigner());
     }
     catch (IOException | CertificateException ex) {
       log.error("Failed to issue CRL", ex);
       throw new CertificateRevocationException("Failed to issue CRL", ex);
     }
-    catch (OperatorCreationException ex) {
+    catch (final OperatorCreationException ex) {
       log.error("Failed to create CRL content signer", ex);
       throw new CertificateRevocationException("Failed to create CRL content signer", ex);
     }

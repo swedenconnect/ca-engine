@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.data;
+
+import java.security.KeyPair;
+import java.util.HashMap;
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.components.CertValidatorComponents;
 import se.swedenconnect.ca.engine.components.TestCAProvider;
 import se.swedenconnect.ca.engine.components.TestUtils;
 import se.swedenconnect.ca.engine.components.TestValidators;
-
-import java.security.KeyPair;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Test data used for unit testing

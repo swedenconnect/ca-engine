@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.crl.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.x509.*;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
+
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
+import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.security.credential.PkiCredential;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
-
 /**
- * Abstract CRL issuer
+ * Abstract CRL issuer.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -43,60 +46,64 @@ public abstract class AbstractCRLIssuer implements CRLIssuer {
 
   /** Issuer private key */
   private final PkiCredential issuerCredential;
+
   /** Issuer certificate */
   private final X509CertificateHolder issuerCertificate;
+
   /** Signature algorithm properties */
   private final CAAlgorithmRegistry.SignatureAlgorithmProperties algorithmProperties;
 
   /**
-   * Constructor of the CRL issuer
+   * Constructor of the CRL issuer.
    *
-   * @param issuerCredential  credentials of the certificate issuer
-   * @param algorithm         algorithm used to sign CRL
+   * @param issuerCredential credentials of the certificate issuer
+   * @param algorithm algorithm used to sign CRL
    * @throws NoSuchAlgorithmException if the algorithm is not supported
    */
-  public AbstractCRLIssuer(PkiCredential issuerCredential, String algorithm)
-    throws NoSuchAlgorithmException {
+  public AbstractCRLIssuer(final PkiCredential issuerCredential, final String algorithm)
+      throws NoSuchAlgorithmException {
     this.issuerCredential = issuerCredential;
     this.algorithmProperties = CAAlgorithmRegistry.getAlgorithmProperties(algorithm);
     try {
       this.issuerCertificate = new JcaX509CertificateHolder(issuerCredential.getCertificate());
     }
-    catch (CertificateEncodingException e) {
+    catch (final CertificateEncodingException e) {
       log.error("The PKI credentials for the CRL issuer does not contain a valid signing certificate");
       throw new RuntimeException(e);
     }
   }
 
   /**
-   * Creates a complete Authority key identifier which includes the name of the issuer, the issuer certificate serial number and the issuer
-   * SKI value
+   * Creates a complete Authority key identifier which includes the name of the issuer, the issuer certificate serial
+   * number and the issuer SKI value.
    *
    * @return Authority key identifier
    * @throws CertificateEncodingException problems parsing the issuer certificate
-   * @throws IOException                  problems parsing the issuer certificate
+   * @throws IOException problems parsing the issuer certificate
    */
   protected AuthorityKeyIdentifier getAki() throws CertificateEncodingException, IOException {
-    GeneralNames generalNames = new GeneralNames(new GeneralName[] {
-      new GeneralName(GeneralName.directoryName, issuerCertificate.getSubject().toASN1Primitive())
+    final GeneralNames generalNames = new GeneralNames(new GeneralName[] {
+        new GeneralName(GeneralName.directoryName, this.issuerCertificate.getSubject().toASN1Primitive())
     });
-    Extension issuerSkiExt = issuerCertificate.getExtension(Extension.subjectKeyIdentifier);
-    byte[] issuerSkiVal = issuerSkiExt == null
-      ? null
-      : SubjectKeyIdentifier.getInstance(issuerSkiExt.getParsedValue()).getKeyIdentifier();
+    final Extension issuerSkiExt = this.issuerCertificate.getExtension(Extension.subjectKeyIdentifier);
+    final byte[] issuerSkiVal = issuerSkiExt == null
+        ? null
+        : SubjectKeyIdentifier.getInstance(issuerSkiExt.getParsedValue()).getKeyIdentifier();
 
-    AuthorityKeyIdentifier aki = new AuthorityKeyIdentifier(issuerSkiVal, generalNames, issuerCertificate.getSerialNumber());
+    final AuthorityKeyIdentifier aki =
+        new AuthorityKeyIdentifier(issuerSkiVal, generalNames, this.issuerCertificate.getSerialNumber());
     return aki;
   }
 
   /**
-   * Get a content signer
+   * Get a content signer.
    *
    * @return content signer
    * @throws OperatorCreationException error creating the content signer
    */
   protected ContentSigner getContentSigner() throws OperatorCreationException {
-    return (new JcaContentSignerBuilder(algorithmProperties.getSigAlgoName())).build(issuerCredential.getPrivateKey());
+    return new JcaContentSignerBuilder(this.algorithmProperties.getSigAlgoName())
+        .build(this.issuerCredential.getPrivateKey());
   }
 
 }

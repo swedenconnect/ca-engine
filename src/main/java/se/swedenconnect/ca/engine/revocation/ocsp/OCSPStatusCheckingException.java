@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.ocsp;
 
 import lombok.Getter;
@@ -39,6 +38,7 @@ public class OCSPStatusCheckingException extends CertificateRevocationException 
    * @param responseStatus response status
    */
   public OCSPStatusCheckingException(final int responseStatus) {
+    super("Status: " + responseStatus);
     this.responseStatus = responseStatus;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 
 /**
- * Extension data model
+ * Extension data model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -38,32 +38,34 @@ public class BasicConstraintsModel extends AbstractExtensionModel {
   /**
    * Constructor
    *
-   * @param ca       true if the certificate is issued to a CA
+   * @param ca true if the certificate is issued to a CA
    * @param critical extension criticality
    */
-  public BasicConstraintsModel(boolean ca, boolean critical) {
-    basicConstraints = new BasicConstraints(ca);
+  public BasicConstraintsModel(final boolean ca, final boolean critical) {
+    this.basicConstraints = new BasicConstraints(ca);
     this.critical = critical;
   }
 
   /**
    * Constructor
    *
-   * @param pathLen  path len constraint for CA
+   * @param pathLen path len constraint for CA
    * @param critical extension criticality
    */
-  public BasicConstraintsModel(int pathLen, boolean critical) {
-    basicConstraints = new BasicConstraints(pathLen);
+  public BasicConstraintsModel(final int pathLen, final boolean critical) {
+    this.basicConstraints = new BasicConstraints(pathLen);
     this.critical = critical;
   }
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(Extension.basicConstraints, "Basic constraints", critical);
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
+    return new ExtensionMetadata(Extension.basicConstraints, "Basic constraints", this.critical);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return basicConstraints;
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    return this.basicConstraints;
   }
 }

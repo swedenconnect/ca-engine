@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.crl;
-
-import org.bouncycastle.cert.X509CRLHolder;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.bouncycastle.cert.X509CRLHolder;
+
 /**
- * CRL revocation data provider interface
+ * CRL revocation data provider interface.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -50,7 +49,7 @@ public interface CRLRevocationDataProvider {
    * @param crl CRL to publish
    * @throws IOException error publishing the new CLR
    */
-  void publishNewCrl(X509CRLHolder crl) throws IOException;
+  void publishNewCrl(final X509CRLHolder crl) throws IOException;
 
   /**
    * Getter for the latest published CRL

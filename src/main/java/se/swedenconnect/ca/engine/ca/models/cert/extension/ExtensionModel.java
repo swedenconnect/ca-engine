@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension;
-
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
-import org.bouncycastle.asn1.x509.Extension;
 
 import java.util.List;
 
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
+
 /**
- * Interface of certificate extension model
+ * Interface of certificate extension model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -31,19 +31,19 @@ import java.util.List;
 public interface ExtensionModel {
 
   /**
-   * Adds an extension based on this extension model to the certificate to be signed
+   * Adds an extension based on this extension model to the certificate to be signed.
    *
    * @param certificateBuilder builder for the certificate to be signed
    * @throws CertificateIssuanceException error building the intended extension based on the extension model
    */
-  void addExtensions(JcaX509v3CertificateBuilder certificateBuilder) throws CertificateIssuanceException;
+  void addExtensions(final JcaX509v3CertificateBuilder certificateBuilder) throws CertificateIssuanceException;
 
   /**
-   * Returns the extensions defined by this ExtensionModel
+   * Returns the extensions defined by this ExtensionModel.
+   *
    * @return List of Extensions objects
    * @throws CertificateIssuanceException on error creating the extensions
    */
   List<Extension> getExtensions() throws CertificateIssuanceException;
-
 
 }

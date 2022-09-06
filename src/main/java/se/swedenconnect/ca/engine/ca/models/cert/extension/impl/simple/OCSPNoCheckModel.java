@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
-import lombok.NoArgsConstructor;
 import org.bouncycastle.asn1.ASN1Object;
+
+import lombok.NoArgsConstructor;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.cert.extensions.OCSPNoCheck;
@@ -32,12 +32,14 @@ import se.swedenconnect.cert.extensions.OCSPNoCheck;
 public class OCSPNoCheckModel extends AbstractExtensionModel {
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
     return new ExtensionMetadata(OCSPNoCheck.OID, "OCSP no check", false);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
     return new OCSPNoCheck();
   }
 }

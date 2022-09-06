@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.attribute;
 
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -50,18 +49,17 @@ public class CertAttributes extends BCStyle {
    */
   protected CertAttributes() {
     super();
-    //defaultLookUp.put("personalIdentityNumber", PERSONAL_IDENTITY_NUMBER_SE);
-    //defaultSymbols.put(PERSONAL_IDENTITY_NUMBER_SE, "personalIdentityNumber");
   }
 
   /**
    * Encode a string value input to a suitable ASN.1 object based on attribute type
    *
-   * @param oid   attribute type OID
+   * @param oid attribute type OID
    * @param value string value
    * @return ASN.1 encoded value
    */
-  @Override protected ASN1Encodable encodeStringValue(ASN1ObjectIdentifier oid, String value) {
+  @Override
+  protected ASN1Encodable encodeStringValue(final ASN1ObjectIdentifier oid, final String value) {
 
     // Adding encoding rules for the SE personal identifier attribute
     if (oid.equals(PERSONAL_IDENTITY_NUMBER_SE) && value.matches(PRINTABLE_STRING_REGEX)) {
@@ -74,7 +72,8 @@ public class CertAttributes extends BCStyle {
       if (value.matches(PRINTABLE_STRING_REGEX)) {
         return new DERPrintableString(value);
       }
-      // For all other cases we are forced to use UTF8String syntax. This is not compatible with X.520, but it is generally acceptable
+      // For all other cases we are forced to use UTF8String syntax. This is not compatible with X.520, but it is
+      // generally acceptable
       return new DERUTF8String(value);
     }
 

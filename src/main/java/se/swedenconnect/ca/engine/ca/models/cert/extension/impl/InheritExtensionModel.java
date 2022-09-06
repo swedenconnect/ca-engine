@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
-
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionIdAndCrit;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionIdAndCrit;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
+
 /**
- * This certificate extension model copies extension data from an existing certificate
+ * This certificate extension model copies extension data from an existing certificate.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -37,49 +37,53 @@ import java.util.List;
 @Slf4j
 public class InheritExtensionModel implements ExtensionModel {
 
-  /** certificate to inherit extensions from */
-  private X509CertificateHolder certificateHolder;
+  /** Certificate to inherit extensions from. */
+  private final X509CertificateHolder certificateHolder;
 
-  /** List of extensions to copy from certficate */
-  private List<ExtensionIdAndCrit> extensionIdList;
+  /** List of extensions to copy from certficate. */
+  private final List<ExtensionIdAndCrit> extensionIdList;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param certificateHolder master certificate holding extensions to copy
    * @param extensionId list of extensions to copy
    */
-  public InheritExtensionModel(X509CertificateHolder certificateHolder, ExtensionIdAndCrit... extensionId) {
+  public InheritExtensionModel(final X509CertificateHolder certificateHolder, final ExtensionIdAndCrit... extensionId) {
     this.certificateHolder = certificateHolder;
     this.extensionIdList = Arrays.asList(extensionId);
   }
 
   /** {@inheritDoc} */
-  @Override public void addExtensions(JcaX509v3CertificateBuilder certificateBuilder) throws CertificateIssuanceException {
+  @Override
+  public void addExtensions(final JcaX509v3CertificateBuilder certificateBuilder) throws CertificateIssuanceException {
     try {
-      for (ExtensionIdAndCrit extensionIdAndCrit : extensionIdList) {
-        certificateBuilder.copyAndAddExtension(extensionIdAndCrit.getOid(), extensionIdAndCrit.isCritical(), certificateHolder);
+      for (final ExtensionIdAndCrit extensionIdAndCrit : this.extensionIdList) {
+        certificateBuilder.copyAndAddExtension(extensionIdAndCrit.getOid(), extensionIdAndCrit.isCritical(),
+            this.certificateHolder);
         log.debug("Added extension copy from cert {}", extensionIdAndCrit.getOid());
       }
     }
-    catch (Exception ex) {
+    catch (final Exception ex) {
       throw new CertificateIssuanceException("Error while attempting to copy extension from cert", ex);
     }
   }
 
   /** {@inheritDoc} */
-  @Override public List<Extension> getExtensions() throws CertificateIssuanceException {
+  @Override
+  public List<Extension> getExtensions() throws CertificateIssuanceException {
     try {
-      List<Extension> extensionList = new ArrayList<>();
-      for (ExtensionIdAndCrit extensionIdAndCrit : extensionIdList) {
-        Extension extractExtension = certificateHolder.getExtension(extensionIdAndCrit.getOid());
-        Extension newExtension = new Extension(extensionIdAndCrit.getOid(), extensionIdAndCrit.isCritical(), extractExtension.getExtnValue());
+      final List<Extension> extensionList = new ArrayList<>();
+      for (final ExtensionIdAndCrit extensionIdAndCrit : this.extensionIdList) {
+        final Extension extractExtension = this.certificateHolder.getExtension(extensionIdAndCrit.getOid());
+        final Extension newExtension = new Extension(extensionIdAndCrit.getOid(), extensionIdAndCrit.isCritical(),
+            extractExtension.getExtnValue());
         extensionList.add(newExtension);
         log.debug("Added extension copy from cert {}", extensionIdAndCrit.getOid());
       }
       return extensionList;
     }
-    catch (Exception ex) {
+    catch (final Exception ex) {
       throw new CertificateIssuanceException("Error while attempting to copy extension from cert", ex);
     }
   }

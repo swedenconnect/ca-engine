@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.components;
 
 import java.io.File;
@@ -30,7 +29,6 @@ import org.bouncycastle.cert.X509CertificateHolder;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import se.swedenconnect.ca.engine.ca.attribute.CertAttributes;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -54,7 +52,8 @@ import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
- * This class when instantiated creates 2 CA services and related revocation services for CRL adn OCSP revocation checking.
+ * This class when instantiated creates 2 CA services and related revocation services for CRL adn OCSP revocation
+ * checking.
  *
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -64,9 +63,15 @@ public class TestCAProvider {
   public static final String FILE_URL_PREFIX = "http://file.example.com/";
 
   private final File dataDir;
-  @Getter private BasicRootCAService rootCA;
-  @Getter private BasicIssuerCAService ca;
-  @Getter public final TestCa caConfig;
+
+  @Getter
+  private BasicRootCAService rootCA;
+
+  @Getter
+  private BasicIssuerCAService ca;
+
+  @Getter
+  public final TestCa caConfig;
 
   public TestCAProvider(TestCa caConfig) {
     this.dataDir = new File(System.getProperty("user.dir"), "target/test/ca-repo");
@@ -94,13 +99,11 @@ public class TestCAProvider {
 
     // Add OCSP capability if there is not OSCP key
     // This is removed since the OCSP signing key should not require
-/*
-    if (caConfig.getOcspKeyPair() == null) {
-      builder
-        .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign + KeyUsage.digitalSignature, true))
-        .extendedKeyUsage(new ExtendedKeyUsageModel(false, KeyPurposeId.id_kp_OCSPSigning));
-    }
-*/
+    /*
+     * if (caConfig.getOcspKeyPair() == null) { builder .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign +
+     * KeyUsage.cRLSign + KeyUsage.digitalSignature, true)) .extendedKeyUsage(new ExtendedKeyUsageModel(false,
+     * KeyPurposeId.id_kp_OCSPSigning)); }
+     */
 
     X509CertificateHolder caCert = rootCA.issueCertificate(builder.build());
     List<X509CertificateHolder> caCertChain = Arrays.asList(caCert, rootCA.getCaCertificate());
@@ -113,20 +116,20 @@ public class TestCAProvider {
   private BasicRootCAService createRootCA() throws Exception {
     // generate key and root CA cert
     CertificateIssuer certificateIssuer = new SelfIssuedCertificateIssuer(new CertificateIssuerModel(
-      caConfig.getRootAlgo(),
-      Duration.ofDays(2 * 3650 + 5)
-    ));
+        caConfig.getRootAlgo(),
+        Duration.ofDays(2 * 3650 + 5)));
 
     log.info("Generating root ca key for {}", caConfig.getId());
     KeyPair kp = caConfig.getRootKeyPair();
     CertNameModel<?> name = getCAName(caConfig.getRootName());
 
-    CertificateModelBuilder builder = SelfIssuedCertificateModelBuilder.getInstance(kp, certificateIssuer.getCertificateIssuerModel())
-      .subject(name)
-      .basicConstraints(new BasicConstraintsModel(true, true))
-      .includeSki(true)
-      .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign, true))
-      .certificatePolicy(new CertificatePolicyModel(true));
+    CertificateModelBuilder builder =
+        SelfIssuedCertificateModelBuilder.getInstance(kp, certificateIssuer.getCertificateIssuerModel())
+            .subject(name)
+            .basicConstraints(new BasicConstraintsModel(true, true))
+            .includeSki(true)
+            .keyUsage(new KeyUsageModel(KeyUsage.keyCertSign + KeyUsage.cRLSign, true))
+            .certificatePolicy(new CertificatePolicyModel(true));
     X509CertificateHolder rootCA01Cert = certificateIssuer.issueCertificate(builder.build());
     File crlFile = new File(dataDir, caConfig.getId() + "/root-ca.crl");
 
@@ -137,16 +140,15 @@ public class TestCAProvider {
 
   private CertNameModel<?> getCAName(String commonName) {
     return new ExplicitCertNameModel(Arrays.asList(
-      AttributeTypeAndValueModel.builder()
-        .attributeType(CertAttributes.C)
-        .value("SE").build(),
-      AttributeTypeAndValueModel.builder()
-        .attributeType(CertAttributes.O)
-        .value("Test Org").build(),
-      AttributeTypeAndValueModel.builder()
-        .attributeType(CertAttributes.CN)
-        .value(commonName).build()
-    ));
+        AttributeTypeAndValueModel.builder()
+            .attributeType(CertAttributes.C)
+            .value("SE").build(),
+        AttributeTypeAndValueModel.builder()
+            .attributeType(CertAttributes.O)
+            .value("Test Org").build(),
+        AttributeTypeAndValueModel.builder()
+            .attributeType(CertAttributes.CN)
+            .value(commonName).build()));
   }
 
   private void addOCSPResponder() {
@@ -161,22 +163,21 @@ public class TestCAProvider {
         kp = caConfig.getOcspKeyPair();
         algorithm = caConfig.getOcspAlgo();
         DefaultCertificateModelBuilder certModelBuilder = ca.getCertificateModelBuilder(
-          CertRequestData.getTypicalServiceName(caConfig.getOcspName()), kp.getPublic());
+            CertRequestData.getTypicalServiceName(caConfig.getOcspName()), kp.getPublic());
 
         certModelBuilder
-          .qcStatements(null)
-          .keyUsage(new KeyUsageModel(KeyUsage.digitalSignature))
-          .crlDistributionPoints(null)
-          .ocspServiceUrl(null)
-          .ocspNocheck(true)
-          .extendedKeyUsage(new ExtendedKeyUsageModel(true, KeyPurposeId.id_kp_OCSPSigning));
+            .qcStatements(null)
+            .keyUsage(new KeyUsageModel(KeyUsage.digitalSignature))
+            .crlDistributionPoints(null)
+            .ocspServiceUrl(null)
+            .ocspNocheck(true)
+            .extendedKeyUsage(new ExtendedKeyUsageModel(true, KeyPurposeId.id_kp_OCSPSigning));
 
         X509CertificateHolder ocspIssuerCert = ca.issueCertificate(certModelBuilder.build());
         ocspServiceChain = Arrays.asList(
-          ocspIssuerCert,
-          ca.getCaCertificate(),
-          rootCA.getCaCertificate()
-        );
+            ocspIssuerCert,
+            ca.getCaCertificate(),
+            rootCA.getCaCertificate());
 
       }
       else {
@@ -184,13 +185,14 @@ public class TestCAProvider {
         kp = caConfig.getCaKeyPair();
         algorithm = caConfig.getCaAlgo();
         ocspServiceChain = Arrays.asList(
-          ca.getCaCertificate(),
-          rootCA.getCaCertificate());
+            ca.getCaCertificate(),
+            rootCA.getCaCertificate());
       }
 
       OCSPModel ocspModel = new OCSPModel(ca.getCaCertificate(), algorithm);
       PkiCredential ocspSigningCredential = new BasicCredential(CAUtils.getCertList(ocspServiceChain), kp.getPrivate());
-      OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(ocspSigningCredential, ocspModel, ca.getCaRepository());
+      OCSPResponder ocspResponder =
+          new RepositoryBasedOCSPResponder(ocspSigningCredential, ocspModel, ca.getCaRepository());
       ca.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp", ocspServiceChain.get(0));
     }
     catch (Exception ex) {

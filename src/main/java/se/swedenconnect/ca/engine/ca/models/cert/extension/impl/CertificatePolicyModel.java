@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
 
 import java.util.ArrayList;
@@ -77,7 +76,7 @@ public class CertificatePolicyModel extends AbstractExtensionModel {
   }
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param critical criticality of the extension
    * @param certificatePolicy one or more certificate policy object identifiers
@@ -157,7 +156,7 @@ public class CertificatePolicyModel extends AbstractExtensionModel {
   }
 
   /**
-   * Certificate policy information
+   * Certificate policy information.
    */
   @Data
   @AllArgsConstructor
@@ -171,7 +170,7 @@ public class CertificatePolicyModel extends AbstractExtensionModel {
      * @param policy certificate policy
      * @return certificate policy
      */
-    ASN1ObjectIdentifier policy;
+    private ASN1ObjectIdentifier policy;
 
     /**
      * Certificate policy object identifier
@@ -179,7 +178,7 @@ public class CertificatePolicyModel extends AbstractExtensionModel {
      * @param cpsUri CPS location URI
      * @return CPS location URI
      */
-    String cpsUri;
+    private String cpsUri;
 
     /**
      * Certificate policy object identifier
@@ -187,7 +186,7 @@ public class CertificatePolicyModel extends AbstractExtensionModel {
      * @param displayText certificate policy display text
      * @return certificate policy policy display text
      */
-    String displayText;
+    private String displayText;
   }
 
 }

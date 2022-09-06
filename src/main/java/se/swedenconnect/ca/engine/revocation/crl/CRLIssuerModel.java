@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.crl;
 
 import java.time.Duration;
-import java.util.Calendar;
 
 import org.bouncycastle.asn1.x509.ReasonFlags;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -85,7 +83,8 @@ public class CRLIssuerModel {
    * @param CRLRevocationDataProvider CRL revocation data provider handling revocation processing
    * @param distributionPointUrl the URL where the URL will be published
    */
-  public CRLIssuerModel(final X509CertificateHolder issuerCertificate, final String algorithm, final Duration validityDuration,
+  public CRLIssuerModel(
+      final X509CertificateHolder issuerCertificate, final String algorithm, final Duration validityDuration,
       final CRLRevocationDataProvider CRLRevocationDataProvider, final String distributionPointUrl) {
     this.issuerCertificate = issuerCertificate;
     this.expiryOffset = validityDuration;

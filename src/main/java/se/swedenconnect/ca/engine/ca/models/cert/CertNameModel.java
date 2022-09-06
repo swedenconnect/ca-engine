@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,36 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert;
 
 /**
- * Interface for name model for subject and issuer names
+ * Interface for name model for subject and issuer names.
+ *
  * @param <T> type of name data carried in this name model
  */
 public interface CertNameModel<T extends Object> {
 
   /**
-   * Get the type of certificate name model
+   * Gets the type of certificate name model.
    *
-   * @return {@link CertNameModel}
+   * @return CertNameModel
    */
   CertNameModelType getType();
 
   /**
-   * Get the underlying name data
+   * Gets the underlying name data.
    *
-   * @return {@link CertNameModel}
+   * @return CertNameModel
    */
   T getNameData();
 
   /**
-   * Enumeration of certificate name model types
+   * Enumeration of certificate name model types.
    */
   enum CertNameModelType {
-    /** Explicit information about every attribute and their encoding **/
+
+    /**
+     * Explicit information about every attribute and their encoding.
+     **/
     explicit,
-    /** Model is provided by an encoded ASN.1 object holding the certificate name information */
+
+    /**
+     * Model is provided by an encoded ASN.1 object holding the certificate name information.
+     */
     encoded;
   }
 

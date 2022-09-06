@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.issuer;
 
 import java.io.IOException;
@@ -30,39 +29,29 @@ public class CertificateIssuanceException extends IOException {
 
   /**
    * Constructor
-   */
-  public CertificateIssuanceException() {
-  }
-
-  /**
-   * Constructor
    *
-   * @param message
-   *          message
+   * @param message message
    */
-  public CertificateIssuanceException(String message) {
+  public CertificateIssuanceException(final String message) {
     super(message);
   }
 
   /**
    * Constructor
    *
-   * @param message
-   *          message
-   * @param cause
-   *          cause
+   * @param message message
+   * @param cause cause
    */
-  public CertificateIssuanceException(String message, Throwable cause) {
+  public CertificateIssuanceException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
   /**
    * Constructor
    *
-   * @param cause
-   *          cause
+   * @param cause cause
    */
-  public CertificateIssuanceException(Throwable cause) {
+  public CertificateIssuanceException(final Throwable cause) {
     super(cause);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package se.swedenconnect.ca.engine.configuration;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -27,10 +29,9 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.operator.AlgorithmNameFinder;
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * Registry for supported algorithms. This class adds support for the minimum supported set of algorithms and allows new
@@ -66,22 +67,28 @@ public class CAAlgorithmRegistry {
   public static final String ALGO_ID_SIGNATURE_RSA_SHA512 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
   /** RSA-SHA256-MGF1 */
-  public static final String ALGO_ID_SIGNATURE_RSA_SHA256_MGF1 = "http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1";
+  public static final String ALGO_ID_SIGNATURE_RSA_SHA256_MGF1 =
+      "http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1";
 
   /** RSA-SHA384-MGF1 */
-  public static final String ALGO_ID_SIGNATURE_RSA_SHA384_MGF1 = "http://www.w3.org/2007/05/xmldsig-more#sha384-rsa-MGF1";
+  public static final String ALGO_ID_SIGNATURE_RSA_SHA384_MGF1 =
+      "http://www.w3.org/2007/05/xmldsig-more#sha384-rsa-MGF1";
 
   /** RSA-SHA512-MGF1 */
-  public static final String ALGO_ID_SIGNATURE_RSA_SHA512_MGF1 = "http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1";
+  public static final String ALGO_ID_SIGNATURE_RSA_SHA512_MGF1 =
+      "http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1";
 
   /** RSA-SHA3-256-MGF1 */
-  public static final String ALGO_ID_SIGNATURE_RSA_SHA3_256_MGF1 = "http://www.w3.org/2007/05/xmldsig-more#sha3-256-rsa-MGF1";
+  public static final String ALGO_ID_SIGNATURE_RSA_SHA3_256_MGF1 =
+      "http://www.w3.org/2007/05/xmldsig-more#sha3-256-rsa-MGF1";
 
   /** RSA-SHA3-384-MGF1 */
-  public static final String ALGO_ID_SIGNATURE_RSA_SHA3_384_MGF1 = "http://www.w3.org/2007/05/xmldsig-more#sha3-384-rsa-MGF1";
+  public static final String ALGO_ID_SIGNATURE_RSA_SHA3_384_MGF1 =
+      "http://www.w3.org/2007/05/xmldsig-more#sha3-384-rsa-MGF1";
 
   /** RSA-SHA3-512-MGF1 */
-  public static final String ALGO_ID_SIGNATURE_RSA_SHA3_512_MGF1 = "http://www.w3.org/2007/05/xmldsig-more#sha3-512-rsa-MGF1";
+  public static final String ALGO_ID_SIGNATURE_RSA_SHA3_512_MGF1 =
+      "http://www.w3.org/2007/05/xmldsig-more#sha3-512-rsa-MGF1";
 
   /** SHA256 */
   public static final String ALGO_ID_DIGEST_SHA256 = "http://www.w3.org/2001/04/xmlenc#sha256";
@@ -132,104 +139,104 @@ public class CAAlgorithmRegistry {
     supportedAlgoMap = new HashMap<>();
     // Standard RSA
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA256)
-      .sigAlgoOID(PKCSObjectIdentifiers.sha256WithRSAEncryption)
-      .sigAlgoName(algorithmNameFinder.getAlgorithmName(PKCSObjectIdentifiers.sha256WithRSAEncryption))
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA256)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha256)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA256)
+        .sigAlgoOID(PKCSObjectIdentifiers.sha256WithRSAEncryption)
+        .sigAlgoName(algorithmNameFinder.getAlgorithmName(PKCSObjectIdentifiers.sha256WithRSAEncryption))
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA256)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha256)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA384)
-      .sigAlgoOID(PKCSObjectIdentifiers.sha384WithRSAEncryption)
-      .sigAlgoName(algorithmNameFinder.getAlgorithmName(PKCSObjectIdentifiers.sha384WithRSAEncryption))
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA384)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha384)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA384)
+        .sigAlgoOID(PKCSObjectIdentifiers.sha384WithRSAEncryption)
+        .sigAlgoName(algorithmNameFinder.getAlgorithmName(PKCSObjectIdentifiers.sha384WithRSAEncryption))
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA384)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha384)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA512)
-      .sigAlgoOID(PKCSObjectIdentifiers.sha512WithRSAEncryption)
-      .sigAlgoName(algorithmNameFinder.getAlgorithmName(PKCSObjectIdentifiers.sha512WithRSAEncryption))
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA512)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha512)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA512)
+        .sigAlgoOID(PKCSObjectIdentifiers.sha512WithRSAEncryption)
+        .sigAlgoName(algorithmNameFinder.getAlgorithmName(PKCSObjectIdentifiers.sha512WithRSAEncryption))
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA512)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha512)
+        .build());
     // Standard RSA-PSS
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA256_MGF1)
-      .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
-      .sigAlgoName(RSAPSS_SHA256_NAME)
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA256)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha256)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA256_MGF1)
+        .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
+        .sigAlgoName(RSAPSS_SHA256_NAME)
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA256)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha256)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA384_MGF1)
-      .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
-      .sigAlgoName(RSAPSS_SHA384_NAME)
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA384)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha384)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA384_MGF1)
+        .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
+        .sigAlgoName(RSAPSS_SHA384_NAME)
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA384)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha384)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA512_MGF1)
-      .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
-      .sigAlgoName(RSAPSS_SHA512_NAME)
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA512)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha512)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA512_MGF1)
+        .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
+        .sigAlgoName(RSAPSS_SHA512_NAME)
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA512)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha512)
+        .build());
     // SHA 3 with RSA-PSS
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA3_256_MGF1)
-      .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
-      .sigAlgoName(RSAPSS_SHA3_256_NAME)
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA3_256)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha3_256)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA3_256_MGF1)
+        .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
+        .sigAlgoName(RSAPSS_SHA3_256_NAME)
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA3_256)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha3_256)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA3_384_MGF1)
-      .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
-      .sigAlgoName(RSAPSS_SHA3_384_NAME)
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA3_384)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha3_384)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA3_384_MGF1)
+        .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
+        .sigAlgoName(RSAPSS_SHA3_384_NAME)
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA3_384)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha3_384)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA3_512_MGF1)
-      .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
-      .sigAlgoName(RSAPSS_SHA3_512_NAME)
-      .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA3_512)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha3_512)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_RSA_SHA3_512_MGF1)
+        .sigAlgoOID(PKCSObjectIdentifiers.id_RSASSA_PSS)
+        .sigAlgoName(RSAPSS_SHA3_512_NAME)
+        .algoType(PKAlgorithmConstants.KEY_ALGO_RSA)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA3_512)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha3_512)
+        .build());
     // ECDSA
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_ECDSA_SHA256)
-      .sigAlgoOID(X9ObjectIdentifiers.ecdsa_with_SHA256)
-      .sigAlgoName(algorithmNameFinder.getAlgorithmName(X9ObjectIdentifiers.ecdsa_with_SHA256))
-      .algoType(PKAlgorithmConstants.KEY_ALGO_EC)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA256)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha256)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_ECDSA_SHA256)
+        .sigAlgoOID(X9ObjectIdentifiers.ecdsa_with_SHA256)
+        .sigAlgoName(algorithmNameFinder.getAlgorithmName(X9ObjectIdentifiers.ecdsa_with_SHA256))
+        .algoType(PKAlgorithmConstants.KEY_ALGO_EC)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA256)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha256)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_ECDSA_SHA384)
-      .sigAlgoOID(X9ObjectIdentifiers.ecdsa_with_SHA384)
-      .sigAlgoName(algorithmNameFinder.getAlgorithmName(X9ObjectIdentifiers.ecdsa_with_SHA384))
-      .algoType(PKAlgorithmConstants.KEY_ALGO_EC)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA384)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha384)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_ECDSA_SHA384)
+        .sigAlgoOID(X9ObjectIdentifiers.ecdsa_with_SHA384)
+        .sigAlgoName(algorithmNameFinder.getAlgorithmName(X9ObjectIdentifiers.ecdsa_with_SHA384))
+        .algoType(PKAlgorithmConstants.KEY_ALGO_EC)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA384)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha384)
+        .build());
     putAlgo(SignatureAlgorithmProperties.builder()
-      .sigAlgoId(ALGO_ID_SIGNATURE_ECDSA_SHA512)
-      .sigAlgoOID(X9ObjectIdentifiers.ecdsa_with_SHA512)
-      .sigAlgoName(algorithmNameFinder.getAlgorithmName(X9ObjectIdentifiers.ecdsa_with_SHA512))
-      .algoType(PKAlgorithmConstants.KEY_ALGO_EC)
-      .digestAlgoId(ALGO_ID_DIGEST_SHA512)
-      .digestAlgoOID(NISTObjectIdentifiers.id_sha512)
-      .build());
+        .sigAlgoId(ALGO_ID_SIGNATURE_ECDSA_SHA512)
+        .sigAlgoOID(X9ObjectIdentifiers.ecdsa_with_SHA512)
+        .sigAlgoName(algorithmNameFinder.getAlgorithmName(X9ObjectIdentifiers.ecdsa_with_SHA512))
+        .algoType(PKAlgorithmConstants.KEY_ALGO_EC)
+        .digestAlgoId(ALGO_ID_DIGEST_SHA512)
+        .digestAlgoOID(NISTObjectIdentifiers.id_sha512)
+        .build());
   }
 
   /**
@@ -257,76 +264,79 @@ public class CAAlgorithmRegistry {
         final AlgorithmIdentifier hashAlgorithm = rsaPssParams.getHashAlgorithm();
 
         return supportedAlgoMap.keySet()
-          .stream()
-          .map(s -> supportedAlgoMap.get(s))
-          .filter(algoProp -> algoProp.getSigAlgoOID().equals(algorithmOID))
-          .filter(algoProp -> algoProp.getDigestAlgoOID().equals(hashAlgorithm.getAlgorithm()))
-          .map(SignatureAlgorithmProperties::getSigAlgoId)
-          .findFirst()
-          .orElseThrow(() -> new NoSuchAlgorithmException("Non supported RSA PSS algorithm parameters"));
+            .stream()
+            .map(s -> supportedAlgoMap.get(s))
+            .filter(algoProp -> algoProp.getSigAlgoOID().equals(algorithmOID))
+            .filter(algoProp -> algoProp.getDigestAlgoOID().equals(hashAlgorithm.getAlgorithm()))
+            .map(SignatureAlgorithmProperties::getSigAlgoId)
+            .findFirst()
+            .orElseThrow(() -> new NoSuchAlgorithmException("Non supported RSA PSS algorithm parameters"));
       }
-      catch (Exception e) {
+      catch (final Exception e) {
         throw new NoSuchAlgorithmException("Illegal RSA PSS parameters", e);
       }
     }
     return supportedAlgoMap.keySet()
-      .stream()
-      .map(s -> supportedAlgoMap.get(s))
-      .filter(
-        algoProp -> algoProp.getSigAlgoOID().equals(algorithmOID))
-      .map(SignatureAlgorithmProperties::getSigAlgoId)
-      .findFirst()
-      .orElseThrow(() -> new NoSuchAlgorithmException("Non supported signature algorithm"));
+        .stream()
+        .map(s -> supportedAlgoMap.get(s))
+        .filter(
+            algoProp -> algoProp.getSigAlgoOID().equals(algorithmOID))
+        .map(SignatureAlgorithmProperties::getSigAlgoId)
+        .findFirst()
+        .orElseThrow(() -> new NoSuchAlgorithmException("Non supported signature algorithm"));
   }
 
   /**
    * Get the URI identifier for a registered signature algorithm based on signature algorithm identifier and hash
    * algorithm identifier.
    *
-   * @param sigAlgoOid    signature algorithm object identifier
+   * @param sigAlgoOid signature algorithm object identifier
    * @param digestAlgoOid hash algorithm object identifier
    * @return URI identifier for the combined signature algorithm
    * @throws NoSuchAlgorithmException if the OID combinations are not supported
    */
   public static String getAlgorithmURI(final ASN1ObjectIdentifier sigAlgoOid, final ASN1ObjectIdentifier digestAlgoOid)
-    throws NoSuchAlgorithmException {
+      throws NoSuchAlgorithmException {
 
     return supportedAlgoMap.keySet()
-      .stream()
-      .map(s -> supportedAlgoMap.get(s))
-      .filter(algoProp -> isSigAlgoEquivalent(algoProp.getSigAlgoOID(), sigAlgoOid, digestAlgoOid) &&
-        algoProp.getDigestAlgoOID().equals(digestAlgoOid))
-      .map(SignatureAlgorithmProperties::getSigAlgoId)
-      .findFirst()
-      .orElseThrow(() -> new NoSuchAlgorithmException("Non supported combination of signature algorithm and hash algorithm"));
+        .stream()
+        .map(s -> supportedAlgoMap.get(s))
+        .filter(algoProp -> isSigAlgoEquivalent(algoProp.getSigAlgoOID(), sigAlgoOid, digestAlgoOid) &&
+            algoProp.getDigestAlgoOID().equals(digestAlgoOid))
+        .map(SignatureAlgorithmProperties::getSigAlgoId)
+        .findFirst()
+        .orElseThrow(
+            () -> new NoSuchAlgorithmException("Non supported combination of signature algorithm and hash algorithm"));
   }
 
   /**
-   * This method is designed to allow identifiers for RSA encryption to be equivalent to identifiers for various RSA combined with various hash functions
+   * This method is designed to allow identifiers for RSA encryption to be equivalent to identifiers for various RSA
+   * combined with various hash functions
    *
-   * @param signatureAlgorithmPropertyOid signature algorithm OID registered in the algorithm properties in this registry for the signature algorithm
-   * @param cmsSignatureAlgorithmOid      CMS signature algorithm OID matched with the registered signature algorithm
-   * @param cmsDigestAlgorithmOid         CMS digest algorithm used with this signature algorithm
+   * @param signatureAlgorithmPropertyOid signature algorithm OID registered in the algorithm properties in this
+   *          registry for the signature algorithm
+   * @param cmsSignatureAlgorithmOid CMS signature algorithm OID matched with the registered signature algorithm
+   * @param cmsDigestAlgorithmOid CMS digest algorithm used with this signature algorithm
    * @return true if the CMS algorithms are equivalent with the registered signature algorithm OID
    */
   private static boolean isSigAlgoEquivalent(final ASN1ObjectIdentifier signatureAlgorithmPropertyOid,
-    final ASN1ObjectIdentifier cmsSignatureAlgorithmOid, final ASN1ObjectIdentifier cmsDigestAlgorithmOid) {
+      final ASN1ObjectIdentifier cmsSignatureAlgorithmOid, final ASN1ObjectIdentifier cmsDigestAlgorithmOid) {
     // Allow RSA encryption identifier in place of explicit identifier for hash and public key algo
     if (cmsSignatureAlgorithmOid.equals(PKCSObjectIdentifiers.rsaEncryption)) {
       if (cmsDigestAlgorithmOid.equals(NISTObjectIdentifiers.id_sha224) && signatureAlgorithmPropertyOid.equals(
-        PKCSObjectIdentifiers.sha224WithRSAEncryption)) {
+          PKCSObjectIdentifiers.sha224WithRSAEncryption)) {
         return true;
       }
       if (cmsDigestAlgorithmOid.equals(NISTObjectIdentifiers.id_sha256) && signatureAlgorithmPropertyOid.equals(
-        PKCSObjectIdentifiers.sha256WithRSAEncryption)) {
+          PKCSObjectIdentifiers.sha256WithRSAEncryption)) {
         return true;
       }
       if (cmsDigestAlgorithmOid.equals(NISTObjectIdentifiers.id_sha384) && signatureAlgorithmPropertyOid.equals(
-        PKCSObjectIdentifiers.sha384WithRSAEncryption)) {
+          PKCSObjectIdentifiers.sha384WithRSAEncryption)) {
         return true;
       }
       if (cmsDigestAlgorithmOid.equals(NISTObjectIdentifiers.id_sha512) && signatureAlgorithmPropertyOid.equals(
-        PKCSObjectIdentifiers.sha512WithRSAEncryption)) {
+          PKCSObjectIdentifiers.sha512WithRSAEncryption)) {
         return true;
       }
     }
@@ -341,7 +351,8 @@ public class CAAlgorithmRegistry {
    * @return algorithm properties
    * @throws NoSuchAlgorithmException if the algorithm is not supported
    */
-  public static SignatureAlgorithmProperties getAlgorithmProperties(final String algorithm) throws NoSuchAlgorithmException {
+  public static SignatureAlgorithmProperties getAlgorithmProperties(final String algorithm)
+      throws NoSuchAlgorithmException {
     if (!isAlgoSupported(algorithm)) {
       throw new NoSuchAlgorithmException("Unsupported Algorithm " + algorithm);
     }
@@ -407,7 +418,7 @@ public class CAAlgorithmRegistry {
    *
    * @param algorithm the properties of the registered signature algorithm
    */
-  public static void removeRegisteredAlgorithm(String algorithm) {
+  public static void removeRegisteredAlgorithm(final String algorithm) {
     if (!isAlgoSupported(algorithm)) {
       throw new IllegalArgumentException("Specified algorithm is not in registry");
     }
@@ -421,7 +432,7 @@ public class CAAlgorithmRegistry {
    * @return the algorithm type
    * @throws IllegalArgumentException if the requested algorithm is not supported
    */
-  public static String getAlgoFamilyFromAlgo(String algorithm) throws IllegalArgumentException {
+  public static String getAlgoFamilyFromAlgo(final String algorithm) throws IllegalArgumentException {
     if (supportedAlgoMap.containsKey(algorithm)) {
       return supportedAlgoMap.get(algorithm).getAlgoType();
     }
@@ -451,41 +462,41 @@ public class CAAlgorithmRegistry {
      *
      * @return the XML URI identifier for the signature algorithm
      */
-    private String sigAlgoId;
+    private final String sigAlgoId;
 
     /**
      * Algorithm Object Identifier.
      *
      * @return the Algorithm Object Identifier
      */
-    private ASN1ObjectIdentifier sigAlgoOID;
+    private final ASN1ObjectIdentifier sigAlgoOID;
 
     /**
      * Name for creating an instance of the algorithm in JcaContentSignerBuilder.
      *
      * @return the name for creating an instance of the algorithm in JcaContentSignerBuilder
      */
-    private String sigAlgoName;
+    private final String sigAlgoName;
 
     /**
      * The family type of this algorithm.
      *
      * @return the family type of this algorithm
      */
-    private String algoType;
+    private final String algoType;
 
     /**
      * The XML URI identifier for this algorithm.
      *
      * @return the XML URI identifier for this algorithm
      */
-    private String digestAlgoId;
+    private final String digestAlgoId;
 
     /**
      * The digest algorithm ObjectIdentifier.
      *
      * @return the digest algorithm ObjectIdentifier
      */
-    private ASN1ObjectIdentifier digestAlgoOID;
+    private final ASN1ObjectIdentifier digestAlgoOID;
   }
 }

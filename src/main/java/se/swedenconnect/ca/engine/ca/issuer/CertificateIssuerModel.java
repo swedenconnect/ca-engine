@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.issuer;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,13 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.ca.issuer.impl.BasicSerialNumberProvider;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.util.Calendar;
-
 /**
- * This certificate builder model provides basic configuration data for a {@link CertificateIssuer}
+ * This certificate builder model provides basic configuration data for a {@link CertificateIssuer}.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -40,42 +38,51 @@ import java.util.Calendar;
 public class CertificateIssuerModel {
 
   /** Engine for generating certificate serial numbers */
-  @Setter private SerialNumberProvider serialNumberProvider = new BasicSerialNumberProvider();
+  @Setter
+  private SerialNumberProvider serialNumberProvider = new BasicSerialNumberProvider();
+
   /** Offset duration for altering the not valid before time of certificates relative to current time */
-  @Setter private Duration startOffset = Duration.ofSeconds(-15);
+  @Setter
+  private Duration startOffset = Duration.ofSeconds(-15);
+
   /** Offset duration for setting the not valid after time relative to current time */
-  @Setter private Duration expiryOffset = Duration.ofDays(365);
+  @Setter
+  private Duration expiryOffset = Duration.ofDays(365);
+
   /** The name of the algorithm used by the crypto provider to sign ASN.1 objects */
   private String algorithmName;
+
   /** The signing algorithm used to sign certificates */
   private String algorithm;
+
   /** Setting this to true generates V1 certificates if the certificate model lacks extensions */
-  @Setter private boolean v1 = false;
+  @Setter
+  private boolean v1 = false;
 
   /**
-   * Constructor for the certificate issuer model
+   * Constructor for the certificate issuer model.
    *
-   * @param algorithm  the XML identifier of the certificate signing algorithm
+   * @param algorithm the XML identifier of the certificate signing algorithm
    * @param validity the validity duration of issued certificates
    * @throws NoSuchAlgorithmException thrown if the provided algorithm is not recognized
    */
-  public CertificateIssuerModel(String algorithm, Duration validity) throws NoSuchAlgorithmException {
+  public CertificateIssuerModel(final String algorithm, final Duration validity) throws NoSuchAlgorithmException {
     this.algorithm = algorithm;
     this.algorithmName = CAAlgorithmRegistry.getSigAlgoName(algorithm);
     this.expiryOffset = validity;
   }
 
   /**
-   * Returns an instance of {@link MessageDigest} specified by the certificate signature algorithm
+   * Returns an instance of {@link MessageDigest} specified by the certificate signature algorithm.
    *
    * @return message digest instance
    */
   public MessageDigest getSigAlgoMessageDigest() {
     MessageDigest messageDigestInstance = null;
     try {
-      messageDigestInstance = CAAlgorithmRegistry.getMessageDigestInstance(algorithm);
+      messageDigestInstance = CAAlgorithmRegistry.getMessageDigestInstance(this.algorithm);
     }
-    catch (NoSuchAlgorithmException e) {
+    catch (final NoSuchAlgorithmException e) {
       log.error("Illegal configured signature algorithm prevents retrieval of signature algorithm digest algorithm", e);
     }
     return messageDigestInstance;

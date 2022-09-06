@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.repository;
 
+import java.math.BigInteger;
+import java.util.Date;
+
 /**
- * Description
+ * A certificate record (for storage).
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -25,86 +27,100 @@ package se.swedenconnect.ca.engine.ca.repository;
 public interface CertificateRecord {
 
   /**
-   * Getter for certificate bytes
+   * Getter for certificate bytes.
+   *
    * @return certificate bytes
    */
   byte[] getCertificate();
 
   /**
-   * Getter for serial number
+   * Getter for serial number.
+   *
    * @return certificate serial number
    */
-  java.math.BigInteger getSerialNumber();
+  BigInteger getSerialNumber();
 
   /**
-   * Getter for issuer date
+   * Getter for issuer date.
+   *
    * @return issue date
    */
-  java.util.Date getIssueDate();
+  Date getIssueDate();
 
   /**
    * Getter for expiry date
+   *
    * @return expiry date
    */
-  java.util.Date getExpiryDate();
+  Date getExpiryDate();
 
   /**
    * Getter for revocation status
+   *
    * @return revocation status
    */
   boolean isRevoked();
 
   /**
    * Getter for revocation reason
+   *
    * @return revocation reason
    */
   Integer getReason();
 
   /**
    * Getter for revocation time
+   *
    * @return revocation time
    */
-  java.util.Date getRevocationTime();
+  Date getRevocationTime();
 
   /**
    * Setter for certificate bytes
+   *
    * @param certificate certificate bytes
    */
-  void setCertificate(byte[] certificate);
+  void setCertificate(final byte[] certificate);
 
   /**
    * Setter for certificate serial number
+   *
    * @param serialNumber certificate serial number
    */
-  void setSerialNumber(java.math.BigInteger serialNumber);
+  void setSerialNumber(final BigInteger serialNumber);
 
   /**
    * Setter for issue date
+   *
    * @param issueDate issue date
    */
-  void setIssueDate(java.util.Date issueDate);
+  void setIssueDate(final Date issueDate);
 
   /**
    * Setter for expiry date
+   *
    * @param expiryDate expiry date
    */
-  void setExpiryDate(java.util.Date expiryDate);
+  void setExpiryDate(final Date expiryDate);
 
   /**
    * Setter for revocation status
+   *
    * @param revoked revocation status
    */
-  void setRevoked(boolean revoked);
+  void setRevoked(final boolean revoked);
 
   /**
    * Setter for revocation reason
+   *
    * @param reason revocation reason
    */
-  void setReason(Integer reason);
+  void setReason(final Integer reason);
 
   /**
    * Setter for revocation time
+   *
    * @param revocationTime revocatioin time
    */
-  void setRevocationTime(java.util.Date revocationTime);
+  void setRevocationTime(final Date revocationTime);
 }

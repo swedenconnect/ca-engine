@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.issuer;
 
 import java.io.IOException;
@@ -36,9 +35,11 @@ import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
  * Interface for a CA service.
  * <p>
  * The CA service provides the collective core services of a CA including certificate issuance and revocation.
+ * </p>
  * <p>
  * This interface is not necessary to provide a CA service, but it can be a convenient collection point that
  * consolidates all the parts of the CA service and its core functions.
+ * </p>
  *
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -48,61 +49,52 @@ public interface CAService {
    * Get a base model builder for a certificate to be issued. This model builder is populated with default properties
    * for certificates issued by this CA.
    *
-   * @param subject
-   *          subject name
-   * @param publicKey
-   *          public key to be certified in the certificate
-   * @return {@link CertificateModel}
-   * @throws CertificateIssuanceException
-   *           errors creating certificate model Get the CRL issuer instance for this CA service
+   * @param subject subject name
+   * @param publicKey public key to be certified in the certificate
+   * @return CertificateModel
+   * @throws CertificateIssuanceException errors creating certificate model Get the CRL issuer instance for this CA
+   *           service
    */
-  CertificateModelBuilder getCertificateModelBuilder(CertNameModel<?> subject, PublicKey publicKey) throws CertificateIssuanceException;
+  CertificateModelBuilder getCertificateModelBuilder(final CertNameModel<?> subject, final PublicKey publicKey)
+      throws CertificateIssuanceException;
 
   /**
    * Issue and register a new certificate based on a certificate model
    *
-   * @param certificateModel
-   *          certificate model
+   * @param certificateModel certificate model
    * @return issued certificate
-   * @throws CertificateIssuanceException
-   *           errors issuing the certificate
+   * @throws CertificateIssuanceException errors issuing the certificate
    */
-  X509CertificateHolder issueCertificate(CertificateModel certificateModel) throws CertificateIssuanceException;
+  X509CertificateHolder issueCertificate(final CertificateModel certificateModel) throws CertificateIssuanceException;
 
   /**
    * Revoke a certificate issued by the CA service with unspecified reason
    *
-   * @param serialNumber
-   *          serial number of the issued certificate
-   * @param revocationDate
-   *          revocation time
-   * @throws CertificateRevocationException
-   *           errors revoking the certificate
+   * @param serialNumber serial number of the issued certificate
+   * @param revocationDate revocation time
+   * @throws CertificateRevocationException errors revoking the certificate
    */
-  void revokeCertificate(BigInteger serialNumber, Date revocationDate) throws CertificateRevocationException;
+  void revokeCertificate(final BigInteger serialNumber, final Date revocationDate)
+      throws CertificateRevocationException;
 
   /**
    * Revoke a certificate issued by the CA service. The revocation request MUST be rejected if the specified serial
    * number does not exist or if the certificate with this serial number has already been revoked with a reason other
    * than certificate hold
    *
-   * @param serialNumber
-   *          serial number of the issued certificate
-   * @param reason
-   *          reason code
-   * @param revocationDate
-   *          revocation time
-   * @throws CertificateRevocationException
-   *           errors revoking the certificate
+   * @param serialNumber serial number of the issued certificate
+   * @param reason reason code
+   * @param revocationDate revocation time
+   * @throws CertificateRevocationException errors revoking the certificate
    */
-  void revokeCertificate(BigInteger serialNumber, int reason, Date revocationDate) throws CertificateRevocationException;
+  void revokeCertificate(final BigInteger serialNumber, final int reason, final Date revocationDate)
+      throws CertificateRevocationException;
 
   /**
    * Publish a new CRL from the CA service
    *
    * @return the newly published CRL or null if no CRL was issued.
-   * @throws CertificateRevocationException
-   *           errors revoking the certificate
+   * @throws CertificateRevocationException errors revoking the certificate
    */
   X509CRLHolder publishNewCrl() throws IOException;
 

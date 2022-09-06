@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.w3c.dom.Element;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.AuthContextInfo;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.IdAttributes;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
 /**
- * Builder for Authn Context data in the Authn Context extension
+ * Builder for Authn Context data in the Authn Context extension.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -80,7 +81,7 @@ public class SAMLAuthContextBuilder {
    * @param assertionRef assertion reference/identifier
    * @return this builder
    */
-  public SAMLAuthContextBuilder assertionRef(String assertionRef) {
+  public SAMLAuthContextBuilder assertionRef(final String assertionRef) {
     this.assertionRef = assertionRef;
     return this;
   }
@@ -91,7 +92,7 @@ public class SAMLAuthContextBuilder {
    * @param authnContextClassRef level of assurance
    * @return this builder
    */
-  public SAMLAuthContextBuilder authnContextClassRef(String authnContextClassRef) {
+  public SAMLAuthContextBuilder authnContextClassRef(final String authnContextClassRef) {
     this.authnContextClassRef = authnContextClassRef;
     return this;
   }
@@ -102,7 +103,7 @@ public class SAMLAuthContextBuilder {
    * @param authenticationInstant time of authentication
    * @return this builder
    */
-  public SAMLAuthContextBuilder authenticationInstant(Date authenticationInstant) {
+  public SAMLAuthContextBuilder authenticationInstant(final Date authenticationInstant) {
     this.authenticationInstant = authenticationInstant;
     return this;
   }
@@ -113,7 +114,7 @@ public class SAMLAuthContextBuilder {
    * @param identityProvider identity provider
    * @return this builder
    */
-  public SAMLAuthContextBuilder identityProvider(String identityProvider) {
+  public SAMLAuthContextBuilder identityProvider(final String identityProvider) {
     this.identityProvider = identityProvider;
     return this;
   }
@@ -124,7 +125,7 @@ public class SAMLAuthContextBuilder {
    * @param serviceID service identifier
    * @return this builder
    */
-  public SAMLAuthContextBuilder serviceID(String serviceID) {
+  public SAMLAuthContextBuilder serviceID(final String serviceID) {
     this.serviceID = serviceID;
     return this;
   }
@@ -135,7 +136,7 @@ public class SAMLAuthContextBuilder {
    * @param extensions extensions
    * @return this builder
    */
-  public SAMLAuthContextBuilder extensions(List<Element> extensions) {
+  public SAMLAuthContextBuilder extensions(final List<Element> extensions) {
     this.extensions = extensions;
     return this;
   }
@@ -146,7 +147,7 @@ public class SAMLAuthContextBuilder {
    * @param attributeMappings attribute mappings
    * @return this builder
    */
-  public SAMLAuthContextBuilder attributeMappings(List<AttributeMapping> attributeMappings) {
+  public SAMLAuthContextBuilder attributeMappings(final List<AttributeMapping> attributeMappings) {
     this.attributeMappings = attributeMappings;
     return this;
   }
@@ -159,24 +160,24 @@ public class SAMLAuthContextBuilder {
    */
   public SAMLAuthContext build() throws CertificateIssuanceException {
 
-    SAMLAuthContext samlAuthContext = new SAMLAuthContext();
-    AuthContextInfo aci = new AuthContextInfo();
+    final SAMLAuthContext samlAuthContext = new SAMLAuthContext();
+    final AuthContextInfo aci = new AuthContextInfo();
     samlAuthContext.setAuthContextInfo(aci);
-    aci.setAssertionRef(assertionRef);
-    aci.setAuthenticationInstant(getXmlDate(authenticationInstant));
-    aci.setAuthnContextClassRef(authnContextClassRef);
-    aci.setIdentityProvider(identityProvider);
-    aci.setServiceID(serviceID);
-    if (extensions != null && !extensions.isEmpty()) {
-      List<Element> elements = aci.getAnies();
-      extensions.stream().forEach(element -> elements.add(element));
+    aci.setAssertionRef(this.assertionRef);
+    aci.setAuthenticationInstant(getXmlDate(this.authenticationInstant));
+    aci.setAuthnContextClassRef(this.authnContextClassRef);
+    aci.setIdentityProvider(this.identityProvider);
+    aci.setServiceID(this.serviceID);
+    if (this.extensions != null && !this.extensions.isEmpty()) {
+      final List<Element> elements = aci.getAnies();
+      this.extensions.stream().forEach(element -> elements.add(element));
     }
 
-    if (attributeMappings != null && !attributeMappings.isEmpty()) {
-      IdAttributes ida = new IdAttributes();
+    if (this.attributeMappings != null && !this.attributeMappings.isEmpty()) {
+      final IdAttributes ida = new IdAttributes();
       samlAuthContext.setIdAttributes(ida);
-      List<AttributeMapping> atrMapList = ida.getAttributeMappings();
-      attributeMappings.stream().forEach(attributeMapping -> atrMapList.add(attributeMapping));
+      final List<AttributeMapping> atrMapList = ida.getAttributeMappings();
+      this.attributeMappings.stream().forEach(attributeMapping -> atrMapList.add(attributeMapping));
     }
 
     return samlAuthContext;
@@ -184,17 +185,18 @@ public class SAMLAuthContextBuilder {
 
   /**
    * Convert {@link Date} to {@link XMLGregorianCalendar}
+   *
    * @param date date to convert
    * @return {@link XMLGregorianCalendar}
    * @throws CertificateIssuanceException error parsing date
    */
-  public static XMLGregorianCalendar getXmlDate(Date date) throws CertificateIssuanceException {
-    GregorianCalendar gcal = new GregorianCalendar();
+  public static XMLGregorianCalendar getXmlDate(final Date date) throws CertificateIssuanceException {
+    final GregorianCalendar gcal = new GregorianCalendar();
     gcal.setTime(date);
     try {
       return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
     }
-    catch (DatatypeConfigurationException e) {
+    catch (final DatatypeConfigurationException e) {
       throw new CertificateIssuanceException("Illegal date", e);
     }
   }

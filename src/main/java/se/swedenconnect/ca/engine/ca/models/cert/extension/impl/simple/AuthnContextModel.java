@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
+import java.util.Arrays;
+
 import org.bouncycastle.asn1.ASN1Object;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.cert.extensions.AuthnContext;
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
 
-import java.util.Arrays;
-
 /**
- * Extension data model
+ * Extension data model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -42,9 +42,9 @@ public class AuthnContextModel extends AbstractExtensionModel {
    * Constructor for non critical extension
    *
    * @param samlAuthnContext SAMLAuthContext data
-   * @param critical         extension criticality
+   * @param critical extension criticality
    */
-  public AuthnContextModel(SAMLAuthContext samlAuthnContext, boolean critical) {
+  public AuthnContextModel(final SAMLAuthContext samlAuthnContext, final boolean critical) {
     this.samlAuthContext = samlAuthnContext;
     this.critical = critical;
   }
@@ -54,18 +54,20 @@ public class AuthnContextModel extends AbstractExtensionModel {
    *
    * @param samlAuthnContext SAMLAuthContext data
    */
-  public AuthnContextModel(SAMLAuthContext samlAuthnContext) {
+  public AuthnContextModel(final SAMLAuthContext samlAuthnContext) {
     this.samlAuthContext = samlAuthnContext;
     this.critical = false;
   }
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(AuthnContext.OID, "Authentication context", critical);
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
+    return new ExtensionMetadata(AuthnContext.OID, "Authentication context", this.critical);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return new AuthnContext(Arrays.asList(samlAuthContext));
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    return new AuthnContext(Arrays.asList(this.samlAuthContext));
   }
 }
