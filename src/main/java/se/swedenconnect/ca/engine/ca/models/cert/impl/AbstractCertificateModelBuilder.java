@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
 import java.io.IOException;
@@ -366,12 +365,13 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
   }
 
   /**
-   * Set authority and subject key identifiers
+   * Add authority and subject key identifiers to a list of extension models
    *
-   * @param extm the extension models for this certificate model builder
+   * @param extensionModelList the extension models for this certificate model builder to which the subject and key
+   *          identifiers should be added
    * @throws IOException error setting AKI and SKI data
    */
-  protected abstract void getKeyIdentifierExtensionsModels(List<ExtensionModel> extm) throws IOException;
+  protected abstract void addKeyIdentifierExtensionsModels(List<ExtensionModel> extensionModelList) throws IOException;
 
   /**
    * Get the default basic extension models for all model data extensions except for AKI and SKI extensions
@@ -388,7 +388,7 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
     }
 
     // Get custom implemented key identifier extensioins
-    this.getKeyIdentifierExtensionsModels(extm);
+    this.addKeyIdentifierExtensionsModels(extm);
 
     // Key usage
     if (this.keyUsage != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
 /**
+ * Enumeration for attribute reference types.
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public enum AttributeRefType {
-  /** Identifier for SubjectAltName type */
+  /**
+   * Identifier for SubjectAltName type.
+   */
   san,
-  /** Identifier for Relative Distinguished Name type */
+
+  /**
+   * Identifier for Relative Distinguished Name type.
+   */
   rdn;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
 
 import java.io.IOException;
@@ -81,8 +80,9 @@ public class DefaultCertificateModelBuilder extends AbstractCertificateModelBuil
     return this.publicKey;
   }
 
+  /** {@inheritDoc} */
   @Override
-  protected void getKeyIdentifierExtensionsModels(final List<ExtensionModel> extm) throws IOException {
+  protected void addKeyIdentifierExtensionsModels(final List<ExtensionModel> extensionModelList) throws IOException {
 
     // Authority key identifier
     if (this.includeAki) {
@@ -103,12 +103,12 @@ public class DefaultCertificateModelBuilder extends AbstractCertificateModelBuil
             this.certificateIssuerModel.getSigAlgoMessageDigest()
                 .digest(this.issuer.getSubjectPublicKeyInfo().getEncoded())));
       }
-      extm.add(akiModel);
+      extensionModelList.add(akiModel);
     }
 
     // Subject key identifier
     if (this.includeSki) {
-      extm.add(new SubjectKeyIdentifierModel(
+      extensionModelList.add(new SubjectKeyIdentifierModel(
           this.certificateIssuerModel.getSigAlgoMessageDigest().digest(this.publicKey.getEncoded())));
     }
 

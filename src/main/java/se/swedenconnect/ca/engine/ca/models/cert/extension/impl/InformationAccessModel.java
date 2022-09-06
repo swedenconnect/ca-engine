@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
 
 import java.util.ArrayList;
@@ -45,24 +44,24 @@ import se.swedenconnect.cert.extensions.SubjectInformationAccess;
  */
 public class InformationAccessModel extends AbstractExtensionModel {
 
-  /** CA Repository OID */
+  /** CA Repository OID. */
   public static final ASN1ObjectIdentifier CA_REPOSITORY = new ASN1ObjectIdentifier("1.3.6.1.5.5.7.48.5");
 
-  /** Timestamping OID */
+  /** Timestamping OID. */
   public static final ASN1ObjectIdentifier TIMESTAMPING = new ASN1ObjectIdentifier("1.3.6.1.5.5.7.48.3");
 
-  /** Set to true if the extension is a SubjectInfoAccess Extension and false for an AuthorityInfoAccess Extension */
+  /** Set to true if the extension is a SubjectInfoAccess Extension and false for an AuthorityInfoAccess Extension. */
   private final EntityType entityType;
 
-  /** Set to true to force this extension to be critical. RFC 5280 recommends that this extension is not critical */
+  /** Set to true to force this extension to be critical. RFC 5280 recommends that this extension is not critical. */
   @Setter
   private boolean critical = false;
 
-  /** List of access descriptions */
+  /** List of access descriptions. */
   private final List<AccessDescriptionParams> accessDescriptionList;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param entityType entity type (subject or issuer)
    * @param accessDescriptionParams information access data

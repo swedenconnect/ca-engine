@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.ocsp;
 
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
 import org.bouncycastle.cert.ocsp.OCSPResp;
+
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 
 /**
- * Interface for an OCSP Responder
+ * Interface for an OCSP Responder.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -29,11 +29,11 @@ import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 public interface OCSPResponder {
 
   /**
-   * Process a request for certificate status information
+   * Process a request for certificate status information.
    *
    * @param ocspRequest OCSP request
    * @return OCSP response
    * @throws CertificateRevocationException on exceptions that prevents generation of an OCSP response
    */
-  OCSPResp handleRequest(OCSPRequest ocspRequest) throws CertificateRevocationException;
+  OCSPResp handleRequest(final OCSPRequest ocspRequest) throws CertificateRevocationException;
 }

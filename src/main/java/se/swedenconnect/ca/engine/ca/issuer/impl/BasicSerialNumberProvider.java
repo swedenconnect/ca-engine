@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.issuer.impl;
-
-import lombok.AllArgsConstructor;
-import se.swedenconnect.ca.engine.ca.issuer.SerialNumberProvider;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import lombok.AllArgsConstructor;
+import se.swedenconnect.ca.engine.ca.issuer.SerialNumberProvider;
+
 /**
- * Basic serial number provider
+ * Basic serial number provider.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -32,17 +31,19 @@ import java.security.SecureRandom;
 public class BasicSerialNumberProvider implements SerialNumberProvider {
 
   /** Random number generator */
-  private SecureRandom rng;
+  private final SecureRandom rng;
 
   /**
-   * Constructor
+   * Constructor.
    */
   public BasicSerialNumberProvider() {
     this.rng = new SecureRandom();
   }
 
   /** {@inheritDoc} */
-  @Override public BigInteger getSerialNumber() {
-    return new BigInteger(128, rng);
+  @Override
+  public BigInteger getSerialNumber() {
+    return new BigInteger(128, this.rng);
   }
+
 }

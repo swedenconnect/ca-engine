@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyUsage;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 
@@ -41,7 +41,7 @@ public class KeyUsageModel extends AbstractExtensionModel {
    *
    * @param keyUsage authority key identifier extension data
    */
-  public KeyUsageModel(int keyUsage) {
+  public KeyUsageModel(final int keyUsage) {
     this.keyUsage = new KeyUsage(keyUsage);
     this.critical = true;
   }
@@ -52,18 +52,20 @@ public class KeyUsageModel extends AbstractExtensionModel {
    * @param keyUsage authority key identifier extension data
    * @param critical extension criticality
    */
-  public KeyUsageModel(int keyUsage, boolean critical) {
+  public KeyUsageModel(final int keyUsage, final boolean critical) {
     this.keyUsage = new KeyUsage(keyUsage);
     this.critical = true;
   }
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(Extension.keyUsage, "Key usage", critical);
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
+    return new ExtensionMetadata(Extension.keyUsage, "Key usage", this.critical);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return keyUsage;
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    return this.keyUsage;
   }
 }

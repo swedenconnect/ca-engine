@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.issuer.impl;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +39,8 @@ import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * This class provides an abstract skeleton for a typical CA service by combining the functions of a CertificateIssuer,
@@ -57,12 +59,14 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
   /**
    * Constructor for the CA service
    *
-   * @param caCertificateChain the certificate chain for the public key of this CA service with the CA certificate first
-   *          and the trust anchor la
+   * @param issuerCredential ths issuing credentials of this CA service with the CA certificate first and the trust
+   *          anchor last
    * @param caRepository repository for certificate and revocation data
+   * @throws CertificateEncodingException error parsing certificate data
    */
-  public AbstractCAService(final List<X509CertificateHolder> caCertificateChain, final CARepository caRepository) {
-    this.caCertificateChain = caCertificateChain;
+  public AbstractCAService(final PkiCredential issuerCredential, final CARepository caRepository)
+      throws CertificateEncodingException {
+    this.caCertificateChain = CAUtils.getCertificateHolderList(issuerCredential.getCertificateChain());
     this.caRepository = caRepository;
   }
 
@@ -96,8 +100,8 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
    * @return base certificate model for issuing a certificate
    * @throws CertificateIssuanceException on errors creating the certificate model
    */
-  protected abstract T getBaseCertificateModelBuilder(CertNameModel<?> subject, PublicKey publicKey,
-      X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
+  protected abstract T getBaseCertificateModelBuilder(final CertNameModel<?> subject, final PublicKey publicKey,
+      final X509CertificateHolder issuerCertificate, final CertificateIssuerModel certificateIssuerModel)
       throws CertificateIssuanceException;
 
   /** {@inheritDoc} */
@@ -131,12 +135,11 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
 
   /** {@inheritDoc} */
   @Override
-  public void revokeCertificate(final BigInteger serialNumber, final int reason, Date revocationDate)
+  public void revokeCertificate(final BigInteger serialNumber, final int reason, final Date revocationDate)
       throws CertificateRevocationException {
+
     // Check that date is set and not a future date
-    if (revocationDate == null || revocationDate.after(new Date())) {
-      revocationDate = new Date();
-    }
+    Date rdate = (revocationDate == null || revocationDate.after(new Date())) ? new Date() : revocationDate;
 
     // Check for existence and previous revocation
     final CertificateRecord certificateRecord = this.caRepository.getCertificate(serialNumber);
@@ -151,15 +154,15 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
       }
       else {
         // This certificate was previously revoked with reason "on hold". Use original revocation time.
-        revocationDate = certificateRecord.getRevocationTime();
+        rdate = certificateRecord.getRevocationTime();
       }
     }
-    this.caRepository.revokeCertificate(serialNumber, reason, revocationDate);
+    this.caRepository.revokeCertificate(serialNumber, reason, rdate);
   }
 
   /** {@inheritDoc} */
   @Override
-  public X509CRLHolder publishNewCrl() throws CertificateRevocationException {
+  public X509CRLHolder publishNewCrl() throws IOException {
     final CRLIssuer crlIssuer = this.getCrlIssuer();
     if (crlIssuer != null) {
       final X509CRLHolder newCrl = crlIssuer.issueCRL();
@@ -175,11 +178,13 @@ public abstract class AbstractCAService<T extends CertificateModelBuilder> imple
     return this.caRepository.getCRLRevocationDataProvider().getCurrentCrl();
   }
 
+  /** {@inheritDoc} */
   @Override
   public X509CertificateHolder getCaCertificate() {
     return this.caCertificateChain.get(0);
   }
 
+  /** {@inheritDoc} */
   @Override
   public List<X509CertificateHolder> getCACertificateChain() {
     return this.caCertificateChain;

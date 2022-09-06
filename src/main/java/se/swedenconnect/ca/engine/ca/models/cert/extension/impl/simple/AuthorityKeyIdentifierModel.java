@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,42 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 
 /**
- * Extension data model
+ * Extension data model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class AuthorityKeyIdentifierModel extends AbstractExtensionModel {
 
-  /** Authority key identifier extension data */
+  /** Authority key identifier extension data. */
   private final AuthorityKeyIdentifier aki;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param aki authority key identifier extension data
    */
-  public AuthorityKeyIdentifierModel(AuthorityKeyIdentifier aki) {
+  public AuthorityKeyIdentifierModel(final AuthorityKeyIdentifier aki) {
     this.aki = aki;
   }
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
     return new ExtensionMetadata(Extension.authorityKeyIdentifier, "Authority key identifier", false);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return aki;
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    return this.aki;
   }
 }

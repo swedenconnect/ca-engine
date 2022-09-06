@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
- * Attribute               ::= SEQUENCE {
- * type             AttributeType,
- * values    SET OF AttributeValue }
- * -- at least one value is required
+ * <pre>
+ *   Attribute ::= SEQUENCE {
+ *     type             AttributeType,
+ *     values    SET OF AttributeValue }
+ *   -- at least one value is required
+ * </pre>
  * <p>
- * AttributeType           ::= OBJECT IDENTIFIER
- * AttributeValue          ::= ANY -- DEFINED BY AttributeType
+ *
+ * <pre>
+ * AttributeType  ::= OBJECT IDENTIFIER
+ * AttributeValue ::= ANY -- DEFINED BY AttributeType
+ * </pre>
+ * </p>
  * <p>
- * X.509 certificates include use of both the type "Attribute" and
- * the type "AttributeTypeAndValue" The difference being that the former
- * may have any number of values, while the latter can have only one value.
+ * X.509 certificates include use of both the type "Attribute" and the type "AttributeTypeAndValue" The difference being
+ * that the former may have any number of values, while the latter can have only one value.
+ * </p>
  * <p>
- * Attribute is used in SubjectDirectoryAttributes extension
+ * Attribute is used in SubjectDirectoryAttributes extension.
+ * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -49,19 +56,21 @@ import java.util.List;
 @Builder
 public class AttributeModel {
 
+  /** Attribute OID. */
+  private ASN1ObjectIdentifier attributeType;
+
+  /** List of attribute values. */
+  private List<Object> valueList;
+
   /**
-   * Constructor
+   * Constructor.
    *
    * @param attributeType attribute OID
-   * @param value         attribute values
+   * @param value attribute values
    */
-  public AttributeModel(ASN1ObjectIdentifier attributeType, Object... value) {
+  public AttributeModel(final ASN1ObjectIdentifier attributeType, final Object... value) {
     this.attributeType = attributeType;
     this.valueList = Arrays.asList(value);
   }
 
-  /** Attribute OID */
-  private ASN1ObjectIdentifier attributeType;
-  /** List of attribute values */
-  private List<Object> valueList;
 }

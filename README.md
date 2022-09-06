@@ -25,9 +25,9 @@ Add this maven dependency to your project
 ## Java API
 
 ### CA Service
-This library provides classes for instantiating Certification Authority services with revocation and repository functionality
+This library provides classes for instantiating Certification Authority services with revocation and repository functionality.
 
-The basic interface for the CA service is the `se.swedenconnect.ca.engine.ca.issuer.CAService` interface
+The basic interface for the CA service is the `se.swedenconnect.ca.engine.ca.issuer.CAService` interface.
 
 The core functions of a CA service is implemented by the `se.swedenconnect.ca.engine.ca.issuer.impl.AbstractCAService` class. 
 The typical way to implement a CA is to extend this class.
@@ -47,19 +47,20 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   private String ocspResponderUrl;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param privateKey private key of the CA service
-   * @param caCertificateChain Certificate chain representing this CA with the ca certificate of this CA 
+   * @param caCertificateChain certificate chain representing this CA with the ca certificate of this CA 
                                being the first certificate
-   * @param caRepository       repository for storing issued certificates
-   * @param issuerModel        model for issuing certificates
-   * @param crlIssuerModel     model for publishing CRL:s
+   * @param caRepository repository for storing issued certificates
+   * @param issuerModel model for issuing certificates
+   * @param crlIssuerModel model for publishing CRL:s
    * @throws NoSuchAlgorithmException algorithm is not supported
    */
-  public BasicCAService(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain,
-    CARepository caRepository, CertificateIssuerModel issuerModel, CRLIssuerModel crlIssuerModel)
-    throws NoSuchAlgorithmException {
+  public BasicCAService(final PrivateKey privateKey, final List<X509CertificateHolder> caCertificateChain,
+      final CARepository caRepository, final CertificateIssuerModel issuerModel, final CRLIssuerModel crlIssuerModel)
+      throws NoSuchAlgorithmException {
+      
     super(caCertificateChain, caRepository);
 
     // Setup service
@@ -73,12 +74,14 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   }
 
   /** {@inheritDoc} */
-  @Override public CertificateIssuer getCertificateIssuer() {
+  @Override 
+  public CertificateIssuer getCertificateIssuer() {
     return certificateIssuer;
   }
 
   /** {@inheritDoc} */
-  @Override protected CRLIssuer getCrlIssuer() {
+  @Override 
+  protected CRLIssuer getCrlIssuer() {
     return crlIssuer;
   }
 
@@ -107,14 +110,14 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
   }
 
   /**
-   * Set OCSP responder for this CA service
+   * Set OCSP responder for this CA service.
    *
    * @param ocspResponder ocsp responder implementation
    * @param ocspResponderUrl URL for sending requests to the OCSP responder
    * @param ocspResponderCertificate OCSP responder certificate
    */
-  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl,
-    X509CertificateHolder ocspResponderCertificate) {
+  public void setOcspResponder(final OCSPResponder ocspResponder, final String ocspResponderUrl,
+      final X509CertificateHolder ocspResponderCertificate) {
     this.ocspResponder = ocspResponder;
     this.ocspResponderUrl = ocspResponderUrl;
     this.ocspResponderCertificate = ocspResponderCertificate;
@@ -128,13 +131,13 @@ public class BasicCAService extends AbstractCAService<DefaultCertificateModelBui
 
   /** {@inheritDoc} */
   @Override
-  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject,
-    PublicKey publicKey,
-    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
-    throws CertificateIssuanceException {
-    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey,
-      getCaCertificate(),
-      certificateIssuerModel);
+  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(final CertNameModel subject,
+      final PublicKey publicKey, final X509CertificateHolder issuerCertificate, 
+      final CertificateIssuerModel certificateIssuerModel)
+      throws CertificateIssuanceException {
+      
+    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(
+        publicKey, getCaCertificate(), certificateIssuerModel);
     certModelBuilder
       .subject(subject)
       .includeAki(true)
@@ -158,7 +161,7 @@ This interface is designed to match the JPA API for database storage, but could 
 
 -----
 
-Copyright &copy; 2022, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright &copy; 2021-2022, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
 
 
 

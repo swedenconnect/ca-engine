@@ -1,15 +1,16 @@
 package se.swedenconnect.ca.engine.ca.repository;
 
 /**
- * Description
+ * Enumeration telling how to sort entries.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public enum SortBy {
 
-  /** Serial Number */
+  /** Sort by serial number. */
   serialNumber,
-  /** Issuer date */
+
+  /** Sort by issuer date. */
   issueDate;
 }

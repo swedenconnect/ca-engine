@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
-
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import se.swedenconnect.cert.extensions.QCStatements;
-import se.swedenconnect.cert.extensions.data.MonetaryValue;
-import se.swedenconnect.cert.extensions.data.PDSLocation;
 
 import java.math.BigInteger;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+
+import se.swedenconnect.cert.extensions.QCStatements;
+import se.swedenconnect.cert.extensions.data.MonetaryValue;
+import se.swedenconnect.cert.extensions.data.PDSLocation;
+
 /**
- * Builder for QC statements
+ * Builder for QC statements.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -42,7 +42,7 @@ public class QcStatementsBuilder {
   private List<PDSLocation> pdsLocations;
 
   /**
-   * Gets an instance of the QC Statements builder
+   * Gets an instance of the QC Statements builder.
    *
    * @return {@link QcStatementsBuilder}
    */
@@ -51,18 +51,18 @@ public class QcStatementsBuilder {
   }
 
   /**
-   * Private constructor
+   * Private constructor.
    */
   private QcStatementsBuilder() {
   }
 
   /**
-   * Set version and semantics
+   * Set version and semantics.
    *
    * @param versionAndSemantics version and semantics
    * @return this builder
    */
-  public QcStatementsBuilder versionAndSemantics(QCPKIXSyntax versionAndSemantics) {
+  public QcStatementsBuilder versionAndSemantics(final QCPKIXSyntax versionAndSemantics) {
     this.versionAndSemantics = versionAndSemantics;
     return this;
   }
@@ -73,7 +73,7 @@ public class QcStatementsBuilder {
    * @param qualifiedCertificate qualified certificate status
    * @return this builder
    */
-  public QcStatementsBuilder qualifiedCertificate(boolean qualifiedCertificate) {
+  public QcStatementsBuilder qualifiedCertificate(final boolean qualifiedCertificate) {
     this.qualifiedCertificate = qualifiedCertificate;
     return this;
   }
@@ -84,7 +84,7 @@ public class QcStatementsBuilder {
    * @param qscd qualified signature creation device status
    * @return this builder
    */
-  public QcStatementsBuilder qscd(boolean qscd) {
+  public QcStatementsBuilder qscd(final boolean qscd) {
     this.qscd = qscd;
     return this;
   }
@@ -95,7 +95,7 @@ public class QcStatementsBuilder {
    * @param qcTypes qualified certificate certificate types
    * @return this builder
    */
-  public QcStatementsBuilder qcTypes(List<ASN1ObjectIdentifier> qcTypes) {
+  public QcStatementsBuilder qcTypes(final List<ASN1ObjectIdentifier> qcTypes) {
     this.qcTypes = qcTypes;
     return this;
   }
@@ -106,7 +106,7 @@ public class QcStatementsBuilder {
    * @param legislationCountries legislation countries
    * @return this builder
    */
-  public QcStatementsBuilder legislationCountries(List<String> legislationCountries) {
+  public QcStatementsBuilder legislationCountries(final List<String> legislationCountries) {
     this.legislationCountries = legislationCountries;
     return this;
   }
@@ -117,7 +117,7 @@ public class QcStatementsBuilder {
    * @param relianceLimit reliance limit
    * @return this builder
    */
-  public QcStatementsBuilder relianceLimit(MonetaryValue relianceLimit) {
+  public QcStatementsBuilder relianceLimit(final MonetaryValue relianceLimit) {
     this.relianceLimit = relianceLimit;
     return this;
   }
@@ -128,7 +128,7 @@ public class QcStatementsBuilder {
    * @param retentionPeriod retention period
    * @return this builder
    */
-  public QcStatementsBuilder retentionPeriod(Integer retentionPeriod) {
+  public QcStatementsBuilder retentionPeriod(final Integer retentionPeriod) {
     this.retentionPeriod = retentionPeriod;
     return this;
   }
@@ -139,7 +139,7 @@ public class QcStatementsBuilder {
    * @param pdsLocations PDS locations
    * @return this builder
    */
-  public QcStatementsBuilder pdsLocations(List<PDSLocation> pdsLocations) {
+  public QcStatementsBuilder pdsLocations(final List<PDSLocation> pdsLocations) {
     this.pdsLocations = pdsLocations;
     return this;
   }
@@ -151,10 +151,10 @@ public class QcStatementsBuilder {
    */
   public QCStatements build() {
 
-    QCStatements qcStatements = new QCStatements();
+    final QCStatements qcStatements = new QCStatements();
 
-    if (versionAndSemantics != null) {
-      switch (versionAndSemantics.getVersion()) {
+    if (this.versionAndSemantics != null) {
+      switch (this.versionAndSemantics.getVersion()) {
       case V1:
         qcStatements.setPkixSyntaxV1(true);
         break;
@@ -162,37 +162,39 @@ public class QcStatementsBuilder {
         qcStatements.setPkixSyntaxV2(true);
         break;
       }
-      qcStatements.setSemanticsInfo(versionAndSemantics.getSemanticsInformation());
+      qcStatements.setSemanticsInfo(this.versionAndSemantics.getSemanticsInformation());
     }
 
-    if (qualifiedCertificate)
+    if (this.qualifiedCertificate) {
       qcStatements.setQcCompliance(true);
-    if (qscd)
+    }
+    if (this.qscd) {
       qcStatements.setQcSscd(true);
+    }
 
-    if (qcTypes != null && !qcTypes.isEmpty()) {
+    if (this.qcTypes != null && !this.qcTypes.isEmpty()) {
       qcStatements.setQcType(true);
-      qcStatements.setQcTypeIdList(qcTypes);
+      qcStatements.setQcTypeIdList(this.qcTypes);
     }
 
-    if (legislationCountries != null && !legislationCountries.isEmpty()) {
+    if (this.legislationCountries != null && !this.legislationCountries.isEmpty()) {
       qcStatements.setQcCClegislation(true);
-      qcStatements.setLegislationCountryList(legislationCountries);
+      qcStatements.setLegislationCountryList(this.legislationCountries);
     }
 
-    if (relianceLimit != null) {
+    if (this.relianceLimit != null) {
       qcStatements.setLimitValue(true);
-      qcStatements.setMonetaryValue(relianceLimit);
+      qcStatements.setMonetaryValue(this.relianceLimit);
     }
 
-    if (retentionPeriod != null) {
+    if (this.retentionPeriod != null) {
       qcStatements.setRetentionPeriod(true);
-      qcStatements.setRetentionPeriodVal(new BigInteger(String.valueOf(retentionPeriod)));
+      qcStatements.setRetentionPeriodVal(new BigInteger(String.valueOf(this.retentionPeriod)));
     }
 
-    if (pdsLocations != null && !pdsLocations.isEmpty()) {
+    if (this.pdsLocations != null && !this.pdsLocations.isEmpty()) {
       qcStatements.setPdsStatement(true);
-      qcStatements.setLocationList(pdsLocations);
+      qcStatements.setLocationList(this.pdsLocations);
     }
     return qcStatements;
   }

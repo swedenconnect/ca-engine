@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.repository.impl;
-
-import lombok.NoArgsConstructor;
-import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 
 import java.math.BigInteger;
 import java.util.Date;
 
+import lombok.NoArgsConstructor;
+import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
+
 /**
- * Certificate record implementation with data stored in objects that are easier to serialize e.g. using a JSON serializer.
+ * Certificate record implementation with data stored in objects that are easier to serialize e.g. using a JSON
+ * serializer.
  *
  * This is done by converting Date to long and BigInteger to string.
  *
@@ -35,21 +35,28 @@ public class SerializableCertificateRecord implements CertificateRecord {
 
   /** The bytes of the issued certificate */
   protected byte[] certificate;
+
   /** The serial number of the issued certificate */
   protected String serialNumber;
+
   /** The issue time of the certificate */
   protected long issueDate;
+
   /** The expiry date of the certificate */
   protected long expiryDate;
+
   /** Boolean indicator if this certificate is revoked */
   protected boolean revoked;
+
   /** Revocation reason if applicable */
   protected Integer reason;
+
   /** Time of revocation if applicable */
   protected long revocationTime;
 
   /**
-   * Constructor for serializable certificate record
+   * Constructor for serializable certificate record.
+   *
    * @param certificate the bytes of the issued certificate
    * @param serialNumber The serial number of the issued certificate
    * @param issueDate the issue time of the certificate
@@ -58,92 +65,106 @@ public class SerializableCertificateRecord implements CertificateRecord {
    * @param reason revocation reason if applicable
    * @param revocationTime time of revocation if applicable
    */
-  public SerializableCertificateRecord(byte[] certificate, BigInteger serialNumber, Date issueDate, Date expiryDate, boolean revoked,
-    Integer reason, Date revocationTime) {
-    setCertificate(certificate);
-    setSerialNumber(serialNumber);
-    setIssueDate(issueDate);
-    setExpiryDate(expiryDate);
-    setRevoked(revoked);
-    setReason(reason);
-    setRevocationTime(revocationTime);
+  public SerializableCertificateRecord(final byte[] certificate, final BigInteger serialNumber, final Date issueDate,
+      final Date expiryDate, final boolean revoked, final Integer reason, final Date revocationTime) {
+    this.setCertificate(certificate);
+    this.setSerialNumber(serialNumber);
+    this.setIssueDate(issueDate);
+    this.setExpiryDate(expiryDate);
+    this.setRevoked(revoked);
+    this.setReason(reason);
+    this.setRevocationTime(revocationTime);
   }
 
   /** {@inheritDoc} */
-  @Override public byte[] getCertificate() {
-    return certificate;
+  @Override
+  public byte[] getCertificate() {
+    return this.certificate;
   }
 
   /** {@inheritDoc} */
-  @Override public BigInteger getSerialNumber() {
-    return serialNumber == null ? null : new BigInteger(serialNumber);
+  @Override
+  public BigInteger getSerialNumber() {
+    return this.serialNumber == null ? null : new BigInteger(this.serialNumber);
   }
 
   /** {@inheritDoc} */
-  @Override public Date getIssueDate() {
-    return getDateOrNull(issueDate);
+  @Override
+  public Date getIssueDate() {
+    return this.getDateOrNull(this.issueDate);
   }
 
   /** {@inheritDoc} */
-  @Override public Date getExpiryDate() {
-    return getDateOrNull(expiryDate);
+  @Override
+  public Date getExpiryDate() {
+    return this.getDateOrNull(this.expiryDate);
   }
 
   /** {@inheritDoc} */
-  @Override public boolean isRevoked() {
-    return revoked;
+  @Override
+  public boolean isRevoked() {
+    return this.revoked;
   }
 
   /** {@inheritDoc} */
-  @Override public Integer getReason() {
-    return reason;
+  @Override
+  public Integer getReason() {
+    return this.reason;
   }
 
   /** {@inheritDoc} */
-  @Override public Date getRevocationTime() {
-    return getDateOrNull(revocationTime);
+  @Override
+  public Date getRevocationTime() {
+    return this.getDateOrNull(this.revocationTime);
   }
 
   /** {@inheritDoc} */
-  @Override public void setCertificate(byte[] certificate) {
+  @Override
+  public void setCertificate(final byte[] certificate) {
     this.certificate = certificate;
   }
 
   /** {@inheritDoc} */
-  @Override public void setSerialNumber(BigInteger serialNumber) {
+  @Override
+  public void setSerialNumber(final BigInteger serialNumber) {
     this.serialNumber = serialNumber == null ? null : serialNumber.toString();
   }
 
   /** {@inheritDoc} */
-  @Override public void setIssueDate(Date issueDate) {
-    this.issueDate = parseDateOrNull(issueDate);
+  @Override
+  public void setIssueDate(final Date issueDate) {
+    this.issueDate = this.parseDateOrNull(issueDate);
   }
 
   /** {@inheritDoc} */
-  @Override public void setExpiryDate(Date expiryDate) {
-    this.expiryDate = parseDateOrNull(expiryDate);
+  @Override
+  public void setExpiryDate(final Date expiryDate) {
+    this.expiryDate = this.parseDateOrNull(expiryDate);
   }
 
   /** {@inheritDoc} */
-  @Override public void setRevoked(boolean revoked) {
+  @Override
+  public void setRevoked(final boolean revoked) {
     this.revoked = revoked;
   }
 
   /** {@inheritDoc} */
-  @Override public void setReason(Integer reason) {
+  @Override
+  public void setReason(final Integer reason) {
     this.reason = reason;
   }
 
   /** {@inheritDoc} */
-  @Override public void setRevocationTime(Date revocationTime) {
-    this.revocationTime = parseDateOrNull(revocationTime);
+  @Override
+  public void setRevocationTime(final Date revocationTime) {
+    this.revocationTime = this.parseDateOrNull(revocationTime);
   }
 
-  private long parseDateOrNull(Date revocationTime) {
+  private long parseDateOrNull(final Date revocationTime) {
     return revocationTime == null ? -1 : revocationTime.getTime();
   }
 
-  private Date getDateOrNull(long longTime) {
+  private Date getDateOrNull(final long longTime) {
     return longTime < 0 ? null : new Date(longTime);
   }
 

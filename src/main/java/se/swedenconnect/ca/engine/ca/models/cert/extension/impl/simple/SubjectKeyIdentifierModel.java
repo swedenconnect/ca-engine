@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 
@@ -38,17 +38,19 @@ public class SubjectKeyIdentifierModel extends AbstractExtensionModel {
    *
    * @param keyId subject key identifier value
    */
-  public SubjectKeyIdentifierModel(byte[] keyId) {
+  public SubjectKeyIdentifierModel(final byte[] keyId) {
     this.ski = new SubjectKeyIdentifier(keyId);
   }
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
     return new ExtensionMetadata(Extension.subjectKeyIdentifier, "Subject key identifier", false);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return ski;
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    return this.ski;
   }
 }

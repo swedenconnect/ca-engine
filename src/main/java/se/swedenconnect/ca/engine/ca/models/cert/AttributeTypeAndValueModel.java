@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
- * Model for attribute type and value
+ * Model for attribute type and value.
  * <p>
- * X.509 certificates include use of both the type "Attribute" and
- * the type "AttributeTypeAndValue" The difference being that the former
- * may have any number of values, while the latter can have only one value.
+ * X.509 certificates include use of both the type "Attribute" and the type "AttributeTypeAndValue" The difference being
+ * that the former may have any number of values, while the latter can have only one value.
+ * </p>
  * <p>
- * AttributeTypeAndValue is used in Subject name RDNs
+ * AttributeTypeAndValue is used in Subject name RDNs.
+ * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -40,9 +41,10 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 @Builder
 public class AttributeTypeAndValueModel {
 
-  /** Attribute OID */
+  /** Attribute OID. */
   private ASN1ObjectIdentifier attributeType;
-  /** attribute value */
+
+  /** Attribute value. */
   private Object value;
 
 }

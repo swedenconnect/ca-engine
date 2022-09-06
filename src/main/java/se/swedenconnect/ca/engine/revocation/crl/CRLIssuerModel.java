@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.crl;
 
-import java.util.Calendar;
+import java.time.Duration;
 
 import org.bouncycastle.asn1.x509.ReasonFlags;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -44,21 +43,13 @@ public class CRLIssuerModel {
   /** The distribution point URL for this CRL (null if the CRL is published on multiple locations) */
   private final String distributionPointUrl;
 
-  /** Offset type for altering revocation time from current time */
+  /** Offset duration for altering revocation time from current time */
   @Setter
-  private int startOffsetType = Calendar.MINUTE;
+  private Duration startOffset = Duration.ofMinutes(-15);
 
-  /** Offset amount for altering revocation time from current time */
+  /** Time duration for defining CRL next update time */
   @Setter
-  private int startOffsetAmount = -15;
-
-  /** Time type for defining CRL next update time */
-  @Setter
-  private int expiryOffsetType = Calendar.HOUR;
-
-  /** Time amount for defining CRL next update time */
-  @Setter
-  private int expiryOffsetAmount = 2;
+  private Duration expiryOffset;
 
   /** true to mark that the CRL only contains EE certificates */
   @Setter
@@ -88,14 +79,15 @@ public class CRLIssuerModel {
    *
    * @param issuerCertificate issuer certificates of the CRL issuing CA
    * @param algorithm CRL signing algorithm
-   * @param validHours the number of time units a CRL is valid (default hour)
+   * @param validityDuration the duration a CRL is valid
    * @param CRLRevocationDataProvider CRL revocation data provider handling revocation processing
    * @param distributionPointUrl the URL where the URL will be published
    */
-  public CRLIssuerModel(final X509CertificateHolder issuerCertificate, final String algorithm, final int validHours,
+  public CRLIssuerModel(
+      final X509CertificateHolder issuerCertificate, final String algorithm, final Duration validityDuration,
       final CRLRevocationDataProvider CRLRevocationDataProvider, final String distributionPointUrl) {
     this.issuerCertificate = issuerCertificate;
-    this.expiryOffsetAmount = validHours;
+    this.expiryOffset = validityDuration;
     this.algorithm = algorithm;
     this.CRLRevocationDataProvider = CRLRevocationDataProvider;
     this.distributionPointUrl = distributionPointUrl;

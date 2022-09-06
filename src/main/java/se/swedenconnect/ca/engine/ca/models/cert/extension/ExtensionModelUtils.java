@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension;
-
-import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
+
 /**
- * Utility class for extension model processing
+ * Utility class for extension model processing.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -33,15 +32,15 @@ import java.net.URISyntaxException;
 public class ExtensionModelUtils {
 
   /**
-   * Test the URI string
+   * Tests the URI string.
    *
    * @param uriStr URI string
    * @throws CertificateIssuanceException if the URI is illegal or is not supported
    */
-  public static void testUriString(String uriStr) throws CertificateIssuanceException {
+  public static void testUriString(final String uriStr) throws CertificateIssuanceException {
     try {
-      URI uri = new URI(uriStr);
-      String protocol = uri.getScheme();
+      final URI uri = new URI(uriStr);
+      final String protocol = uri.getScheme();
       switch (protocol) {
       case "http":
       case "https":
@@ -52,11 +51,11 @@ public class ExtensionModelUtils {
         throw new IOException("Illegal URI protocol: " + protocol + " in URI: " + uriStr);
       }
     }
-    catch (URISyntaxException e) {
+    catch (final URISyntaxException e) {
       log.debug("Illegal URI {}", uriStr);
       throw new CertificateIssuanceException("Illegal URI", e);
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       log.debug("Unsupported URI protocol {}", uriStr);
       throw new CertificateIssuanceException("Illegal URI", e);
     }

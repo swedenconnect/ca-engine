@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.crl;
+
+import java.math.BigInteger;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
-import java.util.Date;
-
 /**
- * Data class for revoked certificate information
+ * Data class for revoked certificate information.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -36,8 +35,10 @@ public class RevokedCertificate {
 
   /** Certificate serial number */
   BigInteger certificateSerialNumber;
+
   /** Revocation time */
   Date revocationTime;
+
   /** Revocation reason */
   int reason;
 

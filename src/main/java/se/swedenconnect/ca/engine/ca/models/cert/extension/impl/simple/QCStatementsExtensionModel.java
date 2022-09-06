@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.Extension;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.cert.extensions.QCStatements;
@@ -31,7 +31,7 @@ import se.swedenconnect.cert.extensions.QCStatements;
 public class QCStatementsExtensionModel extends AbstractExtensionModel {
 
   /** Extension criticality */
-  boolean critical;
+  private final boolean critical;
 
   /** QC Statements */
   private final QCStatements qcStatements;
@@ -41,7 +41,7 @@ public class QCStatementsExtensionModel extends AbstractExtensionModel {
    *
    * @param qcStatements QC Statements
    */
-  public QCStatementsExtensionModel(QCStatements qcStatements) {
+  public QCStatementsExtensionModel(final QCStatements qcStatements) {
     this.qcStatements = qcStatements;
     this.critical = false;
   }
@@ -50,23 +50,25 @@ public class QCStatementsExtensionModel extends AbstractExtensionModel {
    * Constructor non critical extension
    *
    * @param qcStatements QC Statements
-   * @param critical     extension criticality
+   * @param critical extension criticality
    */
-  public QCStatementsExtensionModel(QCStatements qcStatements, boolean critical) {
+  public QCStatementsExtensionModel(final QCStatements qcStatements, final boolean critical) {
     this.qcStatements = qcStatements;
     this.critical = critical;
   }
 
   /** {@inheritDoc} */
-  @Override protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(Extension.qCStatements, "Qualified certificate statements", critical);
+  @Override
+  protected ExtensionMetadata getExtensionMetadata() {
+    return new ExtensionMetadata(Extension.qCStatements, "Qualified certificate statements", this.critical);
   }
 
   /** {@inheritDoc} */
-  @Override protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    if (qcStatements == null) {
+  @Override
+  protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
+    if (this.qcStatements == null) {
       throw new CertificateIssuanceException("No QC Statements data");
     }
-    return qcStatements;
+    return this.qcStatements;
   }
 }

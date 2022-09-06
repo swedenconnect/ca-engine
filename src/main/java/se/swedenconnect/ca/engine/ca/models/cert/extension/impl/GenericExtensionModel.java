@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl;
 
 import org.bouncycastle.asn1.ASN1Object;
@@ -65,7 +64,7 @@ public class GenericExtensionModel extends AbstractExtensionModel {
   }
 
   /**
-   * Get extension metadata
+   * Get extension metadata.
    *
    * @return {@link ExtensionMetadata}
    */
@@ -75,7 +74,7 @@ public class GenericExtensionModel extends AbstractExtensionModel {
   }
 
   /**
-   * Get extension data
+   * Get extension data.
    *
    * @return {@link ASN1Object} data
    * @throws CertificateIssuanceException error parsing data

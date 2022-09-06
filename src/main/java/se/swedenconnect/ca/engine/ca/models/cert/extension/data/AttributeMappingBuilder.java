@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
 import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
 import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
 
 /**
- * Builder for attribute mappings used in SAML Authn context extensions
+ * Builder for attribute mappings used in SAML Authn context extensions.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class AttributeMappingBuilder {
 
-  /** Identifier of the mapped attribute e.g. SAML name */
+  /** Identifier of the mapped attribute e.g. SAML name. */
   private String name;
-  /** Friendly name of the mapped attribute */
+
+  /** Friendly name of the mapped attribute. */
   private String friendlyName;
-  /** The name format of the mapped attribute */
+
+  /** The name format of the mapped attribute. */
   private String nameFormat;
-  /** Reference id defining the target certificate attribute or name */
+
+  /** Reference id defining the target certificate attribute or name. */
   private String ref;
-  /** Type identifier defining the type of certificate name or attribute */
+
+  /** Type identifier defining the type of certificate name or attribute. */
   private AttributeRefType type;
 
   /** Private constructor */
@@ -45,52 +48,52 @@ public class AttributeMappingBuilder {
   /**
    * Creates a new {@link AttributeMappingBuilder}
    *
-   * @return {@link AttributeMappingBuilder}
+   * @return an AttributeMappingBuilder
    */
   public static AttributeMappingBuilder instance() {
     return new AttributeMappingBuilder();
   }
 
   /**
-   * Set source attribute identifier
+   * Sets source attribute identifier.
    *
    * @param name identifier of the source attribute
    * @return this builder
    */
-  public AttributeMappingBuilder name(String name) {
+  public AttributeMappingBuilder name(final String name) {
     this.name = name;
     return this;
   }
 
   /**
-   * Set attribute friendly name
+   * Set attribute friendly name.
    *
    * @param friendlyName attribute friendly name
    * @return this builder
    */
-  public AttributeMappingBuilder friendlyName(String friendlyName) {
+  public AttributeMappingBuilder friendlyName(final String friendlyName) {
     this.friendlyName = friendlyName;
     return this;
   }
 
   /**
-   * Set nameFormat
+   * Set nameFormat.
    *
    * @param nameFormat nameFormat of source attribute
    * @return this builder
    */
-  public AttributeMappingBuilder nameFormat(String nameFormat) {
+  public AttributeMappingBuilder nameFormat(final String nameFormat) {
     this.nameFormat = nameFormat;
     return this;
   }
 
   /**
-   * Set certificate attribute reference
+   * Set certificate attribute reference.
    *
    * @param ref reference for the relevant type (rdn, san or sad)
    * @return this builder
    */
-  public AttributeMappingBuilder ref(String ref) {
+  public AttributeMappingBuilder ref(final String ref) {
     this.ref = ref;
     return this;
   }
@@ -101,7 +104,7 @@ public class AttributeMappingBuilder {
    * @param type rdn (Relative Distinguished Name), san (Subject Alt Name) or sda (Subject Directory Attributes)
    * @return this builder
    */
-  public AttributeMappingBuilder type(AttributeRefType type) {
+  public AttributeMappingBuilder type(final AttributeRefType type) {
     this.type = type;
     return this;
   }
@@ -112,14 +115,14 @@ public class AttributeMappingBuilder {
    * @return attribute mapping
    */
   public AttributeMapping build() {
-    AttributeMapping am = new AttributeMapping();
-    Attribute attribute = new Attribute();
-    attribute.setFriendlyName(friendlyName);
-    attribute.setName(name);
-    attribute.setNameFormat(nameFormat);
+    final AttributeMapping am = new AttributeMapping();
+    final Attribute attribute = new Attribute();
+    attribute.setFriendlyName(this.friendlyName);
+    attribute.setName(this.name);
+    attribute.setNameFormat(this.nameFormat);
     am.setAttribute(attribute);
-    am.setRef(ref);
-    am.setType(type.name());
+    am.setRef(this.ref);
+    am.setType(this.type.name());
     return am;
   }
 

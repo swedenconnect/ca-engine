@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.revocation.ocsp.impl;
 
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 
 import org.bouncycastle.asn1.ocsp.TBSRequest;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -30,6 +28,7 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPStatusCheckingException;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * OCSP responder issuing responses based on data from the CA repository.
@@ -42,14 +41,16 @@ public class RepositoryBasedOCSPResponder extends AbstractOCSPResponder {
   private final CARepository caRepository;
 
   /**
-   * @param privateKey the private key object used to sign OCSP responses
+   * Constructor.
+   *
+   * @param ocspIssuerCredential the private key object used to sign OCSP responses
    * @param ocspModel OCSP responder configuration data
    * @param caRepository CA repository
    * @throws NoSuchAlgorithmException if the selected algorithm is not supported
    */
-  public RepositoryBasedOCSPResponder(final PrivateKey privateKey, final OCSPModel ocspModel,
+  public RepositoryBasedOCSPResponder(final PkiCredential ocspIssuerCredential, final OCSPModel ocspModel,
       final CARepository caRepository) throws NoSuchAlgorithmException {
-    super(privateKey, ocspModel);
+    super(ocspIssuerCredential, ocspModel);
     this.caRepository = caRepository;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.repository.impl;
+
+import java.math.BigInteger;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 
-import java.math.BigInteger;
-import java.util.Date;
-
 /**
- * Data class defining the default content of a CA record
+ * Data class defining the default content of a CA record.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -35,86 +34,106 @@ public class CertificateRecordImpl implements CertificateRecord {
 
   /** The byes of the issued certificate */
   protected byte[] certificate;
+
   /** The serial number of the issued certificate */
   protected BigInteger serialNumber;
+
   /** The issue time of the certificate */
   protected Date issueDate;
+
   /** The expiry date of the certificate */
   protected Date expiryDate;
+
   /** Boolean indicator if this certificate is revoked */
   protected boolean revoked;
+
   /** Revocation reason if applicable */
   protected Integer reason;
+
   /** Time of revocation if applicable */
   protected Date revocationTime;
 
   /** {@inheritDoc} */
-  @Override public byte[] getCertificate() {
-    return certificate;
+  @Override
+  public byte[] getCertificate() {
+    return this.certificate;
   }
 
   /** {@inheritDoc} */
-  @Override public void setCertificate(byte[] certificate) {
+  @Override
+  public void setCertificate(final byte[] certificate) {
     this.certificate = certificate;
   }
 
   /** {@inheritDoc} */
-  @Override public BigInteger getSerialNumber() {
-    return serialNumber;
+  @Override
+  public BigInteger getSerialNumber() {
+    return this.serialNumber;
   }
 
   /** {@inheritDoc} */
-  @Override public void setSerialNumber(BigInteger serialNumber) {
+  @Override
+  public void setSerialNumber(final BigInteger serialNumber) {
     this.serialNumber = serialNumber;
   }
 
   /** {@inheritDoc} */
-  @Override public Date getIssueDate() {
-    return issueDate;
+  @Override
+  public Date getIssueDate() {
+    return this.issueDate;
   }
 
   /** {@inheritDoc} */
-  @Override public void setIssueDate(Date issueDate) {
+  @Override
+  public void setIssueDate(final Date issueDate) {
     this.issueDate = issueDate;
   }
 
   /** {@inheritDoc} */
-  @Override public Date getExpiryDate() {
-    return expiryDate;
+  @Override
+  public Date getExpiryDate() {
+    return this.expiryDate;
   }
 
   /** {@inheritDoc} */
-  @Override public void setExpiryDate(Date expiryDate) {
+  @Override
+  public void setExpiryDate(final Date expiryDate) {
     this.expiryDate = expiryDate;
   }
 
   /** {@inheritDoc} */
-  @Override public boolean isRevoked() {
-    return revoked;
+  @Override
+  public boolean isRevoked() {
+    return this.revoked;
   }
 
   /** {@inheritDoc} */
-  @Override public void setRevoked(boolean revoked) {
+  @Override
+  public void setRevoked(final boolean revoked) {
     this.revoked = revoked;
   }
 
   /** {@inheritDoc} */
-  @Override public Integer getReason() {
-    return reason;
+  @Override
+  public Integer getReason() {
+    return this.reason;
   }
 
   /** {@inheritDoc} */
-  @Override public void setReason(Integer reason) {
+  @Override
+  public void setReason(final Integer reason) {
     this.reason = reason;
   }
 
   /** {@inheritDoc} */
-  @Override public Date getRevocationTime() {
-    return revocationTime;
+  @Override
+  public Date getRevocationTime() {
+    return this.revocationTime;
   }
 
   /** {@inheritDoc} */
-  @Override public void setRevocationTime(Date revocationTime) {
+  @Override
+  public void setRevocationTime(final Date revocationTime) {
     this.revocationTime = revocationTime;
   }
 }

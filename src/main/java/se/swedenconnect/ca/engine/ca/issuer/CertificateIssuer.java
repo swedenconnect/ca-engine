@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.issuer;
 
 import java.io.IOException;
-import java.util.Calendar;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -53,7 +53,7 @@ public abstract class CertificateIssuer {
    *
    * @param certificateIssuerModel configuration data for the certificate issuer component
    */
-  public CertificateIssuer(CertificateIssuerModel certificateIssuerModel) {
+  public CertificateIssuer(final CertificateIssuerModel certificateIssuerModel) {
     this.certificateIssuerModel = certificateIssuerModel;
   }
 
@@ -73,22 +73,20 @@ public abstract class CertificateIssuer {
    * @return X500Name object
    * @throws IOException errors creating the X500Name object
    */
-  protected X500Name getX500Name(CertNameModel<?> nameModel) throws IOException {
-    return CAUtils.getX500Name(nameModel, attributeValueEncoder);
+  protected X500Name getX500Name(final CertNameModel<?> nameModel) throws IOException {
+    return CAUtils.getX500Name(nameModel, this.attributeValueEncoder);
   }
 
   /**
-   * Utility function calculating the offset time based on offset type and amount
+   * Utility function calculating the offset time based on duration
    *
-   * @param offsetType   offset type
-   * @param offsetAmount offset amount of the specified type
+   * @param offsetDuration offset duration
    * @return new time with specified offset from current time
    */
-  public static Date getOffsetTime(int offsetType, int offsetAmount) {
-    Calendar offsetTime = Calendar.getInstance();
-    offsetTime.setTime(new Date());
-    offsetTime.add(offsetType, offsetAmount);
-    return offsetTime.getTime();
+  public static Date getOffsetTime(final Duration offsetDuration) {
+    final Instant now = Instant.now();
+    final Instant offsetInstant = now.plusMillis(offsetDuration.toMillis());
+    return Date.from(offsetInstant);
   }
 
 }

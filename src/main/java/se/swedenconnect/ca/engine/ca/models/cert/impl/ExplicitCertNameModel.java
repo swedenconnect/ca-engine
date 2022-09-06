@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.engine.ca.models.cert.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * The CertName class reflects a complete Name field used in X.509 certificates to define an issuer name or a subject name, or
- * a DistiguishedName field. The difference between Name and DistiguishedName is that Distinguished name is equal to RDNSequence, while
- * Name is a CHOICE, where the only choice is an RDNSequence. As such ,they are equal in practice due to lack of choices for Name.
- * <p>
+ * The CertName class reflects a complete Name field used in X.509 certificates to define an issuer name or a subject
+ * name, or a DistiguishedName field. The difference between Name and DistiguishedName is that Distinguished name is
+ * equal to RDNSequence, while Name is a CHOICE, where the only choice is an RDNSequence. As such ,they are equal in
+ * practice due to lack of choices for Name.
+ *
+ * <pre>
  * RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
- * <p>
  * RelativeDistinguishedName ::= SET SIZE (1..MAX) OF AttributeTypeAndValue
- * <p>
+ *
  * AttributeTypeAndValue   ::= SEQUENCE {
  * type    AttributeType,   -- OID
  * value   AttributeValue } -- Any defined by AttributeType
+ * </pre>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -49,28 +50,31 @@ public class ExplicitCertNameModel implements CertNameModel<List<List<AttributeT
    *
    * @param rdnSequence relative distinguished name structure
    */
-  @Setter private List<List<AttributeTypeAndValueModel>> rdnSequence;
+  @Setter
+  private List<List<AttributeTypeAndValueModel>> rdnSequence;
 
   /**
    * Constructor for this certificate name model
    *
    * @param attributeList list of attribute type and values
    */
-  public ExplicitCertNameModel(List<AttributeTypeAndValueModel> attributeList) {
+  public ExplicitCertNameModel(final List<AttributeTypeAndValueModel> attributeList) {
     this.rdnSequence = new ArrayList<>();
-    for (AttributeTypeAndValueModel atavModel : attributeList) {
-      rdnSequence.add(Arrays.asList(atavModel));
+    for (final AttributeTypeAndValueModel atavModel : attributeList) {
+      this.rdnSequence.add(Arrays.asList(atavModel));
     }
   }
 
   /** {@inheritDoc} */
-  @Override public CertNameModelType getType() {
+  @Override
+  public CertNameModelType getType() {
     return CertNameModelType.explicit;
   }
 
   /** {@inheritDoc} */
-  @Override public List<List<AttributeTypeAndValueModel>> getNameData() {
-    return rdnSequence;
+  @Override
+  public List<List<AttributeTypeAndValueModel>> getNameData() {
+    return this.rdnSequence;
   }
 
 }
