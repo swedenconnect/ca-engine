@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.ca</groupId>
   <artifactId>ca-engine</artifactId>
-  <version>1.2.3-SNAPSHOT</version>
+  <version>1.2.3</version>
   <packaging>jar</packaging>
 
   <name>CA engine</name>
@@ -83,6 +83,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      
+      <dependency>
+        <groupId>se.swedenconnect.security</groupId>
+        <artifactId>credentials-support</artifactId>
+        <version>1.2.4</version>
+      </dependency>      
 
     </dependencies>
 
@@ -129,7 +135,6 @@
     <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
-      <version>1.2.4</version>
     </dependency>
     
     <dependency>
