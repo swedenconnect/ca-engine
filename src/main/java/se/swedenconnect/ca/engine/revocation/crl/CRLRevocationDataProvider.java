@@ -58,4 +58,10 @@ public interface CRLRevocationDataProvider {
    */
   X509CRLHolder getCurrentCrl();
 
+  /**
+   * Getter for metadata for the latest published CRL associated with this CA
+   *
+   * @return current CRL metadata or null if no CRL is available
+   */
+  CurrentCRLMetadata getCurrentCRLMetadata();
 }

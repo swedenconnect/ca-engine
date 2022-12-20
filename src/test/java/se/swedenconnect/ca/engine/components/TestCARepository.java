@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,6 +39,7 @@ import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
+import se.swedenconnect.ca.engine.revocation.crl.CurrentCRLMetadata;
 import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
 /**
@@ -51,6 +53,8 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
   private final File crlFile;
   private List<CertificateRecord> issuedCerts;
   private BigInteger crlNumber;
+  private Instant issuedAt;
+  private Instant nextUpdate;
 
   public TestCARepository(File crlFile) {
     this.crlFile = crlFile;
@@ -60,15 +64,15 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
 
   @Override public List<BigInteger> getAllCertificates() {
     return issuedCerts.stream()
-      .map(certificateRecord -> certificateRecord.getSerialNumber())
+      .map(CertificateRecord::getSerialNumber)
       .collect(Collectors.toList());
   }
 
   @Override public CertificateRecord getCertificate(BigInteger bigInteger) {
-    Optional<CertificateRecord> recordOptional = issuedCerts.stream()
+    return issuedCerts.stream()
       .filter(certificateRecord -> certificateRecord.getSerialNumber().equals(bigInteger))
-      .findFirst();
-    return recordOptional.isPresent() ? recordOptional.get() : null;
+      .findFirst()
+      .orElse(null);
   }
 
   @Override public void addCertificate(X509CertificateHolder certificate) throws IOException {
@@ -193,5 +197,31 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
 
   @SneakyThrows @Override public X509CRLHolder getCurrentCrl() {
     return new X509CRLHolder(new FileInputStream(crlFile));
+  }
+
+  /**
+   * Getter for metadata for the latest published CRL associated with this CA
+   *
+   * @return current CRL metadata or null if no CRL is available
+   */
+  @Override public CurrentCRLMetadata getCurrentCRLMetadata() {
+    X509CRLHolder currentCrl = getCurrentCrl();
+    return new CurrentCRLMetadata() {
+      @Override public BigInteger getCrlNumber() {
+        return crlNumber;
+      }
+
+      @Override public Instant getIssueTime() {
+        return currentCrl.getThisUpdate().toInstant();
+      }
+
+      @Override public Instant getNextUpdate() {
+        return currentCrl.getNextUpdate().toInstant();
+      }
+
+      @Override public int getRevokedCertCount() {
+        return currentCrl.getRevokedCertificates().size();
+      }
+    };
   }
 }
