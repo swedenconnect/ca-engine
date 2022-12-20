@@ -37,9 +37,6 @@ public class CRLIssuerModel {
   /** Algorithm used to sign CRLs */
   private final String algorithm;
 
-  /** Provider of revocation data */
-  private final CRLRevocationDataProvider CRLRevocationDataProvider;
-
   /** The distribution point URL for this CRL (null if the CRL is published on multiple locations) */
   private final String distributionPointUrl;
 
@@ -80,16 +77,14 @@ public class CRLIssuerModel {
    * @param issuerCertificate issuer certificates of the CRL issuing CA
    * @param algorithm CRL signing algorithm
    * @param validityDuration the duration a CRL is valid
-   * @param CRLRevocationDataProvider CRL revocation data provider handling revocation processing
    * @param distributionPointUrl the URL where the URL will be published
    */
   public CRLIssuerModel(
-      final X509CertificateHolder issuerCertificate, final String algorithm, final Duration validityDuration,
-      final CRLRevocationDataProvider CRLRevocationDataProvider, final String distributionPointUrl) {
+    final X509CertificateHolder issuerCertificate, final String algorithm, final Duration validityDuration,
+    final String distributionPointUrl) {
     this.issuerCertificate = issuerCertificate;
     this.expiryOffset = validityDuration;
     this.algorithm = algorithm;
-    this.CRLRevocationDataProvider = CRLRevocationDataProvider;
     this.distributionPointUrl = distributionPointUrl;
   }
 

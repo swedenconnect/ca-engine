@@ -42,17 +42,23 @@ import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
- * Default implementation of a CRL issuer.
+ * Implementation of a synchronized CRL issuer.
+ *
+ * <p>This CRL issuer assumes presence of multiple CA instances that will independently
+ * issue CRLs with the same CRL number, issue time, next update time and revocation content
+ * based on synchronized metadata from the latest published CRL</p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-public class DefaultCRLIssuer extends AbstractCRLIssuer {
+public class SynchronizedCRLIssuer extends AbstractCRLIssuer {
 
   /** Configuration data for this CRL issuer */
   protected final CRLIssuerModel crlIssuerModel;
+  /** Provider of CRL revocation data */
   protected final CRLRevocationDataProvider crlRevocationDataProvider;
+
   /**
    * Constructor.
    *
@@ -60,9 +66,9 @@ public class DefaultCRLIssuer extends AbstractCRLIssuer {
    * @param issuerCredential the credential used to sign CRLs
    * @throws NoSuchAlgorithmException if the issuer model algorithm is not supported
    */
-  public DefaultCRLIssuer(final CRLIssuerModel crlIssuerModel, CRLRevocationDataProvider crlRevocationDataProvider,
+  public SynchronizedCRLIssuer(final CRLIssuerModel crlIssuerModel, CRLRevocationDataProvider crlRevocationDataProvider,
     final PkiCredential issuerCredential)
-      throws NoSuchAlgorithmException {
+    throws NoSuchAlgorithmException {
     super(issuerCredential, crlIssuerModel.getAlgorithm());
     this.crlIssuerModel = crlIssuerModel;
     this.crlRevocationDataProvider = crlRevocationDataProvider;
@@ -71,6 +77,8 @@ public class DefaultCRLIssuer extends AbstractCRLIssuer {
   /** {@inheritDoc} */
   @Override
   public X509CRLHolder issueCRL() throws CertificateRevocationException {
+
+    // TODO implement synchronized CRL issuance based on metadata
 
     try {
       final X509Certificate issuerCert = CAUtils.getCert(this.crlIssuerModel.getIssuerCertificate());
