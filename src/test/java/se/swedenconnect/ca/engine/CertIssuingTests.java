@@ -86,7 +86,9 @@ public class CertIssuingTests {
    */
   @BeforeAll
   public static void init() {
-    Security.addProvider(new BouncyCastleProvider());
+    if (Security.getProvider("BC") == null) {
+      Security.addProvider(new BouncyCastleProvider());
+    }
     // Setup CA:s
     log.info("Setting up test CA:s");
     TestData.addCaAndValidator(TestCa.RSA_CA);

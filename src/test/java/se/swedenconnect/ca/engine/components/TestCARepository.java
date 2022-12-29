@@ -17,6 +17,7 @@ package se.swedenconnect.ca.engine.components;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -195,8 +196,13 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
   }
 
-  @SneakyThrows @Override public X509CRLHolder getCurrentCrl() {
-    return new X509CRLHolder(new FileInputStream(crlFile));
+  @Override public X509CRLHolder getCurrentCrl() {
+    try {
+      return new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      throw new RuntimeException("No current CRL is available");
+    }
   }
 
   /**
@@ -205,7 +211,14 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
    * @return current CRL metadata or null if no CRL is available
    */
   @Override public CurrentCRLMetadata getCurrentCRLMetadata() {
-    X509CRLHolder currentCrl = getCurrentCrl();
+    final X509CRLHolder currentCrl;
+    try {
+      currentCrl = new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      // No CRL is available. Return null;
+      return null;
+    }
     return new CurrentCRLMetadata() {
       @Override public BigInteger getCrlNumber() {
         return crlNumber;

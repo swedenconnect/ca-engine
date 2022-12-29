@@ -52,7 +52,7 @@ public class DefaultCRLIssuer extends AbstractCRLIssuer {
 
   /** Configuration data for this CRL issuer */
   protected final CRLIssuerModel crlIssuerModel;
-  protected final CRLRevocationDataProvider crlRevocationDataProvider;
+
   /**
    * Constructor.
    *
@@ -63,9 +63,8 @@ public class DefaultCRLIssuer extends AbstractCRLIssuer {
   public DefaultCRLIssuer(final CRLIssuerModel crlIssuerModel, CRLRevocationDataProvider crlRevocationDataProvider,
     final PkiCredential issuerCredential)
       throws NoSuchAlgorithmException {
-    super(issuerCredential, crlIssuerModel.getAlgorithm());
+    super(issuerCredential, crlIssuerModel.getAlgorithm(), crlRevocationDataProvider);
     this.crlIssuerModel = crlIssuerModel;
-    this.crlRevocationDataProvider = crlRevocationDataProvider;
   }
 
   /** {@inheritDoc} */

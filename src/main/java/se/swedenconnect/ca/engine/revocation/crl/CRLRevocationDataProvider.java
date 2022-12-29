@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.ca.engine.revocation.crl;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
