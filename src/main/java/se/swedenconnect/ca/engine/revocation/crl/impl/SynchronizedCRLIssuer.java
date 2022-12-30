@@ -20,7 +20,6 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +43,7 @@ import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-import se.swedenconnect.ca.engine.revocation.crl.CurrentCRLMetadata;
+import se.swedenconnect.ca.engine.revocation.crl.CRLMetadata;
 import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -52,9 +51,10 @@ import se.swedenconnect.security.credential.PkiCredential;
 /**
  * Implementation of a synchronized CRL issuer.
  *
- * <p>This CRL issuer assumes presence of multiple CA instances that will independently
- * issue CRLs with the same CRL number, issue time, next update time and revocation content
- * based on synchronized metadata from the latest published CRL</p>
+ * <p>This CRL issuer supports presence of multiple clustered deployment of CA services issuing
+ * CRLs with synchronized CRL number, issue time, next update time and revocation content
+ * based on synchronized metadata from the latest published CRL from any instance in the
+ * cluster</p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -65,8 +65,6 @@ public class SynchronizedCRLIssuer extends AbstractCRLIssuer {
   /** Configuration data for this CRL issuer */
   protected final CRLIssuerModel crlIssuerModel;
 
-  protected final Duration maxDurationBeforeCRLUpgrade;
-
   /**
    * Constructor.
    *
@@ -75,16 +73,17 @@ public class SynchronizedCRLIssuer extends AbstractCRLIssuer {
    * @throws NoSuchAlgorithmException if the issuer model algorithm is not supported
    */
   public SynchronizedCRLIssuer(final CRLIssuerModel crlIssuerModel, CRLRevocationDataProvider crlRevocationDataProvider,
-    final PkiCredential issuerCredential, Duration maxDurationBeforeCRLUpgrade)
+    final PkiCredential issuerCredential)
     throws NoSuchAlgorithmException {
     super(issuerCredential, crlIssuerModel.getAlgorithm(), crlRevocationDataProvider);
     this.crlIssuerModel = crlIssuerModel;
-    this.maxDurationBeforeCRLUpgrade = maxDurationBeforeCRLUpgrade;
   }
 
   /** {@inheritDoc} */
   @Override
   public X509CRLHolder issueCRL() throws CertificateRevocationException {
+
+    log.debug("Issuing CRL");
 
     try {
       final X509Certificate issuerCert = CAUtils.getCert(this.crlIssuerModel.getIssuerCertificate());
@@ -142,36 +141,44 @@ public class SynchronizedCRLIssuer extends AbstractCRLIssuer {
    */
   protected RevocationSettings getCrlRevocationSettings(List<RevokedCertificate> revokedCertificates) {
 
-    CurrentCRLMetadata currentCRLMetadata = crlRevocationDataProvider.getCurrentCRLMetadata();
-    if (currentCRLMetadata == null) {
+    log.debug("Determining if CRL will be issued as new CRL with new CRL number, or as a clone of current"
+      + "CRL metadata");
+
+    CRLMetadata CRLMetadata = crlRevocationDataProvider.getCurrentCRLMetadata();
+    if (CRLMetadata == null) {
+      log.debug("No CRL metadata is available. Issuing new CRL");
       return getNewCRLSettings();
     }
     // Is current CRL expired
     Instant now = Instant.now();
-    if (now.isAfter(currentCRLMetadata.getNextUpdate())){
+    if (now.isAfter(CRLMetadata.getNextUpdate())){
+      log.debug("Current CRL has expired. Issue new CRL");
       return getNewCRLSettings();
     }
     // Is max duration set and expired
-    if (maxDurationBeforeCRLUpgrade != null) {
+    if (crlIssuerModel.getMaxDurationBeforeCRLUpgrade() != null) {
       // Max age is the time after actual issue time. As such it is adjusted against the pre-issue time set by the CRL issuer model
       Instant maxAge = Instant.ofEpochMilli(
-        currentCRLMetadata.getIssueTime().toEpochMilli()
+        CRLMetadata.getIssueTime().toEpochMilli()
           - crlIssuerModel.getStartOffset().toMillis()
-          + maxDurationBeforeCRLUpgrade.toMillis());
+          + crlIssuerModel.getMaxDurationBeforeCRLUpgrade().toMillis());
       if (now.isAfter(maxAge)){
+        log.debug("Current CRL metadata is older than max age {}. Issue new CRL", maxAge);
         return getNewCRLSettings();
       }
     }
     // Has number of revoked certificates changed?
-    if (currentCRLMetadata.getRevokedCertCount() != revokedCertificates.size()) {
+    if (CRLMetadata.getRevokedCertCount() != revokedCertificates.size()) {
+      log.debug("Number of revoked certificates has changed. Issue new CRL");
       return getNewCRLSettings();
     }
 
+    log.debug("Current CRL metadata is current and valid. Issue clone CRL based on CRL metadata");
     // No force update conditions. Re-use current CRL settings
     return RevocationSettings.builder()
-      .issueTime(currentCRLMetadata.getIssueTime())
-      .nextUpdateTime(currentCRLMetadata.getNextUpdate())
-      .crlNumber(currentCRLMetadata.getCrlNumber())
+      .issueTime(CRLMetadata.getIssueTime())
+      .nextUpdateTime(CRLMetadata.getNextUpdate())
+      .crlNumber(CRLMetadata.getCrlNumber())
       .build();
 
   }

@@ -115,11 +115,11 @@ class SynchronizedCRLIssuerTest {
   void issueCRL() throws Exception {
 
     CARepository caRepository = new TestCARepository(crlFile);
+    CRLIssuerModel crlIssuerModel = new CRLIssuerModel(new JcaX509CertificateHolder(issuerCredential.getCertificate()),
+      CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256, Duration.ofHours(1), "", Duration.ofSeconds(1));
 
-    CRLIssuer crlIssuer = new SynchronizedCRLIssuer(
-      new CRLIssuerModel(new JcaX509CertificateHolder(issuerCredential.getCertificate()),
-        CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256, Duration.ofHours(1), ""),
-      caRepository.getCRLRevocationDataProvider(), issuerCredential, Duration.ofMillis(1000));
+    CRLIssuer crlIssuer = new SynchronizedCRLIssuer(crlIssuerModel,
+      caRepository.getCRLRevocationDataProvider(), issuerCredential);
 
     crlList = new ArrayList<>();
     crlB64List = new ArrayList<>();

@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.ca.engine.revocation.crl;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
@@ -64,5 +63,5 @@ public interface CRLRevocationDataProvider {
    *
    * @return current CRL metadata or null if no CRL is available
    */
-  CurrentCRLMetadata getCurrentCRLMetadata();
+  CRLMetadata getCurrentCRLMetadata();
 }

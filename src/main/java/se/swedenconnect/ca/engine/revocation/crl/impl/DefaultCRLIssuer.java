@@ -44,10 +44,10 @@ import se.swedenconnect.security.credential.PkiCredential;
 /**
  * Default implementation of a CRL issuer.
  *
- * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
+ * <p>This is deprecated. Use the Synchronized CRLIssuer instead.</p>
  */
 @Slf4j
+@Deprecated (forRemoval = true)
 public class DefaultCRLIssuer extends AbstractCRLIssuer {
 
   /** Configuration data for this CRL issuer */

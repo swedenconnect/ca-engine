@@ -3,7 +3,10 @@ package se.swedenconnect.ca.engine.revocation.crl;
 import java.math.BigInteger;
 import java.time.Instant;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Metadata for the most recent CRL issued by any of the instances serving the same CA identity.
@@ -19,30 +22,22 @@ import lombok.Data;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public interface CurrentCRLMetadata {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CRLMetadata {
 
-  /**
-   * Get CRL number of the latest published CRL
-   * @return CRL Number
-   */
-  BigInteger getCrlNumber();
+  /** CRL number of the latest published CRL */
+  BigInteger crlNumber;
 
-  /**
-   * Issue time of the latest published CRL
-   * @return issue time
-   */
-  Instant getIssueTime();
+  /** Issue time of the latest published CRL */
+  Instant issueTime;
 
-  /**
-   * Next update time of the latest published CRL
-   * @return update time
-   */
-  Instant getNextUpdate();
+  /** Next update time of the latest published CRL */
+  Instant nextUpdate;
 
-  /**
-   * Revoked certificate count of the latest published CRL
-   * @return revoked certificate count
-   */
-  int getRevokedCertCount();
+  /** Revoked certificate count of the latest published CRL */
+  int revokedCertCount;
 
 }
