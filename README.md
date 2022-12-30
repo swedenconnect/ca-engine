@@ -159,6 +159,17 @@ This library does not implement a CA repository but provides an interface for su
 This interface is designed to match the JPA API for database storage, but could as easily be implemented by a file-based repository.
 
 
+#### multiple server deployment
+
+As of version 1.3.0 this library CARepository API supports running a CA services on multiple servers each providing a unified
+service with common certificate storage and revocation services.
+
+Synchronization of CA repository via a common database has been supported from the start. From 1.3.0 the revocation handling
+has been upgraded to issue CRL:s from a common CRL metadata source, sharing and synchronizing information about current
+CRL number and issue dates, ensuring that all collaborating servers will provide compatible revocation data at all times.
+
+For this purpose the old "DefaultCRLIssuer" has been deprecated and replaced by the SynchronizedCRLIssuer class.
+
 -----
 
 Copyright &copy; 2021-2022, [Myndigheten för digital förvaltning - Swedish Agency for Digital Government (DIGG)](http://www.digg.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
