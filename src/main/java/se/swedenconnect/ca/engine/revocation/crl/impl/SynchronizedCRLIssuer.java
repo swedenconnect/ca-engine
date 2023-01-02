@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
+ * Copyright 2021-2023 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,11 +68,12 @@ public class SynchronizedCRLIssuer extends AbstractCRLIssuer {
   /**
    * Constructor.
    *
-   * @param crlIssuerModel the CRL issuer model
+   * @param crlIssuerModel the CRL issuer model holding essential configuration data
+   * @param crlRevocationDataProvider provider of CRL revocation data regarding the state of revoked certificates
    * @param issuerCredential the credential used to sign CRLs
    * @throws NoSuchAlgorithmException if the issuer model algorithm is not supported
    */
-  public SynchronizedCRLIssuer(final CRLIssuerModel crlIssuerModel, CRLRevocationDataProvider crlRevocationDataProvider,
+  public SynchronizedCRLIssuer(final CRLIssuerModel crlIssuerModel, final CRLRevocationDataProvider crlRevocationDataProvider,
     final PkiCredential issuerCredential)
     throws NoSuchAlgorithmException {
     super(issuerCredential, crlIssuerModel.getAlgorithm(), crlRevocationDataProvider);
