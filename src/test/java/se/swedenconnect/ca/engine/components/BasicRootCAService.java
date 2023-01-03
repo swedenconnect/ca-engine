@@ -42,8 +42,7 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
+import se.swedenconnect.ca.engine.revocation.crl.impl.SynchronizedCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
 
@@ -69,7 +68,8 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
     CRLIssuerModel crlIssuerModel = getCrlIssuerModel(algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(), issuerCredential);
+      this.crlIssuer = new SynchronizedCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(),
+        issuerCredential);
       this.crlDistributionPoints = Arrays.asList(crlIssuerModel.getDistributionPointUrl());
       publishNewCrl();
     }
@@ -114,9 +114,12 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
     return null;
   }
 
-  @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel<?> subject, PublicKey publicKey,
-    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel) throws CertificateIssuanceException {
-    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey, getCaCertificate(),
+  @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel<?> subject,
+    PublicKey publicKey,
+    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
+    throws CertificateIssuanceException {
+    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey,
+      getCaCertificate(),
       certificateIssuerModel);
     certModelBuilder
       .subject(subject)

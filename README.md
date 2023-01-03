@@ -22,6 +22,25 @@ Add this maven dependency to your project
 
 ##### API documentation
 
+## Migration from version 1.x
+
+Version 2 major release makes a backwards incompatible change to the implementation of the CRLIssuer interface where the old
+DefaultCRLIssuer has been removed and replaced by the new SychronizedCRLIssuer. 
+
+The major change of this release is the support of synchronized CRL issuance in clustered service deployment where multiple
+instances of the same CA service can provide a unified CRL experience by sharing synchronized CRL metadata.
+
+The synchronized CRL metadata is now provided by the CRLRevocationDataProvider which before was part of the 
+CRLIssuer model. This has now moved into the CARepository who have responsibility for all information that
+is shared among multiple service instances.
+
+Implementations of ca-engine version 2.x need to do the following updates:
+
+1) Implement the extended interface of CRLRevocationDataProvider to obtain CRLMetadata
+2) Feed this CRLRevocationDataProvider directly to the constructor of the SynchronizedCRLIssuer
+3) Use the SynchronizedCRLIssuer implementation of CRLIssuer instead of the old DefaultCRLIssuer.
+
+
 ## Java API
 
 ### CA Service
