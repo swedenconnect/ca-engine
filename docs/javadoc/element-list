@@ -1,8 +1,6 @@
-se.swedenconnect.ca.engine
 se.swedenconnect.ca.engine.ca.attribute
 se.swedenconnect.ca.engine.ca.issuer
 se.swedenconnect.ca.engine.ca.issuer.impl
-se.swedenconnect.ca.engine.ca.models
 se.swedenconnect.ca.engine.ca.models.cert
 se.swedenconnect.ca.engine.ca.models.cert.extension
 se.swedenconnect.ca.engine.ca.models.cert.extension.data
