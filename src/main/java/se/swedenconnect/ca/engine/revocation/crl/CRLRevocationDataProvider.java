@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
+ * Copyright 2021-2023 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,4 +58,10 @@ public interface CRLRevocationDataProvider {
    */
   X509CRLHolder getCurrentCrl();
 
+  /**
+   * Getter for metadata for the latest published CRL associated with this CA
+   *
+   * @return current CRL metadata or null if no CRL is available
+   */
+  CRLMetadata getCurrentCRLMetadata();
 }

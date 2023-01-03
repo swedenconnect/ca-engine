@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
+ * Copyright 2021-2023 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
+import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
@@ -53,16 +54,23 @@ public abstract class AbstractCRLIssuer implements CRLIssuer {
   /** Signature algorithm properties */
   private final CAAlgorithmRegistry.SignatureAlgorithmProperties algorithmProperties;
 
+  /** Provider of CRL revocation data */
+  protected final CRLRevocationDataProvider crlRevocationDataProvider;
+
+
   /**
    * Constructor of the CRL issuer.
    *
    * @param issuerCredential credentials of the certificate issuer
+   * @param crlRevocationDataProvider provider of CRL revocation data regarding the state of revoked certificates
    * @param algorithm algorithm used to sign CRL
    * @throws NoSuchAlgorithmException if the algorithm is not supported
    */
-  public AbstractCRLIssuer(final PkiCredential issuerCredential, final String algorithm)
+  public AbstractCRLIssuer(final PkiCredential issuerCredential, final String algorithm,
+    final CRLRevocationDataProvider crlRevocationDataProvider)
       throws NoSuchAlgorithmException {
     this.issuerCredential = issuerCredential;
+    this.crlRevocationDataProvider = crlRevocationDataProvider;
     this.algorithmProperties = CAAlgorithmRegistry.getAlgorithmProperties(algorithm);
     try {
       this.issuerCertificate = new JcaX509CertificateHolder(issuerCredential.getCertificate());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
+ * Copyright 2021-2023 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,25 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 
-import lombok.SneakyThrows;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
+import se.swedenconnect.ca.engine.revocation.crl.CRLMetadata;
 import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
 /**
@@ -51,6 +51,8 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
   private final File crlFile;
   private List<CertificateRecord> issuedCerts;
   private BigInteger crlNumber;
+  private Instant issuedAt;
+  private Instant nextUpdate;
 
   public TestCARepository(File crlFile) {
     this.crlFile = crlFile;
@@ -60,15 +62,15 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
 
   @Override public List<BigInteger> getAllCertificates() {
     return issuedCerts.stream()
-      .map(certificateRecord -> certificateRecord.getSerialNumber())
+      .map(CertificateRecord::getSerialNumber)
       .collect(Collectors.toList());
   }
 
   @Override public CertificateRecord getCertificate(BigInteger bigInteger) {
-    Optional<CertificateRecord> recordOptional = issuedCerts.stream()
+    return issuedCerts.stream()
       .filter(certificateRecord -> certificateRecord.getSerialNumber().equals(bigInteger))
-      .findFirst();
-    return recordOptional.isPresent() ? recordOptional.get() : null;
+      .findFirst()
+      .orElse(null);
   }
 
   @Override public void addCertificate(X509CertificateHolder certificate) throws IOException {
@@ -191,7 +193,40 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
   }
 
-  @SneakyThrows @Override public X509CRLHolder getCurrentCrl() {
-    return new X509CRLHolder(new FileInputStream(crlFile));
+  @Override public X509CRLHolder getCurrentCrl() {
+    try {
+      return new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      throw new RuntimeException("No current CRL is available");
+    }
+  }
+
+  /**
+   * Getter for metadata for the latest published CRL associated with this CA
+   *
+   * @return current CRL metadata or null if no CRL is available
+   */
+  @Override public CRLMetadata getCurrentCRLMetadata() {
+    final X509CRLHolder currentCrl;
+    try {
+      currentCrl = new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      // No CRL is available. Return empty metadata to allow initial CRL creation;
+      return CRLMetadata.builder()
+        .crlNumber(BigInteger.ZERO)
+        .issueTime(Instant.ofEpochMilli(0L))
+        .nextUpdate(Instant.ofEpochMilli(0L))
+        .revokedCertCount(0)
+        .build();
+    }
+
+    return CRLMetadata.builder()
+      .crlNumber(crlNumber)
+      .issueTime(currentCrl.getThisUpdate().toInstant())
+      .nextUpdate(currentCrl.getNextUpdate().toInstant())
+      .revokedCertCount(currentCrl.getRevokedCertificates().size())
+      .build();
   }
 }

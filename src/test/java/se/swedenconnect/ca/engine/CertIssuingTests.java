@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
+ * Copyright 2021-2023 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,9 @@ public class CertIssuingTests {
    */
   @BeforeAll
   public static void init() {
-    Security.addProvider(new BouncyCastleProvider());
+    if (Security.getProvider("BC") == null) {
+      Security.addProvider(new BouncyCastleProvider());
+    }
     // Setup CA:s
     log.info("Setting up test CA:s");
     TestData.addCaAndValidator(TestCa.RSA_CA);

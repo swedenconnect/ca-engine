@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022. Agency for Digital Government (DIGG)
+ * Copyright 2021-2023 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,7 @@ import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuer;
 import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
-import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
+import se.swedenconnect.ca.engine.revocation.crl.impl.SynchronizedCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
 
@@ -66,20 +65,21 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(
       new CertificateIssuerModel(algorithm, Duration.ofDays(3652)), issuerCredential);
-    CRLIssuerModel crlIssuerModel = getCrlIssuerModel(getCaRepository().getCRLRevocationDataProvider(), algorithm);
+    CRLIssuerModel crlIssuerModel = getCrlIssuerModel(algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, issuerCredential);
+      this.crlIssuer = new SynchronizedCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(),
+        issuerCredential);
       this.crlDistributionPoints = Arrays.asList(crlIssuerModel.getDistributionPointUrl());
       publishNewCrl();
     }
   }
 
-  private CRLIssuerModel getCrlIssuerModel(CRLRevocationDataProvider crlRevocationDataProvider, String algorithm)
+  private CRLIssuerModel getCrlIssuerModel(String algorithm)
     throws CertificateRevocationException {
     try {
       return new CRLIssuerModel(getCaCertificate(), algorithm,
-        Duration.ofHours(2), crlRevocationDataProvider, TestCAProvider.getFileUrl(crlFile));
+        Duration.ofHours(2), TestCAProvider.getFileUrl(crlFile));
     }
     catch (Exception e) {
       throw new CertificateRevocationException(e);
@@ -114,9 +114,12 @@ public class BasicRootCAService extends AbstractCAService<DefaultCertificateMode
     return null;
   }
 
-  @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel<?> subject, PublicKey publicKey,
-    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel) throws CertificateIssuanceException {
-    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey, getCaCertificate(),
+  @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel<?> subject,
+    PublicKey publicKey,
+    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
+    throws CertificateIssuanceException {
+    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey,
+      getCaCertificate(),
       certificateIssuerModel);
     certModelBuilder
       .subject(subject)
