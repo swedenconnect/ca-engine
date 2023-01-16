@@ -16,20 +16,15 @@
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.w3c.dom.Element;
 
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.AuthContextInfo;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.IdAttributes;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
+import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
+import se.swedenconnect.cert.extensions.data.saci.AuthContextInfo;
+import se.swedenconnect.cert.extensions.data.saci.IdAttributes;
+import se.swedenconnect.cert.extensions.data.saci.SAMLAuthContext;
 
 /**
  * Builder for Authn Context data in the Authn Context extension.
@@ -160,45 +155,24 @@ public class SAMLAuthContextBuilder {
    */
   public SAMLAuthContext build() throws CertificateIssuanceException {
 
-    final SAMLAuthContext samlAuthContext = new SAMLAuthContext();
+    final SAMLAuthContext samlAuthContext = new SAMLAuthContext(false);
     final AuthContextInfo aci = new AuthContextInfo();
     samlAuthContext.setAuthContextInfo(aci);
     aci.setAssertionRef(this.assertionRef);
-    aci.setAuthenticationInstant(getXmlDate(this.authenticationInstant));
+    aci.setAuthenticationInstant(this.authenticationInstant.toInstant());
     aci.setAuthnContextClassRef(this.authnContextClassRef);
     aci.setIdentityProvider(this.identityProvider);
     aci.setServiceID(this.serviceID);
     if (this.extensions != null && !this.extensions.isEmpty()) {
-      final List<Element> elements = aci.getAnies();
-      this.extensions.stream().forEach(element -> elements.add(element));
+      aci.setAnyList(extensions);
     }
 
     if (this.attributeMappings != null && !this.attributeMappings.isEmpty()) {
       final IdAttributes ida = new IdAttributes();
+      ida.setAttributeMappings(attributeMappings);
       samlAuthContext.setIdAttributes(ida);
-      final List<AttributeMapping> atrMapList = ida.getAttributeMappings();
-      this.attributeMappings.stream().forEach(attributeMapping -> atrMapList.add(attributeMapping));
     }
 
     return samlAuthContext;
   }
-
-  /**
-   * Convert {@link Date} to {@link XMLGregorianCalendar}
-   *
-   * @param date date to convert
-   * @return {@link XMLGregorianCalendar}
-   * @throws CertificateIssuanceException error parsing date
-   */
-  public static XMLGregorianCalendar getXmlDate(final Date date) throws CertificateIssuanceException {
-    final GregorianCalendar gcal = new GregorianCalendar();
-    gcal.setTime(date);
-    try {
-      return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
-    }
-    catch (final DatatypeConfigurationException e) {
-      throw new CertificateIssuanceException("Illegal date", e);
-    }
-  }
-
 }

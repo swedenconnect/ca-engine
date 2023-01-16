@@ -22,7 +22,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.cert.extensions.AuthnContext;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
+import se.swedenconnect.cert.extensions.data.saci.SAMLAuthContext;
 
 /**
  * Extension data model.

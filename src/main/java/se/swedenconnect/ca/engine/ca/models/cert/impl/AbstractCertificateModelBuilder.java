@@ -47,7 +47,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageM
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.OCSPNoCheckModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.QCStatementsExtensionModel;
 import se.swedenconnect.cert.extensions.QCStatements;
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.SAMLAuthContext;
+import se.swedenconnect.cert.extensions.data.saci.SAMLAuthContext;
 
 /**
  * Abstract implementation of the certificate model builder interface.

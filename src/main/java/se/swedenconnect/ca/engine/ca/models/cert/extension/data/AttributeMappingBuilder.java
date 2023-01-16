@@ -15,8 +15,8 @@
  */
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
-import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
+import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
+import se.swedenconnect.cert.extensions.data.saci.SAMLAttribute;
 
 /**
  * Builder for attribute mappings used in SAML Authn context extensions.
@@ -39,7 +39,7 @@ public class AttributeMappingBuilder {
   private String ref;
 
   /** Type identifier defining the type of certificate name or attribute. */
-  private AttributeRefType type;
+  private AttributeMapping.Type type;
 
   /** Private constructor */
   private AttributeMappingBuilder() {
@@ -104,7 +104,7 @@ public class AttributeMappingBuilder {
    * @param type rdn (Relative Distinguished Name), san (Subject Alt Name) or sda (Subject Directory Attributes)
    * @return this builder
    */
-  public AttributeMappingBuilder type(final AttributeRefType type) {
+  public AttributeMappingBuilder type(final AttributeMapping.Type type) {
     this.type = type;
     return this;
   }
@@ -116,13 +116,13 @@ public class AttributeMappingBuilder {
    */
   public AttributeMapping build() {
     final AttributeMapping am = new AttributeMapping();
-    final Attribute attribute = new Attribute();
+    final SAMLAttribute attribute = new SAMLAttribute();
     attribute.setFriendlyName(this.friendlyName);
     attribute.setName(this.name);
     attribute.setNameFormat(this.nameFormat);
     am.setAttribute(attribute);
     am.setRef(this.ref);
-    am.setType(this.type.name());
+    am.setType(this.type);
     return am;
   }
 
