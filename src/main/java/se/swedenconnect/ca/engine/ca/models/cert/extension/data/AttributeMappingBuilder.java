@@ -15,8 +15,12 @@
  */
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
-import se.swedenconnect.cert.extensions.data.saci.SAMLAttribute;
+import se.swedenconnect.cert.extensions.data.saci.Attribute;
 
 /**
  * Builder for attribute mappings used in SAML Authn context extensions.
@@ -40,6 +44,9 @@ public class AttributeMappingBuilder {
 
   /** Type identifier defining the type of certificate name or attribute. */
   private AttributeMapping.Type type;
+
+  /** A single attribute string value. */
+  private String attributeStringValue;
 
   /** Private constructor */
   private AttributeMappingBuilder() {
@@ -110,16 +117,31 @@ public class AttributeMappingBuilder {
   }
 
   /**
+   * Set a single attribute string value. If other attribute values are needed then insert attribute
+   * values manually after build.
+   *
+   * @param attributeStringValue single attribute string value
+   * @return this builder
+   */
+  public AttributeMappingBuilder attributeStringValue(final String attributeStringValue) {
+    this.attributeStringValue = attributeStringValue;
+    return this;
+  }
+
+  /**
    * Create attribute mapping
    *
    * @return attribute mapping
    */
   public AttributeMapping build() {
     final AttributeMapping am = new AttributeMapping();
-    final SAMLAttribute attribute = new SAMLAttribute();
+    final Attribute attribute = new Attribute();
     attribute.setFriendlyName(this.friendlyName);
     attribute.setName(this.name);
     attribute.setNameFormat(this.nameFormat);
+    attribute.setAttributeValues(StringUtils.isNotBlank(attributeStringValue)
+      ? List.of(Attribute.createStringAttributeValue(attributeStringValue))
+      :null);
     am.setAttribute(attribute);
     am.setRef(this.ref);
     am.setType(this.type);
