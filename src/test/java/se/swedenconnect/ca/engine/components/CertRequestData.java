@@ -63,6 +63,7 @@ import se.swedenconnect.cert.extensions.QCStatements;
 import se.swedenconnect.cert.extensions.data.MonetaryValue;
 import se.swedenconnect.cert.extensions.data.PDSLocation;
 import se.swedenconnect.cert.extensions.data.SemanticsInformation;
+import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
 
 /**
  * Generating basic certificate request data for test
@@ -190,15 +191,15 @@ public class CertRequestData {
         .attributeMappings(Arrays.asList(
           AttributeMappingBuilder.instance()
             .name("name1").friendlyName("fName1").nameFormat("nameFormat")
-            .ref("2.5.4.1").type(AttributeRefType.rdn)
+            .ref("2.5.4.1").type(AttributeMapping.Type.rdn)
             .build(),
           AttributeMappingBuilder.instance()
             .name("name2").friendlyName("fName2").nameFormat("nameFormat")
-            .ref("2.5.4.2").type(AttributeRefType.rdn)
+            .ref("2.5.4.2").type(AttributeMapping.Type.rdn)
             .build(),
           AttributeMappingBuilder.instance()
             .name("name3").friendlyName("fName3").nameFormat("nameFormat")
-            .ref("6").type(AttributeRefType.san)
+            .ref("6").type(AttributeMapping.Type.san)
             .build()
         ))
         .build())

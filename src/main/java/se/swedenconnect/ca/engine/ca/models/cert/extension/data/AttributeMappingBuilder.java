@@ -15,8 +15,12 @@
  */
 package se.swedenconnect.ca.engine.ca.models.cert.extension.data;
 
-import se.swedenconnect.schemas.cert.authcont.saci_1_0.AttributeMapping;
-import se.swedenconnect.schemas.saml_2_0.assertion.Attribute;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
+import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
+import se.swedenconnect.cert.extensions.data.saci.Attribute;
 
 /**
  * Builder for attribute mappings used in SAML Authn context extensions.
@@ -39,7 +43,10 @@ public class AttributeMappingBuilder {
   private String ref;
 
   /** Type identifier defining the type of certificate name or attribute. */
-  private AttributeRefType type;
+  private AttributeMapping.Type type;
+
+  /** A single attribute string value. */
+  private String attributeStringValue;
 
   /** Private constructor */
   private AttributeMappingBuilder() {
@@ -104,8 +111,20 @@ public class AttributeMappingBuilder {
    * @param type rdn (Relative Distinguished Name), san (Subject Alt Name) or sda (Subject Directory Attributes)
    * @return this builder
    */
-  public AttributeMappingBuilder type(final AttributeRefType type) {
+  public AttributeMappingBuilder type(final AttributeMapping.Type type) {
     this.type = type;
+    return this;
+  }
+
+  /**
+   * Set a single attribute string value. If other attribute values are needed then insert attribute
+   * values manually after build.
+   *
+   * @param attributeStringValue single attribute string value
+   * @return this builder
+   */
+  public AttributeMappingBuilder attributeStringValue(final String attributeStringValue) {
+    this.attributeStringValue = attributeStringValue;
     return this;
   }
 
@@ -120,9 +139,12 @@ public class AttributeMappingBuilder {
     attribute.setFriendlyName(this.friendlyName);
     attribute.setName(this.name);
     attribute.setNameFormat(this.nameFormat);
+    attribute.setAttributeValues(StringUtils.isNotBlank(attributeStringValue)
+      ? List.of(Attribute.createStringAttributeValue(attributeStringValue))
+      :null);
     am.setAttribute(attribute);
     am.setRef(this.ref);
-    am.setType(this.type.name());
+    am.setType(this.type);
     return am;
   }
 
