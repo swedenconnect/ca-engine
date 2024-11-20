@@ -30,7 +30,7 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 public class CertAttributes extends BCStyle {
 
   /**
-   * Provides a static instance this class
+   * Provides a static instance of this class
    */
   public static final CertAttributes INSTANCE = new CertAttributes();
 
