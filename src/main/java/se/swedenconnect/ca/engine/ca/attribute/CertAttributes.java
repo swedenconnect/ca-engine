@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Agency for Digital Government (DIGG)
+ * Copyright 2024 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 public class CertAttributes extends BCStyle {
 
   /**
-   * Provides a static instance this class
+   * Provides a static instance of this class
    */
   public static final CertAttributes INSTANCE = new CertAttributes();
 
