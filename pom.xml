@@ -18,7 +18,7 @@
 
     <bouncy-castle.version>1.83</bouncy-castle.version>
     <spring.version>7.0.6</spring.version>
-    <sigval.version>2.0.0</sigval.version>
+    <sigval.version>2.0.1</sigval.version>
   </properties>
 
   <licenses>
