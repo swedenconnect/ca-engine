@@ -44,6 +44,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AuthnCont
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.NoRevAvailModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.OCSPNoCheckModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.QCStatementsExtensionModel;
 import se.swedenconnect.cert.extensions.QCStatements;
@@ -117,9 +118,6 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
 
   /** true to include a noRevAvail extension */
   protected boolean noRevAvail;
-
-  /** true to set the validity period to infinite */
-  protected boolean infiniteValidity;
 
   /** {@inheritDoc} */
   @Override
@@ -491,7 +489,7 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
 
     // NoRevAvail
     if (this.noRevAvail) {
-
+      extm.add(new NoRevAvailModel());
     }
 
     return extm;
