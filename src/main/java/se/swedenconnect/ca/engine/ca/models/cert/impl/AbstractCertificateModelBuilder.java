@@ -115,6 +115,12 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
   /** subject attributes extension model */
   protected SubjDirectoryAttributesModel subjectDirectoryAttributes;
 
+  /** true to include a noRevAvail extension */
+  protected boolean noRevAvail;
+
+  /** true to set the validity period to infinite */
+  protected boolean infiniteValidity;
+
   /** {@inheritDoc} */
   @Override
   public CertificateModel build() throws CertificateIssuanceException {
@@ -482,6 +488,12 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
     if (this.ocspNocheck) {
       extm.add(new OCSPNoCheckModel());
     }
+
+    // NoRevAvail
+    if (this.noRevAvail) {
+
+    }
+
     return extm;
   }
 

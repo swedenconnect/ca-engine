@@ -15,11 +15,11 @@
  */
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
-import org.bouncycastle.asn1.ASN1Object;
-
 import lombok.NoArgsConstructor;
+import org.bouncycastle.asn1.ASN1Object;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
+import se.swedenconnect.cert.extensions.NoRevAvail;
 import se.swedenconnect.cert.extensions.OCSPNoCheck;
 
 /**
@@ -29,17 +29,17 @@ import se.swedenconnect.cert.extensions.OCSPNoCheck;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @NoArgsConstructor
-public class OCSPNoCheckModel extends AbstractExtensionModel {
+public class NoRevAvailModel extends AbstractExtensionModel {
 
   /** {@inheritDoc} */
   @Override
   protected ExtensionMetadata getExtensionMetadata() {
-    return new ExtensionMetadata(OCSPNoCheck.OID, "OCSP no check", false);
+    return new ExtensionMetadata(NoRevAvail.OID, "NoRevAvail", false);
   }
 
   /** {@inheritDoc} */
   @Override
   protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return OCSPNoCheck.getInstance();
+    return NoRevAvail.getInstance();
   }
 }
