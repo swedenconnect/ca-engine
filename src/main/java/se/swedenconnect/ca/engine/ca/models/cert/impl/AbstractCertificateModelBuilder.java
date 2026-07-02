@@ -369,6 +369,18 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
   }
 
   /**
+   * Set noRevAvail
+   *
+   * @param noRevAvail true to include a noRevAvail extension
+   * @return this builder
+   */
+  @SuppressWarnings("unchecked")
+  public T noRevAvail(final boolean noRevAvail) {
+    this.noRevAvail = noRevAvail;
+    return (T) this;
+  }
+
+  /**
    * Add authority and subject key identifiers to a list of extension models
    *
    * @param extensionModelList the extension models for this certificate model builder to which the subject and key
