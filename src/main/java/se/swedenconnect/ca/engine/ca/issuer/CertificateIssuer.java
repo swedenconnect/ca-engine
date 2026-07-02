@@ -40,6 +40,9 @@ import se.swedenconnect.ca.engine.utils.CAUtils;
  */
 public abstract class CertificateIssuer {
 
+  /** RFC 5280 §4.1.2.5 "no well-defined expiration date". BC encodes any year > 2049 as GeneralizedTime. */
+  public static final Instant INFINITE_EXPIRY = Instant.parse("9999-12-31T23:59:59Z");
+
   /** Configuration data for a certificate issuer component */
   @Getter
   protected final CertificateIssuerModel certificateIssuerModel;
@@ -84,6 +87,20 @@ public abstract class CertificateIssuer {
    * @return new time with specified offset from current time
    */
   public static Date getOffsetTime(final Duration offsetDuration) {
+    return getOffsetTime(offsetDuration, false);
+  }
+  /**
+   * Utility function calculating the offset time based on duration
+   *
+   * @param offsetDuration offset duration
+   * @param zeroAsInfinite if true, the offset Duration.ZERO is used as infinite, otherwise it is treated as zero
+   * @return new time with specified offset from current time
+   */
+  public static Date getOffsetTime(final Duration offsetDuration, final boolean zeroAsInfinite) {
+    if (zeroAsInfinite && offsetDuration.equals(Duration.ZERO)) {
+      // Set infinite validity
+      return Date.from(INFINITE_EXPIRY);
+    }
     final Instant now = Instant.now();
     final Instant offsetInstant = now.plusMillis(offsetDuration.toMillis());
     return Date.from(offsetInstant);

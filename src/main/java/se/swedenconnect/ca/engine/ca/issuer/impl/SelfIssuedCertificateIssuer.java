@@ -85,7 +85,7 @@ public class SelfIssuedCertificateIssuer extends CertificateIssuer {
         this.getX500Name(model.getSubject()),
         this.certificateIssuerModel.getSerialNumberProvider().getSerialNumber(),
         CertificateIssuer.getOffsetTime(this.certificateIssuerModel.getStartOffset()),
-        CertificateIssuer.getOffsetTime(this.certificateIssuerModel.getExpiryOffset()),
+        CertificateIssuer.getOffsetTime(this.certificateIssuerModel.getExpiryOffset(), true),
         this.getX500Name(model.getSubject()),
         model.getPublicKey());
 
@@ -111,7 +111,7 @@ public class SelfIssuedCertificateIssuer extends CertificateIssuer {
         this.getX500Name(model.getSubject()),
         this.certificateIssuerModel.getSerialNumberProvider().getSerialNumber(),
         CertificateIssuer.getOffsetTime(this.certificateIssuerModel.getStartOffset()),
-        CertificateIssuer.getOffsetTime(this.certificateIssuerModel.getExpiryOffset()),
+        CertificateIssuer.getOffsetTime(this.certificateIssuerModel.getExpiryOffset(), true),
         this.getX500Name(model.getSubject()),
         model.getPublicKey());
     return certificateBuilder.build(

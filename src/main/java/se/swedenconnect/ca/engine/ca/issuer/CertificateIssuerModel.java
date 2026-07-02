@@ -18,6 +18,7 @@ package se.swedenconnect.ca.engine.ca.issuer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.Objects;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,8 +46,10 @@ public class CertificateIssuerModel {
   @Setter
   private Duration startOffset = Duration.ofSeconds(-15);
 
-  /** Offset duration for setting the not valid after time relative to current time */
-  @Setter
+  /**
+   * Offset duration for setting the not valid after time relative to current time.
+   * A value of Duration.ZERO indicates that the certificate should not expire.
+   */
   private Duration expiryOffset = Duration.ofDays(365);
 
   /** The name of the algorithm used by the crypto provider to sign ASN.1 objects */
@@ -67,9 +70,26 @@ public class CertificateIssuerModel {
    * @throws NoSuchAlgorithmException thrown if the provided algorithm is not recognized
    */
   public CertificateIssuerModel(final String algorithm, final Duration validity) throws NoSuchAlgorithmException {
+    Objects.requireNonNull(algorithm, "algorithm must not be null");
     this.algorithm = algorithm;
     this.algorithmName = CAAlgorithmRegistry.getSigAlgoName(algorithm);
-    this.expiryOffset = validity;
+    setExpiryOffset(validity);
+  }
+
+  public void setExpiryOffset(final Duration expiryOffset) {
+    Objects.requireNonNull(expiryOffset, "expiryOffset must not be null");
+    if (expiryOffset.equals(Duration.ZERO)) {
+      throw new IllegalArgumentException("Expiry offset cannot be zero");
+    }
+    this.expiryOffset = expiryOffset;
+  }
+
+  public void setInfiniteValidity() {
+    this.expiryOffset = Duration.ZERO;
+  }
+
+  public boolean isInfiniteValidity() {
+    return this.expiryOffset.isZero();
   }
 
   /**

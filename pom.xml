@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.ca</groupId>
   <artifactId>ca-engine</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
   <packaging>jar</packaging>
 
   <name>CA engine</name>
@@ -16,9 +16,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>21</java.version>
 
-    <bouncy-castle.version>1.83</bouncy-castle.version>
-    <spring.version>7.0.6</spring.version>
-    <sigval.version>2.0.0</sigval.version>
+    <bouncy-castle.version>1.84</bouncy-castle.version>
+    <spring.version>7.0.8</spring.version>
+    <sigval.version>3.0.0</sigval.version>
   </properties>
 
   <licenses>
@@ -80,13 +80,13 @@
       <dependency>
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
-        <version>10.8</version>
+        <version>10.9.1</version>
       </dependency>
 
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.0</version>
       </dependency>
 
       <dependency>
@@ -110,25 +110,25 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.21.0</version>
+        <version>1.22.0</version>
       </dependency>
 
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>2.0.17</version>
+        <version>2.0.18</version>
       </dependency>
 
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.44</version>
+        <version>1.18.46</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.httpcomponents.core5</groupId>
         <artifactId>httpcore5</artifactId>
-        <version>5.4.2</version>
+        <version>5.4.3</version>
       </dependency>
 
     </dependencies>
@@ -155,7 +155,7 @@
     <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
-      <version>2.2.0</version>
+      <version>2.2.1</version>
     </dependency>
 
     <dependency>
@@ -172,7 +172,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>2.0.17</version>
+      <version>2.0.18</version>
       <scope>test</scope>
     </dependency>
 
@@ -187,13 +187,13 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
-      <version>6.0.3</version>
+      <version>6.1.0</version>
     </dependency>
 
     <dependency>
       <groupId>se.idsec.utils</groupId>
       <artifactId>print-cert</artifactId>
-      <version>1.0.9</version>
+      <version>1.0.11</version>
       <scope>test</scope>
     </dependency>
 

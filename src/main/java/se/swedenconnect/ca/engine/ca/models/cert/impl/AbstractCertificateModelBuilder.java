@@ -44,6 +44,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AuthnCont
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.BasicConstraintsModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.ExtendedKeyUsageModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.KeyUsageModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.NoRevAvailModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.OCSPNoCheckModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.QCStatementsExtensionModel;
 import se.swedenconnect.cert.extensions.QCStatements;
@@ -114,6 +115,9 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
 
   /** subject attributes extension model */
   protected SubjDirectoryAttributesModel subjectDirectoryAttributes;
+
+  /** true to include a noRevAvail extension */
+  protected boolean noRevAvail;
 
   /** {@inheritDoc} */
   @Override
@@ -365,6 +369,18 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
   }
 
   /**
+   * Set noRevAvail
+   *
+   * @param noRevAvail true to include a noRevAvail extension
+   * @return this builder
+   */
+  @SuppressWarnings("unchecked")
+  public T noRevAvail(final boolean noRevAvail) {
+    this.noRevAvail = noRevAvail;
+    return (T) this;
+  }
+
+  /**
    * Add authority and subject key identifiers to a list of extension models
    *
    * @param extensionModelList the extension models for this certificate model builder to which the subject and key
@@ -482,6 +498,12 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
     if (this.ocspNocheck) {
       extm.add(new OCSPNoCheckModel());
     }
+
+    // NoRevAvail
+    if (this.noRevAvail) {
+      extm.add(new NoRevAvailModel());
+    }
+
     return extm;
   }
 
