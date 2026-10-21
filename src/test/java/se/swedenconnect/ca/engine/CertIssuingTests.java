@@ -64,7 +64,10 @@ import se.swedenconnect.ca.engine.components.TestUtils;
 import se.swedenconnect.ca.engine.components.TestValidators;
 import se.swedenconnect.ca.engine.data.TestCa;
 import se.swedenconnect.ca.engine.data.TestData;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.OIDCAuthContextBuilder;
 import se.swedenconnect.cert.extensions.AuthnContext;
+import se.swedenconnect.cert.extensions.data.oaci.OIDCAuthContext;
 import se.swedenconnect.cert.extensions.OCSPNoCheck;
 import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
 import se.swedenconnect.sigval.cert.chain.PathValidationResult;
@@ -252,6 +255,53 @@ public class CertIssuingTests {
     assertNotNull(extensions.getExtension(Extension.policyConstraints));
     assertNotNull(extensions.getExtension(Extension.policyMappings));
     assertNotNull(extensions.getExtension(Extension.privateKeyUsagePeriod));
+  }
+
+  @Test
+  public void oidcAuthenticationContextTest() throws Exception {
+    TestCAProvider caProvider = TestData.getTestCAs().get(TestCa.ECDSA_CA);
+    BasicIssuerCAService ca = caProvider.getCa();
+
+    // The complete model builder sets a SAML authentication context; replace it with an OIDC one through the same
+    // builder method, which accepts both kinds of authentication context.
+    OIDCAuthContext oidcAuthContext = CertRequestData.getOidcAuthContext();
+    DefaultCertificateModelBuilder certModelBuilder = CertRequestData.getCompleteCertModelBuilder(
+      TestData.ec256kp01.getPublic(), ca.getCaCertificate(), ca.getCertificateIssuer().getCertificateIssuerModel())
+      .authenticationContext(oidcAuthContext);
+    X509CertificateHolder certificate = ca.issueCertificate(certModelBuilder.build());
+    PrintCertificate printCertificate = new PrintCertificate(certificate);
+    log.info("OIDC authentication context certificate:\n{}", printCertificate.toString(true, true, true));
+    log.info("OIDC authentication context certificate PEM:\n{}", printCertificate.toPEM());
+
+    // Strict parsing of the issued extension yields exactly one OACI entry equal to what was put in
+    AuthnContext authnContext = AuthnContext.fromExtensions(certificate.getExtensions());
+    assertEquals(1, authnContext.getEntries().size());
+    assertEquals(0, authnContext.getSamlAuthContexts().size());
+    assertEquals(1, authnContext.getOidcAuthContexts().size());
+    assertEquals(oidcAuthContext, authnContext.getOidcAuthContexts().get(0));
+    assertEquals(AuthnContext.OACI_CONTEXT_TYPE, authnContext.getEntries().get(0).getContextType());
+
+    // The SAML path is unchanged: the unmodified complete model still yields one SACI entry
+    X509CertificateHolder samlCertificate = ca.issueCertificate(CertRequestData.getCompleteCertModelBuilder(
+      TestData.ec256kp01.getPublic(), ca.getCaCertificate(), ca.getCertificateIssuer().getCertificateIssuerModel()).build());
+    AuthnContext samlAuthnContext = AuthnContext.fromExtensions(samlCertificate.getExtensions(), false);
+    assertEquals(1, samlAuthnContext.getSamlAuthContexts().size());
+    assertEquals(0, samlAuthnContext.getOidcAuthContexts().size());
+  }
+
+  @Test
+  public void oidcAuthContextBuilderValidationTest() {
+    // The builder enforces the content rules of the specification: iss is required and must be an https URL
+    org.junit.jupiter.api.Assertions.assertThrows(CertificateIssuanceException.class,
+      () -> OIDCAuthContextBuilder.instance().acr("http://id.elegnamnden.se/loa/1.0/loa3").build());
+    org.junit.jupiter.api.Assertions.assertThrows(CertificateIssuanceException.class,
+      () -> OIDCAuthContextBuilder.instance().iss("http://op.example.com").build());
+    // Additional members must not collide with defined members or with each other
+    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+      () -> OIDCAuthContextBuilder.instance().additionalMember("acr", "x"));
+    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+      () -> OIDCAuthContextBuilder.instance().additionalMember("https://example.com/x", "1")
+        .additionalMember("https://example.com/x", "2"));
   }
 
   private String getVal(ASN1ObjectIdentifier attrTpe, List<AttributeTypeAndValueModel> attributes) {

@@ -48,7 +48,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.NoRevAvai
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.OCSPNoCheckModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.QCStatementsExtensionModel;
 import se.swedenconnect.cert.extensions.QCStatements;
-import se.swedenconnect.cert.extensions.data.saci.SAMLAuthContext;
+import se.swedenconnect.cert.extensions.data.ProtocolAuthContext;
 
 /**
  * Abstract implementation of the certificate model builder interface.
@@ -105,7 +105,7 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
   protected CertificatePolicyModel certificatePolicy;
 
   /** SAML authentication context model */
-  protected SAMLAuthContext authenticationContext;
+  protected ProtocolAuthContext authenticationContext;
 
   /** QC statements */
   protected QCStatements qcStatements;
@@ -321,13 +321,19 @@ public abstract class AbstractCertificateModelBuilder<T extends AbstractCertific
   }
 
   /**
-   * Set authentication context (RFC 7773)
+   * Set authentication context (RFC 7773).
+   * <p>
+   * The authentication context is either SAML Authentication Context Information
+   * ({@link se.swedenconnect.cert.extensions.data.saci.SAMLAuthContext}) or OpenID Connect Authentication Context
+   * Information ({@link se.swedenconnect.cert.extensions.data.oaci.OIDCAuthContext}), depending on the protocol used
+   * to authenticate the subject. The resulting extension holds exactly one {@code AuthenticationContext} entry.
+   * </p>
    *
    * @param authenticationContext authentication context
    * @return this builder
    */
   @SuppressWarnings("unchecked")
-  public T authenticationContext(final SAMLAuthContext authenticationContext) {
+  public T authenticationContext(final ProtocolAuthContext authenticationContext) {
     this.authenticationContext = authenticationContext;
     return (T) this;
   }

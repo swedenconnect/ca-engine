@@ -47,6 +47,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeMapping
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.AttributeRefType;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.QCPKIXSyntax;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.QcStatementsBuilder;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.data.OIDCAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.data.SAMLAuthContextBuilder;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.CertificatePolicyModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.GenericExtensionModel;
@@ -63,6 +64,8 @@ import se.swedenconnect.cert.extensions.QCStatements;
 import se.swedenconnect.cert.extensions.data.MonetaryValue;
 import se.swedenconnect.cert.extensions.data.PDSLocation;
 import se.swedenconnect.cert.extensions.data.SemanticsInformation;
+import se.swedenconnect.cert.extensions.data.oaci.ClaimMapping;
+import se.swedenconnect.cert.extensions.data.oaci.OIDCAuthContext;
 import se.swedenconnect.cert.extensions.data.saci.AttributeMapping;
 
 /**
@@ -230,6 +233,28 @@ public class CertRequestData {
       .ocspNocheck(true);
     return builder;
 
+  }
+
+  /**
+   * OpenID Connect Authentication Context Information for a subject authenticated by an OpenID Provider, with claim
+   * mappings for the serialNumber, givenName, surname and commonName attributes and an rfc822Name alt name.
+   */
+  public static OIDCAuthContext getOidcAuthContext() throws CertificateIssuanceException {
+    return OIDCAuthContextBuilder.instance()
+      .iss("https://op.example.com")
+      .authTime(java.time.Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS))
+      .acr("http://id.elegnamnden.se/loa/1.0/loa3")
+      .jti("0f3e2c6a-7b1d-4e4c-9a2e-5d1c2b3a4f60")
+      .clientId("https://sign.example.com")
+      .claimMappings(Arrays.asList(
+        ClaimMapping.builder().type(AttributeMapping.Type.rdn).ref("2.5.4.5")
+          .claim("/https:~1~1id.oidc.se~1claim~1personalIdentityNumber").build(),
+        ClaimMapping.builder().type(AttributeMapping.Type.rdn).ref("2.5.4.42").claim("/given_name").build(),
+        ClaimMapping.builder().type(AttributeMapping.Type.rdn).ref("2.5.4.4").claim("/family_name").build(),
+        ClaimMapping.builder().type(AttributeMapping.Type.rdn).ref("2.5.4.3").claim("/name").build(),
+        ClaimMapping.builder().type(AttributeMapping.Type.san).ref("1").claim("/email")
+          .source(ClaimMapping.Source.userinfo).build()))
+      .build();
   }
 
   public static void addUncommonExtensions(CertificateModel certificateModel) {

@@ -15,14 +15,15 @@
  */
 package se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Object;
 
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.AbstractExtensionModel;
 import se.swedenconnect.cert.extensions.AuthnContext;
-import se.swedenconnect.cert.extensions.data.saci.SAMLAuthContext;
+import se.swedenconnect.cert.extensions.AuthnContextEntry;
+import se.swedenconnect.cert.extensions.data.ProtocolAuthContext;
 
 /**
  * Extension data model.
@@ -35,28 +36,29 @@ public class AuthnContextModel extends AbstractExtensionModel {
   /** Extension criticality */
   private final boolean critical;
 
-  /** Authn context data */
-  private final SAMLAuthContext samlAuthContext;
+  /** Authentication context data (SAML or OpenID Connect) */
+  private final ProtocolAuthContext authContext;
 
   /**
-   * Constructor for non critical extension
+   * Constructor
    *
-   * @param samlAuthnContext SAMLAuthContext data
+   * @param authContext authentication context data, SAML Authentication Context Information or OpenID Connect
+   *          Authentication Context Information
    * @param critical extension criticality
    */
-  public AuthnContextModel(final SAMLAuthContext samlAuthnContext, final boolean critical) {
-    this.samlAuthContext = samlAuthnContext;
+  public AuthnContextModel(final ProtocolAuthContext authContext, final boolean critical) {
+    this.authContext = authContext;
     this.critical = critical;
   }
 
   /**
    * Constructor for non critical extension
    *
-   * @param samlAuthnContext SAMLAuthContext data
+   * @param authContext authentication context data, SAML Authentication Context Information or OpenID Connect
+   *          Authentication Context Information
    */
-  public AuthnContextModel(final SAMLAuthContext samlAuthnContext) {
-    this.samlAuthContext = samlAuthnContext;
-    this.critical = false;
+  public AuthnContextModel(final ProtocolAuthContext authContext) {
+    this(authContext, false);
   }
 
   /** {@inheritDoc} */
@@ -68,6 +70,6 @@ public class AuthnContextModel extends AbstractExtensionModel {
   /** {@inheritDoc} */
   @Override
   protected ASN1Object getExtensionObject() throws CertificateIssuanceException {
-    return new AuthnContext(Arrays.asList(this.samlAuthContext));
+    return AuthnContext.fromEntries(List.of(new AuthnContextEntry(this.authContext)));
   }
 }

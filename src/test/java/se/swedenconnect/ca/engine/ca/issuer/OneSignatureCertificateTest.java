@@ -116,8 +116,14 @@ class OneSignatureCertificateTest {
   @Test
   void issueOneSignatureCertificates_variousBindingTypes() throws Exception {
     // null == default binding (bindingType field omitted); the rest are the registered identifiers.
-    final List<String> bindingTypes = Arrays.asList(null, "cades", "xades", "jws", "cose");
-    for (final String bindingType : bindingTypes) {
+    final List<ASN1ObjectIdentifier> bindingTypes = Arrays.asList(
+        null,
+        SignedDocumentBinding.CADES_BINDING,
+        SignedDocumentBinding.XADES_BINDING,
+        SignedDocumentBinding.JWS_BINDING,
+        SignedDocumentBinding.COSE_BINDING
+    );
+    for (final ASN1ObjectIdentifier bindingType : bindingTypes) {
       final X509CertificateHolder cert = issueOneSignatureCert(bindingType);
       assertCompliant(cert, bindingType);
       PrintCertificate pc = new PrintCertificate(cert);
@@ -128,7 +134,7 @@ class OneSignatureCertificateTest {
     }
   }
 
-  private X509CertificateHolder issueOneSignatureCert(final String bindingType) throws Exception {
+  private X509CertificateHolder issueOneSignatureCert(final ASN1ObjectIdentifier bindingType) throws Exception {
     final DefaultCertificateModelBuilder builder =
         DefaultCertificateModelBuilder.getInstance(eeKeyPair.getPublic(), caCert, issuer.getCertificateIssuerModel())
             .subject(johnDoe())
@@ -145,7 +151,7 @@ class OneSignatureCertificateTest {
     return issuer.issueCertificate(model);
   }
 
-  private static void assertCompliant(final X509CertificateHolder cert, final String expectedBindingType)
+  private static void assertCompliant(final X509CertificateHolder cert, final ASN1ObjectIdentifier expectedBindingType)
       throws Exception {
     // Infinite validity -> notAfter is GeneralizedTime 99991231235959Z.
     assertTrue(cert.toASN1Structure().getEndDate().toASN1Primitive() instanceof ASN1GeneralizedTime,
