@@ -2,7 +2,7 @@
 
 # Certificate Authority (CA) Engine
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://img.shields.io/maven-central/v/se.swedenconnect.ca/ca-engine.svg)](https://central.sonatype.com/artifact/se.swedenconnect.ca/ca-engine)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Core components for creating a Certificate Authority (CA) service
 
@@ -15,10 +15,14 @@ Add this maven dependency to your project
 ```
 <dependency>
     <groupId>se.swedenconnect.ca</groupId>
-    <artifactId>ca-engine/artifactId>
+    <artifactId>ca-engine</artifactId>
     <version>${ca-engine.version}</version>
 </dependency>
 ```
+
+Versions up to 2.2.1 are on Maven Central. Later versions are published only to the GitHub Packages Maven registry of this repository. Using them needs a repository entry in your POM and a GitHub token, see [Using the Artifacts from GitHub Packages](docs/github-packages.md).
+
+How to make a release is described in [Releasing](docs/release.md).
 
 ##### API documentation
 
